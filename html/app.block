@@ -1,0 +1,1788 @@
+    *
+
+// nestor blockfile
+
+// define custom blocks
+!break
+    init
+        {
+            return Block('span').add('br');
+        }
+    load
+        {
+            data('val', val => {
+                for (var i = 1; i < val; i++)
+                    block.add('br');
+            });
+        }
+!text
+    init
+        {
+            return Block('span');
+        }
+    load
+        {
+            data('val', val => {
+                block.node().appendChild(document.createTextNode(val));
+            });
+            data('html', html => {
+                block.html(html);
+            });
+        }
+!image
+    init
+        {
+            return Block('div');
+        }
+    load
+        {
+            var src = data('src');
+            var height = data('height');
+            var width = data('width');
+            var alt = data('alt');
+            if (src != null) {
+                block.css('background-image', "url('" + src + "')")
+                    .css('background-repeat', 'no-repeat')
+                    .css('background-size', 'contain')
+                ;
+            }
+            if (height !== null) block.css('height', height);
+            if (width !== null) block.css('width', width);
+            if (alt !== null) block.attribute('title', alt);
+        }
+!switch
+    init
+        {
+            var block;
+            block = Block('div')
+                .key('state', false)
+                .css({
+                    width: 'auto',
+                    height: '30px',
+                    cursor: 'pointer',
+                    margin: '5px 10px',
+                    fontSize: '17px'
+                })
+                .add(Block('block', 'label')
+                    .css({
+                        display: 'inline-table',
+                        width: 'auto',
+                        minWidth: '70px',
+                        float: 'left',
+                        marginRight: '10px',
+                        cursor: 'inherit',
+                        fontSize: 'inherit'
+                    })
+                    .__child('content')
+                        .css('text-align', 'left')
+                        .__parent()
+                    .add(Block('text', 1)
+                        .data('Label 1: ')
+                    )
+                    .on('click', (e, b, d) => {
+                        if (block.key('enabled')) {
+                            block.key('state', (!block.key('state')));
+                            block.on('modified');
+                        }
+                    })
+                )
+                .add(Block('div', 'main')
+                    .css({
+                        width: '65px',
+                        height: '100%',
+                        position: 'relative',
+                        cursor: 'inherit',
+                        display: 'inline-block'
+                    })
+                    .add(Block('div', 'bg')
+                        .css({
+                            width: '100%',
+                            height: '100%',
+                            borderRadius: '16px',
+                            backgroundColor: '#e4e4e4',
+                            position: 'absolute',
+                            top: '0',
+                            left: '0',
+                            zIndex: '1',
+                            transition: 'background-color 0.2s ease-in-out'
+                        })
+                    )
+                    .add(Block('block', 'circle')
+                        .css({
+                            width: '30px',
+                            height: '100%',
+                            position: 'absolute',
+                            top: '0.5px',
+                            left: '1px',
+                            zIndex: '2',
+                            transition: 'left 0.2s ease-in-out'
+                        })
+                        .add(Block('div')
+                            .css({
+                                width: '75%',
+                                height: '75%',
+                                borderRadius: '100%',
+                                backgroundColor: 'white',
+                                margin: '0 auto'
+                            })
+                        )
+                    )
+                    .on('click', (e, b, d) => {
+                        if (block.key('enabled')) {
+                            block.key('state', (!block.key('state')));
+                            block.on('modified');
+                        }
+                    })
+                )
+                .on('updateUI', (e, b, d) => {
+                    if (block.key('state')) {
+                        block.child('main/circle').css({
+                            left: '34px'
+                        }).sibling('bg').css({
+                            backgroundColor: '#558fed'
+                        });
+                    } else {
+                        block.child('main/circle').css({
+                            left: '1px',
+                        }).sibling('bg').css({
+                            backgroundColor: '#e4e4e4'
+                        });
+                    }
+                })
+                .on('modified', (e, b, d) => {
+                    block.on('updateUI');
+                })
+                .key('enabled', true)
+                .on('enable', (e, b, d) => {
+                    block.key('enabled', true);
+                    block.css({
+                        opacity: '1',
+                        cursor: 'pointer'
+                    });
+                    e.stopPropagation();
+                })
+                .on('disable', (e, b, d) => {
+                    block.key('enabled', false);
+                    block.css({
+                        opacity: '0.6',
+                        cursor: 'default'
+                    });
+                    e.stopPropagation();
+                })
+            ;
+            return block;
+        }
+    load
+        {
+            data('val', (val) => {
+                var v = (val == 'on');
+                if (block.key('state') != v) {
+                    block.key('state', v);
+                    block.on('modified', { locked: true });
+                }
+            });
+            data('label', (label) => {
+                block.child('label/text').html('').data(label);
+            });
+        }
+
+// app UI content layer
+app
+    id app
+    css
+        opacity 0
+        transition opacity 0.4s
+        height 100%
+        width 101%
+        overflow hidden
+        max-width 700px
+        margin 0 auto
+        box-sizing border-box
+        left -3px
+        position relative
+    {
+        block
+            .key('deleteRed', 'rgba(237, 69, 61, 1)')
+            .key('buttonBlue', 'rgba(40, 124, 246, 1)')
+            .key('statusGreen', 'rgba(85, 196, 110, 1)')
+            .key('slowYellow', '#f7bb0a')
+            .key('stalledGrey', '#dddddd')
+        ;
+    }
+    #auth
+        {
+            var login = false;
+            if (auth === true) {
+                if (app.auth) {
+                    app.util.cookie('username', app.auth.username, `${app.auth_cookie_expiration}`);
+                    app.util.cookie('password', app.auth.password, `${app.auth_cookie_expiration}`);
+                }
+                login = true;
+                app.api.get_core_list(true);
+            } else {
+                if (app.hasOwnProperty('_temp_prelogin') && app._temp_prelogin) {
+                    app._temp_prelogin = false;
+                } else {
+                    login = false;
+                }
+            }
+            if (login) {
+                block.child('login').on('hide', { concurrent: _ => {
+                    app.block.child('main').on('show');
+                } });
+            } else {
+                block.child('login/content/error/text').css('display', 'inline-block');
+            }
+        }
+    #node_profiles
+        {
+            for (var np in node_profiles) {
+                app.api.node_profiles[np] = node_profiles[np];
+            }
+        }
+    #core_list
+        {
+            if (Block.is.arr(core_list)) {
+                if (core_list.length > 0) {
+                    block.child('main/cores/default').css({
+                        display: 'none'
+                    }).sibling('list').css({
+                        display: 'block'
+                    }).data({
+                        core_list: core_list
+                    });
+                } else {
+                    block.child('main/cores/default').css({
+                        display: 'table'
+                    }).sibling('list').css({
+                        display: 'none'
+                    }).data({
+                        core_list: core_list
+                    });
+                }
+            }
+        }
+    #core_info
+        {
+            if (block.child('main/core').key('id') == core_info.id) {
+                block.child('main/core').data({ core_info: core_info });
+                if (block.child('main/core/default').css('display') != "none") {
+                    block.child('main/core/default')
+                        .css({ display: 'none' })
+                    .sibling('info')
+                        .css({ display: 'table' });
+                }
+                if (block.child('main/node').key('id') == "core") {
+                    block.child('main/node').data({ node_info: {
+                        name: core_info.name,
+                        type: "core"
+                    } });
+                }
+            }
+            block.data({ core_name: {
+                id: core_info.id,
+                name: core_info.name
+            } });
+        }
+    #core_name
+        {
+            if (block.child('main/core').key('id') == core_name.id) {
+                block.child('main/core').data({ core_name: core_name.name });
+                if (block.child('main/node').key('id') == 'core') {
+                    block.child('main/node').data({ node_name: core_name.name });
+                }
+            }
+            if (block.child('main/cores/list').child(core_name.id) != null) {
+                block.child(`main/cores/list/${core_name.id}`).data({
+                    name: core_name.name
+                });
+            }
+        }
+    #core_status
+        {
+            if (block.child('main/core').key('id') == core_status.id) {
+                block.child('main/core').data({
+                    core_status: core_status
+                });
+                if ("core" == block.child('main/node').key('id')) {
+                    block.child('main/node').data({
+                        node_status: core_status
+                    });
+                }
+                block.child('main/core/bar/status').on('update');
+            }
+        }
+    #core_nodes
+        {
+            if (block.child('main/core').key('id') == core_nodes.id) {
+                block.child('main/core').data({
+                    core_nodes: core_nodes
+                });
+            }
+        }
+    #node_info
+        {
+            if (block.child('main/core').key('id') == node_info.core_id) {
+                block.child('main/core/nodes').data({
+                    node_info: node_info
+                });
+            }
+            if (block.child('main/node').key('id') == node_info.id) {
+                block.child('main/node').data({
+                    node_info: node_info
+                });
+            }
+        }
+    #node_name
+        {
+            if (block.child('main/core').key('id') == node_name.core_id) {
+                block.child('main/core/nodes').data({
+                    node_name: node_name
+                });
+            }
+            if (block.child('main/node').key('id') == node_name.id) {
+                block.child('main/node').data({
+                    node_name: node_name.name
+                });
+            }
+
+        }
+    #node_status
+        {
+            if (block.child('main/core').key('id') == node_status.core_id) {
+                block.child('main/core/nodes').data({
+                    node_status: node_status
+                });
+                if (block.child('main/node').key('id') == node_status.id) {
+                    block.child('main/node').data({
+                        node_status: node_status
+                    });
+                }
+                block.child('main/core/bar/status').on('update');
+            }
+        }
+    #delete_core
+        {
+            if (delete_core) {
+                if (delete_core == block.child('main/core').key('id')) {
+                    block.child('main/core').on('hide', { next: _ => {
+                        app.block.child('main/cores').on('show');
+                    } });
+                    if ("core" == block.child('main/node').key('id')) {
+                        block.child('main/node').on('hide', { next: _ => {
+                            app.block.child('main/cores').on('show');
+                        } });
+                    }
+                }
+            }
+        }
+    #delete_node
+        {
+            if (delete_node) {
+                if (delete_node == block.child('main/node').key('id')) {
+                    block.child('main/node').on('hide', { next: _ => {
+                        app.block.child('main/core').on('show');
+                    } });
+                }
+            }
+        }
+    block login
+        {
+            block.css('transition', `opacity ${app.transition_fade_duration}s`);
+        }
+        :show
+            {
+                block.css('display', 'table');
+                block.css('opacity', '1');
+                setTimeout(_ => {
+                    if (data.concurrent) data.concurrent();
+                }, 1);
+                setTimeout(_ => {
+                    if (data.next) data.next()
+                }, app.transition_fade_duration * 1000);
+                event.stopPropagation();
+            }
+        :hide
+            {
+                block.css('opacity', '0');
+                setTimeout(_ => {
+                    if (data.concurrent) data.concurrent();
+                }, 1);
+                setTimeout(_ => {
+                    block.css('display', 'none');
+                    if (data && data.next) data.next();
+                }, app.transition_fade_duration * 1000);
+                event.stopPropagation();
+            }
+        css
+            margin 0
+            opacity 1
+        div logo
+            css
+                margin 0 auto -15px auto
+                width 150px
+                opacity 0.9
+            image logo
+                src img/nestor_b.png
+                width 150px
+                height 150px
+        h1 h1
+            html nestor
+            css
+                opacity 0.9
+                font-size xx-large
+        div content
+            css
+                margin-bottom 70px
+            input username
+                type text
+                placeholder username
+                css
+                    width 120px
+                    margin-bottom 5px
+                    text-align center
+                    border 1px solid rgba(20, 20, 20, 0.15)
+                    border-radius 1.5px
+                    outline none
+                :keyup
+                    {
+                        if (event.keyCode == 13) {
+                            block.sibling('submit').$().click();
+                        }
+                    }
+            break br1
+                // break
+            input password
+                type password
+                placeholder password
+                css
+                    width 120px
+                    margin-bottom 5px
+                    text-align center
+                    border 1px solid rgba(20, 20, 20, 0.15)
+                    border-radius 1.5px
+                    outline none
+                :keyup
+                    {
+                        if (event.keyCode == 13) {
+                            block.sibling('submit').$().click();
+                        }
+                    }
+            div error
+                css
+                    margin-bottom 4px
+                text text
+                    val invalid credentials
+                    css
+                        color rgba(150, 30, 30, 0.8)
+                        font-size 12px
+                        display none
+            button submit
+                html enter
+                css
+                    width 128px
+                    cursor pointer
+                    border 1px solid rgba(20, 20, 20, 0.15)
+                    border-radius 1.5px
+                    transition background-color 0.2s ease
+                    background-color #f6f6f6
+                    outline none
+                    height 24px
+                :click
+                    {
+                        var username = block.sibling('username').node().value;
+                        var password = block.sibling('password').node().value;
+                        if (username && password) {
+                            username = username.trim();
+                            password = password.trim();
+                            if (username != "" && password != "") {
+                                app.util.sha256(password, hashed_password => {
+                                    app.api.login(username, hashed_password);
+                                });
+                            }
+                        }
+                    }
+                :mouseover
+                    css
+                        background-color #f1f1f1
+                :mouseout
+                    css
+                        background-color #f6f6f6
+    div main
+        {
+            block.css('transition', `opacity ${app.transition_fade_duration}s`);
+        }
+        :show
+            {
+                block.css('display', 'block');
+                block.css('opacity', '1');
+                setTimeout(_ => {
+                    if (data.concurrent) data.concurrent();
+                }, 1);
+                setTimeout(_ => {
+                    if (data.next) data.next()
+                }, app.transition_fade_duration * 1000);
+                event.stopPropagation();
+            }
+        :hide
+            {
+                block.css('opacity', '0');
+                setTimeout(_ => {
+                    if (data.concurrent) data.concurrent();
+                }, 1);
+                setTimeout(_ => {
+                    block.css('display', 'none');
+                    if (data && data.next) data.next();
+                }, app.transition_fade_duration * 1000);
+                event.stopPropagation();
+            }
+        css
+            display none
+            position relative
+            height 100%
+            width 100%
+            opacity 1
+            background-color #f5f5f5
+            borderLeft 1px solid #f2f2f2
+            borderRight 1px solid #f2f2f2
+        div header
+            css
+                position absolute
+                top 0
+                left 0
+                width 100%
+                height 86px
+                background-color black
+                box-shadow rgba(50, 50, 50, 0.3) 0px 2px 4px
+            block logo
+                css
+                    width 86px
+                    margin-left 32px
+                    margin-top -3px
+                    float left
+                image img
+                    src img/nestor_w.png
+                    height 60px
+                    width 60px
+            block title
+                css
+                    width auto
+                    float left
+                    margin-left -5px
+                    margin-top -2px
+                text text
+                    val Nestor
+                    css
+                        color white
+                        font-size 30px
+                        letter-spacing 0.8px
+                        cursor default
+            block logout
+                css
+                    position absolute
+                    top 0
+                    right 7px
+                    width 86px
+                div image
+                    css
+                        margin 0 auto
+                        cursor pointer
+                        width 42px
+                        height 42px
+                        opacity 0.9
+                        transition opacity 0.1s ease
+                    :mouseover
+                        css
+                            opacity 1
+                    :mouseout
+                        css
+                            opacity 0.9
+                    :click
+                        {
+                            app.api.logout();
+                        }
+                    image img
+                        src img/power_w.png
+                        width 42px
+                        height 42px
+        div cores
+            {
+                block.css('transition', `opacity ${app.transition_fade_duration}s`);
+            }
+            :show
+                {
+                    block.css('display', 'block');
+                    block.css('opacity', '1');
+                    setTimeout(_ => {
+                        if (data.concurrent) data.concurrent();
+                    }, 1);
+                    setTimeout(_ => {
+                        if (data.next) data.next()
+                    }, app.transition_fade_duration * 1000);
+                    event.stopPropagation();
+                }
+            :hide
+                {
+                    block.css('opacity', '0');
+                    setTimeout(_ => {
+                        if (data.concurrent) data.concurrent();
+                    }, 1);
+                    setTimeout(_ => {
+                        block.css('display', 'none');
+                        if (data && data.next) data.next();
+                    }, app.transition_fade_duration * 1000);
+                    event.stopPropagation();
+                }
+            css
+                height 100%
+                width 100%
+                padding-top 86px
+                padding-bottom 86px
+                box-sizing border-box
+                opacity 1
+            block default
+                text text
+                    val welcome
+                    css
+                        font-size 40px
+                        color #333
+                        letter-spacing 1.5px
+            div list
+                css
+                    display none
+                !core-item
+                    init
+                        {
+                            var block = Block('div');
+                            return block
+                                .css({
+                                    width: '100%',
+                                    height: '110px',
+                                    backgroundColor: 'white',
+                                    borderBottom: '1px solid #ededed',
+                                    cursor: 'pointer',
+                                    transition: 'background-color 0.15s ease',
+                                    position: 'relative'
+                                })
+                                .on('mouseover', _ => {
+                                    block.css('background-color', '#f9f9f9');
+                                })
+                                .on('mouseout', _ => {
+                                    block.css('background-color', 'white');
+                                })
+                                .add(Block('block', 'img')
+                                    .css({
+                                        opacity: '0.6',
+                                        width: '90px',
+                                        height: '110px',
+                                        float: 'left',
+                                        boxSizing: 'border-box',
+                                        paddingTop: '3.5px'
+                                    })
+                                    .add(Block('image', 1)
+                                        .data({
+                                            src: 'img/memory_b.png',
+                                            //src: 'img/gear_b.png',
+                                            css: { margin: '0 auto' },
+                                            width: '40px',
+                                            height: '40px'
+                                            //width: '35px',
+                                            //height: '35px'
+                                        })
+                                    )
+                                )
+                                .add(Block('block', 'name')
+                                    .css({
+                                        height: '110px',
+                                        float: 'left',
+                                        width: 'auto'
+                                    })
+                                    .add(Block('text', 1)
+                                        .data('Name')
+                                        .css({
+                                            fontSize: '25px',
+                                            letterSpacing: '1px'
+                                        })
+                                    )
+                                )
+                                .add(Block('block', 'next')
+                                    .css({
+                                        width: '50px',
+                                        height: '110px',
+                                        opacity: '0.55',
+                                        position: 'absolute',
+                                        right: '15px',
+                                    })
+                                    .add(Block('image', 1)
+                                        .data({
+                                            src: 'img/right_b.png',
+                                            css: { margin: '0 auto' },
+                                            width: '50px',
+                                            height: '50px'
+                                        })
+                                    )
+                                )
+                                .on('click' , _ => {
+                                    var id = block.key('id');
+                                    if (id) {
+                                        block.parent(1)
+                                            .sibling('core').data({
+                                                    id: id
+                                                })
+                                            .sibling('cores')
+                                                .on('hide', { concurrent: _ => {
+                                                    block.parent(1)
+                                                        .sibling('core').on('show');
+                                                } });
+                                    }
+                                })
+                            ;
+                        }
+                    load
+                        {
+                            data('name', name => {
+                                block.key('name', name);
+                                block.child('name/text').html('').data(name);
+                            });
+                            data('id', id => {
+                                block.key('id', id);
+                            });
+                            data('status', status => {
+                                switch (status.status) {
+                                    case "online":
+                                        block.child('status/circle').css('background-color', app.block.key('statusGreen'));
+                                        break;
+                                    case "offline":
+                                        block.child('status/circle').css('background-color', app.block.key('deleteRed'));
+                                        break;
+                                    case "desync":
+                                        block.child('status/circle').css('background-color', app.block.key('slowYellow'));
+                                        break;
+                                    case "intermediate":
+                                        block.child('status/circle').css('background-color', app.block.key('buttonBlue'));
+                                        break;
+                                    case "new":
+                                    default:
+                                        block.child('status/circle').css('background-color', app.block.key('stalledGrey'));
+                                        break;
+                                }
+                            });
+                        }
+                #core_list
+                    {
+                        block.html('');
+                        for (var c in core_list) {
+                            block.add(Block('core-item', core_list[c].id).data(core_list[c]));
+                        }
+                    }
+            block footer
+                css
+                    position absolute
+                    bottom 0
+                    left 0
+                    width 100%
+                    height 105px
+                    padding-bottom 15px
+                    background-color black
+                    cursor pointer
+                :mouseover
+                    img
+                        css
+                            opacity 1
+                :mouseout
+                    img
+                        css
+                            opacity 0.9
+                :click
+                    {
+                        app.api.new_core();
+                    }
+                div img
+                    css
+                        opacity 0.9
+                        margin 0 auto
+                        cursor pointer
+                        height 60px
+                        width 60px
+                        transition opacity 0.1s ease
+                    image image
+                        src img/plus_w.png
+                        width 60px
+                        height 60px
+        div core
+            {
+                block.css('transition', `opacity ${app.transition_fade_duration}s`);
+            }
+            :show
+                {
+                    block.css('display', 'block');
+                    block.css('opacity', '1');
+                    setTimeout(_ => {
+                        if (data.concurrent) data.concurrent();
+                    }, 1);
+                    setTimeout(_ => {
+                        if (data.next) data.next()
+                    }, app.transition_fade_duration * 1000);
+                    event.stopPropagation();
+                }
+            :hide
+                {
+                    block.css('opacity', '0');
+                    setTimeout(_ => {
+                        if (data.concurrent) data.concurrent();
+                    }, 1);
+                    setTimeout(_ => {
+                        block.css('display', 'none');
+                        if (data && data.next) data.next();
+                    }, app.transition_fade_duration * 1000);
+                    event.stopPropagation();
+                }
+            css
+                display none
+                height 100%
+                width 100%
+                padding-top 86px
+                box-sizing border-box
+                opacity 1
+            #id
+                {
+                    block.key('id', id);
+                    block.key('core_info', null);
+                    app.api.get_core_info(id);
+                }
+            #core_info
+                {
+                    block.key('core_info', core_info);
+                    block.child('info/content/text1').html('').data(core_info.code);
+                    block.child('info/content/text2').html('').data(core_info.id);
+                    block.data({ core_name: core_info.name });
+                }
+            #core_name
+                {
+                    var core_info = block.key('core_info');
+                    core_info.name = core_name;
+                    block.key('core_info', core_info);
+                    // block.child('bar/title/display/text').html('').data(core_info.name);
+                    block.child('nodes/core-node').data({
+                        title: core_info.name
+                    });
+                }
+            #core_status
+                {
+                    if (core_status.status == "new") {
+                        block.child('info')
+                            .css('display', 'table')
+                        .sibling('nodes')
+                            .css('display', 'none')
+                        .sibling('default')
+                            .css('display', 'none');
+                        block.child('nodes/core-node').data({
+                            status: {
+                                code: "new",
+                                time: -1
+                            }
+                        });
+                    } else {
+                        block.child('info')
+                            .css('display', 'none')
+                        .sibling('nodes')
+                            .css('display', 'block')
+                        .sibling('default')
+                            .css('display', 'none');
+                        block.child('nodes/core-node').data({
+                            status: {
+                                code: core_status.status,
+                                time: core_status.status_time
+                            }
+                        });
+                    }
+                }
+            #core_nodes
+                {
+                    block.child('nodes').data({ nodes: core_nodes });
+                }
+            div bar
+                css
+                    width 100%
+                    height 80px
+                    background-color white
+                    border-bottom 1px solid #e8e8e8
+                    position absolute
+                    z-index 5
+                block title
+                    css
+                        position absolute
+                        top 0
+                        left 0
+                    div display
+                        text text
+                            html Dashboard
+                            css
+                                font-size 32px
+                                cursor default
+                block back
+                    css
+                        width 50px
+                        position absolute
+                        top 0
+                        left 0
+                    div div
+                        css
+                            height 40px
+                            width 112px
+                            margin-left 16px
+                            background-color rgba(20, 20, 20, 0)
+                            border-radius 5px
+                            cursor pointer
+                            transition background-color 0.2s ease
+                        :mouseover
+                            css
+                                background-color rgba(20, 20, 20, 0.05)
+                        :mouseout
+                            css
+                                background-color rgba(20, 20, 20, 0)
+                        :click
+                            {
+                                var bb = block;
+                                bb.parent(2).on('hide', { next: _ => {
+                                    bb.parent(2).sibling('cores').on('show');
+                                } });
+                            }
+                        image img
+                            src img/right_b.png
+                            css
+                                transform rotate(180deg)
+                                display block
+                                float left
+                                margin-right 4px
+                                opacity 0.8
+                            width 40px
+                            height 40px
+                        text text
+                            val Cores
+                            css
+                                font-size 24px
+                                display block
+                                float left
+                                margin-top 3.5px
+                                opacity 0.8
+                                cursor pointer
+                block status
+                    css
+                        width 64px
+                        position absolute
+                        top 0
+                        right 10px
+                    div light
+                        css
+                            height 20px
+                            width 20px
+                            background-color #ddd
+                            border 1px solid #eee
+                            border-radius 100%
+                            margin 0 auto
+                    :update
+                        {
+                            var agg_status = {
+                                code: "new",
+                                time: -1
+                            };
+                            var node_items = block.parent().sibling('nodes').children();
+                            var core_status = node_items['core-node'].key('status');
+                            if (core_status) {
+                                agg_status.code = core_status.code;
+                                agg_status.time = core_status.time;
+                                if (core_status.code == "online") {
+                                    for (var n_i in node_items) {
+                                        if (node_items.hasOwnProperty(n_i) && node_items[n_i] && node_items[n_i].type() == 'node-item' && n_i != 'core-node') {
+                                            var status = node_items[n_i].key('status');
+                                            if (status && (status.code == "offline" || status.code == "desync")) {
+                                                agg_status.code = "intermediate";
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            switch (agg_status.code) {
+                                case "online":
+                                    block.child('light').css('background-color', app.block.key('statusGreen'));
+                                    break;
+                                case "offline":
+                                    block.child('light').css('background-color', app.block.key('deleteRed'));
+                                    break;
+                                case "desync":
+                                    block.child('light').css('background-color', app.block.key('slowYellow'));
+                                    break;
+                                case "intermediate":
+                                    block.child('light').css('background-color', app.block.key('buttonBlue'));
+                                    break;
+                                case "new":
+                                default:
+                                    block.child('light').css('background-color', app.block.key('stalledGrey'));
+                                    break;
+                            }
+                        }
+            block default
+                css
+                    box-sizing border-box
+                    margin-top 10px
+                image img
+                    src img/loading_b.svg
+                    css
+                        margin 0 auto
+                        opacity 0.54
+                    height 80px
+                    width 80px
+            block info
+                css
+                    display none
+                    box-sizing border-box
+                    padding-top 80px
+                    padding-bottom 100px
+                    position relative
+                div content
+                    css
+                        width 210px
+                        height 230px
+                        margin 0 auto
+                    image img
+                        src img/memory_b.png
+                        css
+                            opacity 0.7
+                            margin 0 auto
+                        height 130px
+                        width 130px
+                    text text1
+                        html &nbsp;
+                        css
+                            color black
+                            font-size 40px
+                            text-align center
+                            letter-spacing 1.5px
+                    break br
+                        // break
+                    text text2
+                        html &nbsp;
+                        css
+                            color black
+                            font-size 17px
+                            text-align center
+                div delete
+                    css
+                        position absolute
+                        bottom 0
+                        left 0
+                        height 140px
+                        width 100%
+                    block wrap
+                        css
+                            width 46%
+                            height 100%
+                            padding-top 52px
+                            box-sizing border-box
+                            margin 0 auto
+                        block button
+                            :click
+                                {
+                                    var core_info = block.parent(3).key('core_info');
+                                    if (core_info && core_info.name && core_info.id) {
+                                        app.api.delete_core(core_info.id, core_info.name);
+                                    }
+                                }
+                            css
+                                background-color rgb(185, 185, 185)
+                                color white
+                                cursor pointer
+                                transition background-color 0.15s ease, color 0.15s ease
+                                border-radius 5px 5px 0 0
+                                border 1px solid #ddd
+                            :mouseout
+                                css
+                                    background-color rgb(185, 185, 185)
+                                    color white
+                            :mouseover
+                                css
+                                    background-color rgba(180, 49, 41, 0.87)
+                                    color white
+                            div text
+                                text text
+                                    val delete
+                                    css
+                                        text-transform uppercase
+                                        font-size 25px
+            div nodes
+                css
+                    display none
+                    box-sizing border-box
+                    height 100%
+                    width 100%
+                    padding 105px 22px 35px
+                    overflow scroll
+                #nodes
+                    {
+                        var children = block.children();
+                        for (var c in children) {
+                            if (c != "core-node" && children.hasOwnProperty(c) && children[c]) {
+                                children[c].remove();
+                            }
+                        }
+                        for (var n in nodes.nodes) {
+                            var node_id = nodes.nodes[n];
+                            block.add(Block('node-item', node_id)
+                                .key('id', node_id)
+                                .key('node_id', n)
+                                .data({
+                                    title: "Node " + (parseInt(n) + 1),
+                                    type: "node"
+                                })
+                            );
+                            app.api.get_node_info(node_id);
+                        }
+                        Block.queries();
+                    }
+                #node_info
+                    {
+                        var node_item = block.child(node_info.id);
+                        if (node_item) {
+                            node_item.data({
+                                id: node_info.id,
+                                title: node_info.name,
+                                type: node_info.type
+                            });
+                        }
+                    }
+                #node_name
+                    {
+                        var node_item = block.child(node_name.id);
+                        if (node_item) {
+                            node_item.data({
+                                title: node_name.name,
+                            });
+                        }
+                    }
+                #node_status
+                    {
+                        var node_item = block.child(node_status.id);
+                        if (node_item) {
+                            node_item.data({
+                                status: {
+                                    code: node_status.status,
+                                    time: node_status.status_time
+                                }
+                            });
+                        }
+                    }
+                !node-item
+                    init
+                        {
+                            var block = Block('block')
+                                .css({
+                                    width: '50%',
+                                    height: '50%',
+                                    minHeight: '345px',
+                                    maxHeight: '355px',
+                                    float: 'left'
+                                })
+                                .add(Block('div', 'content')
+                                    .css({
+                                        width: '89.5%',
+                                        height: '92%',
+                                        margin: '0 auto',
+                                        backgroundColor: 'white',
+                                        border: '1px solid #f0f0f0',
+                                        boxSizing: 'border-box',
+                                        borderRadius: '7px',
+                                        boxShadow: 'rgba(50, 50, 50, 0.04) 0px 2px 4px',
+                                        transition: 'box-shadow 0.15s ease, background-color 0.1s ease',
+                                        cursor: 'pointer',
+                                        position: 'relative'
+                                    })
+                                    .on('mouseover', (e, b, d) => {
+                                        b.css({
+                                            boxShadow: 'rgba(50, 50, 50, 0.08) 0px 2px 4px',
+                                            backgroundColor: '#fbfbfb'
+                                        });
+                                    })
+                                    .on('mouseout', (e, b, d) => {
+                                        b.css({
+                                            boxShadow: 'rgba(50, 50, 50, 0.04) 0px 2px 4px',
+                                            backgroundColor: 'white'
+                                        });
+                                    })
+                                    .add(Block('div', 'img')
+                                        .css({
+                                            margin: '20px auto 0',
+                                            height: '160px',
+                                            width: '160px',
+                                            opacity: '0.7'
+                                        })
+                                        .bind('load', load => {
+                                            block.child('content/img/image').data({
+                                                src: load,
+                                                height: '160px',
+                                                width: '160px'
+                                            });
+                                        })
+                                        .add(Block('image', 1))
+                                    )
+                                    .add(Block('div', 'title')
+                                        .add(Block('text', 1)
+                                            .data('Title')
+                                            .css({
+                                                fontSize: '35px',
+                                                color: '#222'
+                                            })
+                                        )
+                                    )
+                                    .add(Block('div', 'status')
+                                        .css({
+                                            width: '100%',
+                                            height: '80px',
+                                            marginTop: '8px',
+                                            position: 'absolute',
+                                            bottom: '13.2px'
+                                        })
+                                        .add(Block('block', 'light')
+                                            .css({
+                                                width: '27%',
+                                                height: '100%',
+                                                float: 'left'
+                                            })
+                                            .query('window width >= 665', function (event, block, data) {
+                                                block.css('width', '27%');
+                                            })
+                                            .query('window width < 665', function (event, block, data) {
+                                                block.css('width', '23%');
+                                            })
+                                            .add(Block('div', 'circle')
+                                                .css({
+                                                    borderRadius: '100%',
+                                                    height: '20px',
+                                                    width: '20px',
+                                                    backgroundColor: '#ddd',
+                                                    border: '1px solid #eee',
+                                                    margin: '0 0 0 auto'
+                                                })
+                                            )
+                                        )
+                                        .add(Block('div', 'labels')
+                                            .css({
+                                                width: '73%',
+                                                height: '100%',
+                                                float: 'left',
+                                                paddingLeft: '25px',
+                                                boxSizing: 'border-box'
+                                            })
+                                            .add(Block('div', 'type')
+                                                .css({
+                                                    height: '50%',
+                                                    width: '100%'
+                                                })
+                                                .add(Block('text', 1)
+                                                    .data('Type')
+                                                    .css({
+                                                        display: 'block',
+                                                        textAlign: 'left',
+                                                        paddingTop: '13px',
+                                                        fontSize: '23px',
+                                                        color: '#222'
+                                                    })
+                                                )
+                                            )
+                                            .add(Block('div', 'status')
+                                                .css({
+                                                    height: '50%',
+                                                    width: '100%'
+                                                })
+                                                .add(Block('text', 1)
+                                                    .data('Status 5 min ago')
+                                                    .css({
+                                                        display: 'block',
+                                                        textAlign: 'left',
+                                                        fontSize: '15px',
+                                                        color: '#888',
+                                                        fontStyle: 'italic',
+                                                        paddingTop: '3px'
+                                                    })
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                                .on('click', _ => {
+                                    var id = block.key('id');
+                                    if (id) {
+                                        block.parent(1)
+                                            .sibling('node').data({
+                                                id: id
+                                            });
+                                        block.parent(1).on('hide', { concurrent: _ => {
+                                            block.parent(1).sibling('node').on('show');
+                                        }});
+                                    }
+                                })
+                            ;
+                            return block;
+                        }
+                    load
+                        {
+                            data('title', title => {
+                                block.child('content/title/text').html('').data(title);
+                            });
+                            data('type', type => {
+                                block.child('content/img').data({ load: 'img/' + app.api.node_profiles[type].meta.img + '.png' });
+                                block.child('content/status/labels/type/text').html('').data(app.api.node_profiles[type].meta.label);
+                            });
+                            data('status', status => {
+                                block.key('status', status);
+                                block.child('content/status/labels/status/text').html('').data(status.code.charAt(0).toUpperCase() + status.code.slice(1) + " " + (status.code == "online" ? "now" : app.util.duration_desc(status.time)));
+                                switch (status.code) {
+                                    case "online":
+                                        block.child('content/status/light/circle').css('background-color', app.block.key('statusGreen'));
+                                        break;
+                                    case "offline":
+                                        block.child('content/status/light/circle').css('background-color', app.block.key('deleteRed'));
+                                        break;
+                                    case "desync":
+                                        block.child('content/status/light/circle').css('background-color', app.block.key('slowYellow'));
+                                        break;
+                                    case "new":
+                                    default:
+                                        block.child('content/status/light/circle').css('background-color', app.block.key('stalledGrey'));
+                                        break;
+                                }
+                            });
+                            data('id', id => {
+                                block.key('id', id);
+                            });
+                        }
+                {
+                    var updateNodeStatus = _ => {
+                        var node_items = block.children();
+                        for (var n_i in node_items) {
+                            var node_item = node_items[n_i];
+                            var node_status = node_item.key('status');
+                            if (node_status != null) {
+                                node_item.data({
+                                    status: node_status
+                                });
+                            }
+                        }
+                        setTimeout(updateNodeStatus, app.update_node_status_interval * 1000);
+                    };
+                    setTimeout(updateNodeStatus, 5000);
+                }
+                node-item core-node
+                    title Core Node
+                    type core
+                    id core
+        div node
+            {
+                block.css('transition', `opacity ${app.transition_fade_duration}s`);
+            }
+            :show
+                {
+                    block.css('display', 'block');
+                    block.css('opacity', '1');
+                    setTimeout(_ => {
+                        if (data.concurrent) data.concurrent();
+                    }, 1);
+                    setTimeout(_ => {
+                        if (data.next) data.next()
+                    }, app.transition_fade_duration * 1000);
+                    event.stopPropagation();
+                }
+            :hide
+                {
+                    block.css('opacity', '0');
+                    setTimeout(_ => {
+                        if (data.concurrent) data.concurrent();
+                    }, 1);
+                    setTimeout(_ => {
+                        block.css('display', 'none');
+                        if (data && data.next) data.next();
+                    }, app.transition_fade_duration * 1000);
+                    event.stopPropagation();
+                }
+            css
+                display none
+                height 100%
+                width 100%
+                padding-top 86px
+                box-sizing border-box
+                opacity 1
+            #id
+                {
+                    block.key('id', id);
+                    block.key('node_info', null);
+                    block.child('menu').css('display', 'none')
+                        .sibling('default').css('display', 'table');
+                    if (id == "core") {
+                        var id = block.sibling('core').key('id');
+                        if (id) app.api.get_core_info(id, false);
+                    } else {
+                        app.api.get_node_info(id);
+                    }
+                }
+            #menu_type
+                {
+                    
+                    // TODO: set up menu
+                    // before here: create custom blocktype for menu item which emits update events (final/transitional)
+                    // in here: use custom blocktype, create name edit item and then menu_type based items
+                    // in here: bind name edit item's update event to the corresponding core/node name update ws event
+                    // in here: bind menu_type based items' update events to the node data update ws event
+                    // before (but can be done later): build default core menu_type builtin
+                    if (app.api.node_profiles.hasOwnProperty(menu_type) && app.api.node_profiles[menu_type]) {
+                        var menu_profile = app.api.node_profiles[menu_type];
+                        block.child('menu/status/labels/type/text').html('').data(menu_profile.meta.label);
+                        block.child('menu/status/image/img').data({ src: `img/${menu_profile.meta.img}.png` });
+
+                        console.log(menu_profile);
+
+                        block.child('default').css('display', 'none')
+                            .sibling('menu').css('display', 'block');
+                    }
+                }
+            #node_info
+                {
+                    block.key('node_info', node_info);
+                    block.data({
+                        node_name: node_info.name,
+                        menu_type: node_info.type
+                    });
+                }
+            #node_name
+                {
+                    var node_info = block.key('node_info');
+                    node_info.name = node_name;
+                    block.key('node_info', node_info);
+                    block.child('bar/title/editor').css('display', 'none').data(node_name)
+                        .child('input').$().blur();
+                    block.child('bar/title/display/text').html('').data(node_name)
+                        .parent().css('display', 'block');
+                }
+            #node_status
+                {
+                    block.child('menu/status').data({
+                        status: {
+                            code: node_status.status,
+                            time: node_status.status_time
+                        }
+                    });
+                }
+            div bar
+                css
+                    width 100%
+                    height 80px
+                    background-color white
+                    border-bottom 1px solid #e8e8e8
+                    position absolute
+                    z-index 5
+                block title
+                    css
+                        position absolute
+                        top 0
+                        left 0
+                    div display
+                        text text
+                            html &nbsp;
+                            css
+                                font-size 32px
+                                cursor default
+                    div editor
+                        css
+                            display none
+                        input input
+                            placeholder Core Title
+                            css
+                                font-size 32px
+                                text-align center
+                                outline none
+                                border none
+                                background-color rgba(0,0,0,0)
+                            :keyup
+                                {
+                                    if (event.keyCode) {
+                                        if (event.keyCode == 13) {
+                                            block.$().blur();
+                                        } else if (event.keyCode == 27) {
+                                            var node_info = block.parent(3).key('node_info');
+                                            if (node_info && node_info.name && node_info.name != "") {
+                                                block.node().value = node_info.name;
+                                                block.$().blur();
+                                            }
+                                        }
+                                    }
+                                }
+                            :focusout
+                                {
+                                    block.on('save');
+                                }
+                            :save
+                                {
+                                    var value = (`${block.node().value}`).trim();
+                                    var node_id = block.parent(3).key('id');
+                                    var node_info = block.parent(3).key('node_info');
+                                    if (value && value != "" && node_id && node_id != "") {
+                                        if (value != node_info.name) {
+                                            if (node_id == 'core') {
+                                                var core_info = block.parent(3).sibling('core').key('core_info');
+                                                if (core_info && core_info.id && core_info.id != "")
+                                                    app.api.set_core_name(core_info.id, value);
+                                            } else app.api.set_node_name(node_id, value);
+                                        } else {
+                                            block.parent(3).data({ node_name: node_info.name });
+                                        }
+                                    }
+                                }
+                        #val
+                            {
+                                block.child('input').node().value = val;
+                            }
+                block back
+                    css
+                        width 50px
+                        position absolute
+                        top 0
+                        left 0
+                    div div
+                        css
+                            height 40px
+                            width 119px
+                            margin-left 16px
+                            background-color rgba(20, 20, 20, 0)
+                            border-radius 5px
+                            cursor pointer
+                            transition background-color 0.2s ease
+                        :mouseover
+                            css
+                                background-color rgba(20, 20, 20, 0.05)
+                        :mouseout
+                            css
+                                background-color rgba(20, 20, 20, 0)
+                        :click
+                            {
+                                var bb = block;
+                                bb.parent(2).on('hide', { next: _ => {
+                                    bb.parent(2).sibling('core').on('show');
+                                } });
+                            }
+                        image img
+                            src img/right_b.png
+                            css
+                                transform rotate(180deg)
+                                display block
+                                float left
+                                margin-right 4px
+                                opacity 0.8
+                            width 40px
+                            height 40px
+                        text text
+                            val Nodes
+                            css
+                                font-size 24px
+                                display block
+                                float left
+                                margin-top 3.5px
+                                opacity 0.8
+                                cursor pointer
+                block edit
+                    css
+                        width 64px
+                        position absolute
+                        top 0
+                        right 10px
+                    image img
+                        height 40px
+                        width 40px
+                        src img/pencil_b.png
+                        css
+                            margin 0 auto
+                            opacity 0.61
+                            cursor pointer
+                            transition opacity 0.15s ease
+                        :mouseover
+                            css
+                                opacity 0.7
+                        :mouseout
+                            css
+                                opacity 0.61
+                        :click
+                            {
+                                block.parent().sibling('title').child('display').css('display', 'none')
+                                    .sibling('editor').css('display', 'block')
+                                        .child('input').$().focus().select();
+                            }
+            block default
+                css
+                    box-sizing border-box
+                    margin-top 10px
+                image img
+                    src img/loading_b.svg
+                    css
+                        margin 0 auto
+                        opacity 0.54
+                    height 80px
+                    width 80px
+            !node-menu-item
+                init
+                    {
+
+                    }
+                load
+                    {
+                        
+                    }
+            div menu
+                css
+                    box-sizing border-box
+                    padding-top 80px
+                    display none
+                    width 100%
+                    height 100%
+                    position relative
+                div status
+                    css
+                        width 100%
+                        height 150px
+                        background-color white
+                        border-bottom 1px solid #ececec
+                        position relative
+                    #status
+                        {
+                            block.key('status', status);
+                            block.child('labels/status/text').html('').data(status.code.charAt(0).toUpperCase() + status.code.slice(1) + " " + (status.code == "online" ? "now" : app.util.duration_desc(status.time)));
+                            switch (status.code) {
+                                case "online":
+                                    block.child('light/circle').css('background-color', app.block.key('statusGreen'));
+                                    break;
+                                case "offline":
+                                    block.child('light/circle').css('background-color', app.block.key('deleteRed'));
+                                    break;
+                                case "desync":
+                                    block.child('light/circle').css('background-color', app.block.key('slowYellow'));
+                                    break;
+                                case "new":
+                                default:
+                                    block.child('light/circle').css('background-color', app.block.key('stalledGrey'));
+                                    break;
+                            }
+                        }
+                    block image
+                        css
+                            width  135px
+                            float left
+                        image img
+                            width 50px
+                            height 50px
+                            src img/gear_b.png
+                            css
+                                opacity 0.65
+                                margin 0 auto
+                    block light
+                        css
+                            float left
+                            width 50px
+                            margin-right 15px
+                            margin-left -12px
+                        div circle
+                            css
+                                border-radius 100%
+                                height 20px
+                                width 20px
+                                margin 0 auto
+                                border 1px solid #eee
+                                background-color #ddd
+                    div labels
+                        css
+                            width 55%
+                            height 100%
+                            float left
+                            padding-left 2px
+                            box-sizing border-box
+                        div type
+                            css
+                                height 50%
+                                width 100%
+                                position relative
+                            text text
+                                val Type
+                                css
+                                    display block
+                                    text-align left
+                                    font-size 27px
+                                    color #222
+                                    position absolute
+                                    bottom -1.5px
+                                    left 0
+                        div status
+                            css
+                                height 50%
+                                width 100%
+                            text text
+                                val Status 5 min ago
+                                css
+                                    display block
+                                    text-align left
+                                    font-size 16px
+                                    color #888
+                                    font-style italic
+                                    padding-top 5px
+                    block delete
+                        css
+                            width 130px
+                            position absolute
+                            top 0
+                            right 45px
+                        image img
+                            src img/trash_b.png
+                            height 45px
+                            width 45px
+                            css
+                                display none
+                                margin 0 auto
+                                opacity 0.61
+                                cursor pointer
+                                transition opacity 0.15s ease
+                            :mouseover
+                                css
+                                    opacity 0.7
+                            :mouseout
+                                css
+                                    opacity 0.61
+                        block button
+                            css
+                                background-color #ccc
+                                width 100%
+                                height 40%
+                                color white
+                                border-radius 3px
+                                cursor pointer
+                                transition background-color 0.1s ease
+                            text text
+                                val Delete
+                                css
+                                    text-transform uppercase
+                                    font-size 17px
+                            :mouseout
+                                css
+                                    background-color #ccc
+                            :mouseover
+                                css
+                                    background-color rgba(190, 49, 41, 0.9)
+                            :click
+                                {
+                                    var id = block.parent(3).key('id');
+                                    if (id == 'core') {
+                                        var core_info = block.parent(3).sibling('core').key('core_info');
+                                        if (core_info && core_info.name && core_info.id) {
+                                            app.api.delete_core(core_info.id, core_info.name);
+                                        }
+                                    } else {
+                                        var node_info = block.parent(3).key('node_info');
+                                        if (node_info && node_info.name) {
+                                            app.api.delete_node(id, node_info.name);
+                                        }
+                                    }
+                                }

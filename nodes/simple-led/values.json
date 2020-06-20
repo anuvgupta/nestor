@@ -1,0 +1,23 @@
+{
+    "meta": {
+        "img": "led_b",
+        "label": "Simple LED"
+    },
+    "data": [
+        {
+            "id": "switch",
+            "label": "Switch",
+            "type": "bool",
+            "initial": true,
+            "editor": "switch"
+        },
+        {
+            "id": "brightness",
+            "label": "Brightness",
+            "type": "b_int",
+            "initial": 50,
+            "editor": "slider",
+            "bounds": [0, 100]
+        }
+    ]
+}
