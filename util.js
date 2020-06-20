@@ -1,4 +1,3 @@
-
 const read_line = require('readline');
 const random_number = require("random-number");
 
