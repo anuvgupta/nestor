@@ -1,2 +1,2 @@
 # nestor
-Home automation ecosystem – cloud control hub &amp; Arduino hardware custom IoT modules (voice control, audio-LEDs)
+Home automation ecosystem – cloud control hub & Arduino-hardware custom IoT modules (voice control, audio-LEDs)
