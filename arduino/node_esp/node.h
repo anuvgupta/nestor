@@ -1,4 +1,4 @@
-/* nestor node device driver */
+/* nestor node device client driver */
 
 #ifndef __N_DRIVER_H__
 #define __N_DRIVER_H__

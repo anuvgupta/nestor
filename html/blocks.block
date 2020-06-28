@@ -344,3 +344,33 @@
                 block.child('display/text').html('').data(`${value}`);
             });
         }
+
+!text-display-e
+    init
+        {
+            var block = Block('block');
+            return block
+                .css({
+                    width: 'auto',
+                    paddingLeft: '15px',
+                    boxSizing: 'border-box',
+                    paddingBottom: '3px'
+                })
+                .add(Block('text', 1)
+                    .data('text')
+                    .css({
+                        fontSize: '28px'
+                    })
+                )
+            ;
+        }
+    load
+        {
+            data('metadata', metadata => {
+                block.key('metadata', metadata);
+                block.child('text').html('').data(`${metadata.initial}`);
+            });
+            data('val', value => {
+                block.child('text').html('').data(`${value}`);
+            });
+        }

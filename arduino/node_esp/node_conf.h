@@ -10,10 +10,12 @@
 // device
 #define DEVICE_USER "anuv"
 #define NODE_TYPE "simple-led"
-#define CORE_CODE "AMqBr"
+#define CORE_CODE "v2euO"
 #define CORE_PORT 80
 
 // api
+//#define API_URL "nestor.anuv.me"
+//#define API_PORT 3007
 #define API_URL "192.168.86.25"
 #define API_PORT 30007
 

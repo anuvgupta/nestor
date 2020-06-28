@@ -144,7 +144,16 @@ var app = {
                     img: 'memory_b',
                     label: 'Nestor Core'
                 },
-                data: []
+                data: [
+                    {
+                        "id": "code",
+                        "img": "key_b",
+                        "type": "string",
+                        "initial": "code",
+                        "editor": "text-display",
+                        "label": "Code"
+                    }
+                ]
             }
         }
     },
