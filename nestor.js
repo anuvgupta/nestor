@@ -14,7 +14,9 @@ const debug = process.argv.slice(2)[0] == "dev";
 const wss_port = debug ? 30007 : 3007;
 const http_port = debug ? 30008 : 3008;
 const mdb_port = debug ? 27017 : 3009;
-util.LEVEL = debug ? /* util.INF */ util.REP : util.IMP;
+// util.LEVEL = debug ? util.REP : util.IMP;
+util.LEVEL = debug ? util.INF : util.IMP;
+
 
 /* DATABASE */
 var database = {
@@ -122,6 +124,20 @@ var wss = {
             }
         }
     },
+    // trigger event for all authenticated clients for user (except one)
+    trigger_for_user_except: (event, data, user_id, except_client_id) => {
+        for (var c_id in wss.clients) {
+            if (
+                wss.clients.hasOwnProperty(c_id) &&
+                wss.clients[c_id] !== null &&
+                wss.clients[c_id].auth &&
+                wss.clients[c_id].o_id == user_id &&
+                c_id != except_client_id
+            ) {
+                wss.events[event](wss.clients[c_id], data, database.mdb);
+            }
+        }
+    },
     // bind handler to client event
     bind: (event, handler, auth_req = true) => {
         wss.events[event] = (client, req, db) => {
@@ -193,8 +209,8 @@ var wss = {
                         wss.send_to_client("auth", true, client);
                         util.log("ws", util.INF, `client ${client.id} authenticated as user ${client.o_id}`);
                         var node_profiles = {};
-                        for (var np in app.node_profiles)
-                            node_profiles[np] = app.node_profiles[np].values;
+                        for (var nd in app.node_drivers)
+                            node_profiles[nd] = app.node_drivers[nd].data;
                         wss.send_to_client("node_profiles", node_profiles, client);
                     }
                 }
@@ -203,9 +219,10 @@ var wss = {
         wss.bind('new_core', (client, req, db) => {
             var mdb_cores = db.collection('cores');
             mdb_cores.countDocuments().then(count => {
+                var new_code = util.rand_id(5);
                 var core = {
-                    name: "Core " + (count + 1),
-                    code: util.rand_id(5),
+                    name: new_code,
+                    code: new_code,
                     user_id: client.o_id,
                     status_time: -1,
                     status: "new",
@@ -343,7 +360,7 @@ var wss = {
                     } else {
                         wss.send_to_client("node_info", {
                             name: item.name,
-                            node_id: item.node_id,
+                            mac: item.mac,
                             core_id: item.core_id,
                             type: item.type,
                             id: item._id.toString()
@@ -391,7 +408,7 @@ var wss = {
                         util.log("mdb", util.ERR, `client ${client.id} error - delete node ${id} (find node - not found)`);
                     } else {
                         var unset = {};
-                        unset[`nodes.${item.node_id}`] = "";
+                        unset[`nodes.${item.mac}`] = "";
                         db.collection('cores').updateOne({ _id: database.o_id(item.core_id), user_id: client.o_id }, { $unset: unset }, (err2, result) => {
                             if (err2) util.log("mdb", util.ERR, `client ${client.id} error - delete node ${id} (update core/delete node reference)`, err2);
                             else {
@@ -409,8 +426,87 @@ var wss = {
                 }
             });
         });
+        wss.bind('get_node_data', (client, req, db) => {
+            var id = req.id.toString();
+            db.collection('nodes').findOne({ _id: database.o_id(id), user_id: client.o_id }, (err, item) => {
+                if (err) util.log("mdb", util.ERR, `client ${client.id} error - get node ${id}`, err);
+                else {
+                    if (item == null) {
+                        util.log("mdb", util.ERR, `client ${client.id} error - get node ${id} (not found)`);
+                    } else {
+                        if (req.hasOwnProperty('field') && req.field) {
+                            var field_val = item.data[req.field];
+                            item.data = {};
+                            item.data[req.field] = field_val;
+                        }
+                        wss.send_to_client("node_data", {
+                            id: item._id.toString(),
+                            core_id: item.core_id,
+                            data: item.data
+                        }, client);
+                        util.log("ws", util.INF, `client ${client.id} requested node ${id} data`);
+                    }
+                }
+            });
+        });
+        wss.bind('update_node_data', (client, req, db) => {
+            var id = `${req.id}`;
+            db.collection('nodes').findOne({ _id: database.o_id(id), user_id: client.o_id }, (err, item) => {
+                if (err) util.log("mdb", util.ERR, `client ${client.id} error - update node ${id} data`, err);
+                else {
+                    if (item == null) {
+                        util.log("mdb", util.ERR, `client ${client.id} error - update node ${id} data (not found)`);
+                    } else {
+                        var _send = _ => {
+                            for (var c_id in wss.clients) {
+                                if (
+                                    wss.clients.hasOwnProperty(c_id) &&
+                                    wss.clients[c_id] !== null &&
+                                    wss.clients[c_id].auth &&
+                                    wss.clients[c_id].type == "core" &&
+                                    wss.clients[c_id].o_id == item.core_id
+                                ) {
+                                    wss.clients[c_id].socket.send(`@node-data-${item._id.toString()}-${req.field_id}-${req.field_val}`);
+                                }
+                            }
+                        };
+                        var _save = _ => {
+                            var set = {};
+                            set[`data.${req.field_id}`] = req.field_val;
+                            db.collection('nodes').updateOne({ _id: item._id }, { $set: set }, (err2, result) => {
+                                if (err2) util.log("mdb", util.ERR, `client ${client.id} error - update node ${id} data (update node)`, err2);
+                                else {
+                                    util.log("ws", util.INF, `client ${client.id} update node ${id} data`);
+                                    wss.trigger_for_user_except("get_node_data", { id: id, field: req.field_id }, client.o_id, client.id);
+                                    db.collection('cores').findOne({ _id: database.o_id(item.core_id), user_id: item.user_id }, (err, item2) => {
+                                        if (item2 == null) {
+                                            util.log("mdb", util.ERR, `client ${client.id} error - update node ${id} data (send to device - core not found)`);
+                                        } else {
+                                            if (item2.status == "online") _send();
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                        var _next = _ => {
+                            if (req.hasOwnProperty('transitional') && req.transitional === true)
+                                _send();
+                            else _save();
+                        };
+                        if (app.node_drivers[item.type].drivers.hasOwnProperty(id) && app.node_drivers[item.type].drivers[id] &&
+                            app.node_drivers[item.type].drivers[id].hasOwnProperty(req.field_id) && app.node_drivers[item.type].drivers[id][req.field_id]) {
+                            app.node_drivers[item.type].drivers[id][req.field_id](item, req.field_val, value => {
+                                if (value != undefined)
+                                    req.field_val = value;
+                                _next();
+                            }, req.hasOwnProperty('transitional') && req.transitional === true);
+                        } else _next();
+                    }
+                }
+            });
+        });
 
-        // client: core device
+        // client: device
         wss.bind('core_sync', (client, req, db) => {
             db.collection('cores').findOne({ _id: mongodb.ObjectId(req.id), code: req.code }, (err, item) => {
                 if (err) util.log("mdb", util.ERR, `${client.id} error - core sync (find core)`, err);
@@ -424,7 +520,15 @@ var wss = {
                                 if (item2 == null)
                                     wss.send_to_device('sync', 'f', client);
                                 else {
-                                    db.collection('cores').updateOne({ _id: mongodb.ObjectId(req.id), code: req.code }, { $set: { status: "online", status_time: (new Date()).getTime(), ipi: req.ip } }, (err3, result) => {
+                                    db.collection('cores').updateOne({ _id: mongodb.ObjectId(req.id), code: req.code }, {
+                                        $set: {
+                                            name: item.name == item.code ? "C-" + (req.mac.slice(0, 5)) : item.name,
+                                            status: "online",
+                                            status_time: (new Date()).getTime(),
+                                            ipi: req.ip,
+                                            mac: req.mac
+                                        }
+                                    }, (err3, result) => {
                                         if (err3) util.log("mdb", util.ERR, `${client.id} error - core sync (update core)`, err3);
                                         else {
                                             if (result.matchedCount < 1)
@@ -445,13 +549,13 @@ var wss = {
                                                                 wss.clients[cl].type == "node" && wss.clients[cl].o_id == item.nodes[n] &&
                                                                 wss.clients[cl].auth
                                                             ) {
-                                                                wss.send_to_device("core-ipi", req.ip, wss.clients[cl]);
+                                                                wss.send_to_device("info", `${req.ip}-${item.nodes[n]}`, wss.clients[cl]);
                                                                 count++;
                                                             }
                                                         }
                                                     }
                                                 }
-                                                util.log("ws", util.INF, `forwarded core IP to ${count} nodes of core ${client.o_id} `);
+                                                util.log("ws", util.INF, `forwarded info to ${count} nodes of core ${client.o_id} `);
                                             }
                                         }
                                     });
@@ -464,18 +568,18 @@ var wss = {
         }, false);
         wss.bind('core_hb', (client, req, db) => {
             db.collection('cores').findOne({ _id: database.o_id(client.o_id) }, (err, item) => {
-                if (err) util.log("mdb", util.ERR, `client ${client.id} error - core heartbeat (find core)`, err);
+                if (err) util.log("mdb", util.ERR, `client ${client.id} error - core ${client.o_id} heartbeat (find core)`, err);
                 else {
                     if (item == null) {
-                        util.log("mdb", util.ERR, `client ${client.id} error - core heartbeat ${id} (core not found)`);
+                        util.log("mdb", util.ERR, `client ${client.id} error - core ${client.o_id} heartbeat (core not found)`);
                     } else {
-                        util.log("ws", util.REP, `client ${client.id} core heartbeat`);
+                        util.log("ws", util.REP, `client ${client.id} core ${client.o_id} heartbeat`);
                         var now = (new Date()).getTime();
                         db.collection('cores').updateOne({ _id: database.o_id(client.o_id) }, { $set: { status: "online", status_time: now } }, (err2, result) => {
-                            if (err2) util.log("mdb", util.ERR, `client ${client.id} error - core heartbeat (update core)`, err2);
+                            if (err2) util.log("mdb", util.ERR, `client ${client.id} error - core ${client.o_id} heartbeat (update core)`, err2);
                             else {
                                 if (result.matchedCount < 1) {
-                                    util.log("mdb", util.ERR, `client ${client.id} error - core heartbeat ${id} (core not found)`);
+                                    util.log("mdb", util.ERR, `client ${client.id} error - core ${client.o_id} heartbeat (core not found)`);
                                 } else {
                                     if (item.status != "online") {
                                         wss.send_to_user("core_status", {
@@ -491,8 +595,6 @@ var wss = {
                 }
             });
         });
-
-        // client: node device
         wss.bind('node_sync', (client, req, db) => {
             var mdb_cores = db.collection('cores');
             mdb_cores.findOne({ code: req.core_code }, (err, item) => {
@@ -504,32 +606,35 @@ var wss = {
                         db.collection('users').findOne({ _id: mongodb.ObjectId(item.user_id), username: req.user }, (err2, item2) => {
                             if (err2) util.log("mdb", util.ERR, `${client.id} error - node sync (user verification)`, err2);
                             else {
-                                if (item2 == null)
+                                if (item2 == null) {
                                     wss.send_to_device('sync', 'f', client);
-                                else {
-                                    if (item.nodes.hasOwnProperty(req.node_id) && item.nodes[req.node_id]) {
-                                        client.o_id = item.nodes[req.node_id];
+                                } else {
+                                    var node_type = app.node_drivers.hasOwnProperty(req.node_type) && app.node_drivers[req.node_type] ? req.node_type : 'node';
+                                    if (item.nodes.hasOwnProperty(req.mac) && item.nodes[req.mac]) {
+                                        var node_id = item.nodes[req.mac];
+                                        wss.send_to_device('sync', `t`, client);
+                                        client.o_id = node_id;
                                         client.type = "node";
                                         client.auth = true;
-                                        wss.send_to_device('sync', 't', client);
                                         util.log("ws", util.INF, `client ${client.id} synced as node ${client.o_id}`);
+                                        app.node_drivers[node_type].drivers[node_id] = app.node_drivers[node_type].init();
                                         if (item.status == "online") {
-                                            wss.send_to_device('core-ipi', item.ipi, client);
-                                            util.log("ws", util.INF, `core IP forwarded to node ${client.o_id}`);
+                                            util.delay(_ => {
+                                                wss.send_to_device("info", `${item.ipi}-${client.o_id}`, client);
+                                                util.log("ws", util.INF, `info forwarded to node ${client.o_id}`);
+                                            }, 300);
                                         }
                                     } else {
-                                        var node_type = app.node_profiles.hasOwnProperty(req.node_type) && app.node_profiles[req.node_type] ? req.node_type : 'node';
-                                        console.log(node_type);
                                         var node_data = {};
-                                        for (var v in app.node_profiles[node_type].values) {
-                                            var value_profile = app.node_profiles[node_type].values[v];
+                                        for (var v in app.node_drivers[node_type].data.data) {
+                                            var value_profile = app.node_drivers[node_type].data.data[v];
                                             node_data[value_profile.id] = value_profile.initial;
                                         }
                                         var node = {
-                                            name: "Node " + (parseInt(req.node_id) + 1),
+                                            name: "N-" + (req.mac.slice(0, 5)),
                                             core_id: item._id.toString(),
                                             core_code: item.code,
-                                            node_id: req.node_id,
+                                            mac: req.mac,
                                             user_id: item.user_id,
                                             status_time: -1,
                                             status: "new",
@@ -542,23 +647,31 @@ var wss = {
                                                 if (status.insertedCount < 1)
                                                     util.log("mdb", util.ERR, `client ${client.id} error - node sync (create node - not created)`);
                                                 else {
+                                                    var node_id = status.insertedId.toString();
                                                     var set = { $set: {} };
-                                                    set["$set"]["nodes." + req.node_id] = status.insertedId.toString();
+                                                    set["$set"]["nodes." + req.mac] = node_id;
                                                     mdb_cores.updateOne({ _id: item._id, code: item.code }, set, (err4, status2) => {
                                                         if (err4) util.log("mdb", util.ERR, `client ${client.id} error - node sync (update core)`, err4);
                                                         else {
                                                             if (status2.matchedCount < 1) {
                                                                 util.log("mdb", util.ERR, `client ${client.id} error - node sync (update core - not found)`);
                                                             } else {
+                                                                wss.send_to_device('sync', `t`, client);
                                                                 util.log("ws", util.INF, `client ${client.id} added new node - ${node.name}`);
-                                                                client.o_id = status.insertedId;
+                                                                client.o_id = node_id;
                                                                 client.type = "node";
                                                                 client.auth = true;
-                                                                wss.send_to_device('sync', 't', client);
                                                                 util.log("ws", util.INF, `client ${client.id} synced as node ${client.o_id}`);
+                                                                app.node_drivers[node_type].drivers[node_id] = app.node_drivers[node_type].init();
+                                                                wss.trigger_for_user('get_core_info', {
+                                                                    id: node.core_id,
+                                                                    get_nodes: true
+                                                                }, node.user_id);
                                                                 if (item.status == "online") {
-                                                                    wss.send_to_device('core-ipi', item.ipi, client);
-                                                                    util.log("ws", util.INF, `core IP forwarded to node ${client.o_id}`);
+                                                                    util.delay(_ => {
+                                                                        wss.send_to_device("info", `${item.ipi}-${client.o_id}`, client);
+                                                                        util.log("ws", util.INF, `info forwarded to node ${client.o_id}`);
+                                                                    }, 300);
                                                                 }
                                                             }
                                                         }
@@ -577,26 +690,27 @@ var wss = {
         wss.bind('node_hb', (client, req, db) => {
             var mdb_nodes = db.collection('nodes');
             db.collection('cores').findOne({ _id: database.o_id(client.o_id) }, (err, item) => {
-                if (err) util.log("mdb", util.ERR, `client ${client.id} error - node[${req.node_id}] heartbeat (find core)`, err);
+                if (err) util.log("mdb", util.ERR, `client ${client.id} error - node[${req.id}] heartbeat (find core)`, err);
                 else {
                     if (item == null) {
-                        util.log("mdb", util.ERR, `client ${client.id} error - node[${req.node_id}] heartbeat (core not found)`);
+                        util.log("mdb", util.ERR, `client ${client.id} error - node[${req.id}] heartbeat (core not found)`);
                     } else {
-                        var node_mdb_id = item.nodes[req.node_id];
+                        var node_mdb_id = req.id;
                         if (node_mdb_id) {
                             mdb_nodes.findOne({ _id: database.o_id(node_mdb_id) }, (err2, item2) => {
-                                if (err2) util.log("mdb", util.ERR, `client ${client.id} error - node[${req.node_id}] heartbeat (find node)`, err2);
+                                if (err2) util.log("mdb", util.ERR, `client ${client.id} error - node[${req.id}] heartbeat (find node)`, err2);
                                 else {
                                     if (item2 == null) {
-                                        util.log("mdb", util.ERR, `client ${client.id} error - node[${req.node_id}] heartbeat (find node - not found)`, err2);
+                                        util.log("mdb", util.ERR, `client ${client.id} error - node[${req.id}] heartbeat (find node - not found)`, err2);
+                                        wss.send_to_device("node-hb", `${node_mdb_id}-404`, client);
                                     } else {
-                                        util.log("ws", util.REP, `client ${client.id} node[${req.node_id}] heartbeat`);
+                                        util.log("ws", util.REP, `client ${client.id} node[${req.id}] heartbeat`);
                                         var now = (new Date()).getTime();
                                         mdb_nodes.updateOne({ _id: database.o_id(node_mdb_id) }, { $set: { status: "online", status_time: now } }, (err3, result) => {
-                                            if (err3) util.log("mdb", util.ERR, `client ${client.id} error - node[${req.node_id}] heartbeat (update node)`, err3);
+                                            if (err3) util.log("mdb", util.ERR, `client ${client.id} error - node[${req.id}] heartbeat (update node)`, err3);
                                             else {
                                                 if (result.matchedCount < 1) {
-                                                    util.log("mdb", util.ERR, `client ${client.id} error - node[${req.node_id}] heartbeat (update node - not found)`);
+                                                    util.log("mdb", util.ERR, `client ${client.id} error - node[${req.id}] heartbeat (update node - not found)`);
                                                 } else {
                                                     if (item2.status != "online") {
                                                         wss.send_to_user("node_status", {
@@ -605,6 +719,23 @@ var wss = {
                                                             status: "online",
                                                             status_time: now
                                                         }, item2.user_id);
+                                                        if (app.node_drivers[item2.type].drivers.hasOwnProperty(node_mdb_id)) {
+                                                            for (var d in app.node_drivers[item2.type].drivers[node_mdb_id]) {
+                                                                var initial_val;
+                                                                for (var f in app.node_drivers[item2.type].data.data) {
+                                                                    if (app.node_drivers[item2.type].data.data[f].id == d) {
+                                                                        initial_val = app.node_drivers[item2.type].data.data[f].initial;
+                                                                        break;
+                                                                    }
+                                                                }
+                                                                wss.trigger_for_user('update_node_data', {
+                                                                    id: item2._id.toString(),
+                                                                    transitional: true,
+                                                                    field_id: d,
+                                                                    field_val: item2.data[d] == undefined ? initial_val : item2.data[d]
+                                                                }, item2.user_id);
+                                                            }
+                                                        }
                                                     }
                                                 }
                                             }
@@ -612,7 +743,7 @@ var wss = {
                                     }
                                 }
                             });
-                        } else util.log("mdb", util.ERR, `client ${client.id} error - node[${req.node_id}] heartbeat (node id not found)`);
+                        } else util.log("mdb", util.ERR, `client ${client.id} error - node[${req.id}] heartbeat (node id not found)`);
                     }
                 }
             });
@@ -657,8 +788,13 @@ var cli = {
             line = line.trim();
             if (line != '') {
                 line = line.split(' ');
-                if (line[0] == "test") {
+                if (line[0] == "testing") {
                     console.log("testing 123");
+                } else if (line[0] == "reload") {
+                    if (line[1] == "nodes") {
+                        app.load_node_drivers();
+                        console.log("node drivers reloaded");
+                    }
                 }
             }
         });
@@ -667,7 +803,18 @@ var cli = {
 
 /* MAIN */
 var app = {
-    node_profiles: {},
+    node_drivers: {},
+    load_node_drivers: _ => {
+        fs.readdirSync(path.join(__dirname, "nodes")).forEach(type_id => {
+            if (type_id[0] != '.' && type_id[0] != '_') {
+                app.node_drivers[type_id] = {
+                    init: require(`./nodes/${type_id}/driver.js`),
+                    data: JSON.parse(fs.readFileSync(`./nodes/${type_id}/data.json`, { encoding: 'utf8', flag: 'r' })),
+                    drivers: []
+                };
+            }
+        });
+    },
     device_desync_timeout: 3,
     device_disconnect_timeout: 8,
     device_monitor_interval: 1,
@@ -760,14 +907,7 @@ var app = {
         }, app.device_monitor_interval * 1000);
     },
     init: _ => {
-        fs.readdirSync(path.join(__dirname, "nodes")).forEach(type_id => {
-            if (type_id[0] != '.' && type_id[0] != '_') {
-                app.node_profiles[type_id] = {
-                    events: require(`./nodes/${type_id}/events.js`),
-                    values: JSON.parse(fs.readFileSync(`./nodes/${type_id}/values.json`, { encoding: 'utf8', flag: 'r' }))
-                };
-            }
-        });
+        app.load_node_drivers();
         util.delay(_ => {
             app.device_monitor(1);
         }, 1000);

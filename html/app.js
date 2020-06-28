@@ -38,8 +38,8 @@ var app = {
         callback();
     },
     update_node_status_interval: 5,
-    // transition_fade_duration: 0.155,
-    transition_fade_duration: 0.145,
+    transition_fade_duration: 0.145, // 0.155
+    transitional_update_interval: 0.09,
     auth_cookie_expiration: 'Fri, 31 Dec 9999 23:59:59 GMT',
     api: {
         connect: _ => {
@@ -59,12 +59,12 @@ var app = {
             socket.addEventListener('message', e => {
                 var d = app.decode_msg(e.data);
                 if (d != null) {
-                    console.log('socket:', d.event, d.data);
+                    console.log('received:', d.event, d.data);
                     var data = {};
                     data[d.event] = d.data;
                     app.block.data(data);
                 } else {
-                    console.log('socket:', 'invalid message', e.data);
+                    console.log('received:', 'invalid message', e.data);
                 }
             });
             socket.addEventListener('close', e => {
@@ -77,9 +77,13 @@ var app = {
             });
             app.socket = socket;
         },
+        send: (event, data) => {
+            console.log('sending:', event, data);
+            app.socket.send(app.encode_msg(event, data));
+        },
         login: (user, pass) => {
             app.auth = { username: user, password: pass };
-            app.socket.send(app.encode_msg('auth', app.auth));
+            app.api.send('auth', app.auth);
         },
         logout: _ => {
             app.util.deleteCookie('username');
@@ -88,38 +92,51 @@ var app = {
             window.location.href = String(window.location.href);
         },
         new_core: _ => {
-            app.socket.send(app.encode_msg('new_core', null));
+            app.api.send('new_core', null);
         },
         get_core_list: status => {
-            app.socket.send(app.encode_msg('get_core_list', { status: status }));
+            app.api.send('get_core_list', { status: status });
         },
         get_core_info: (id, get_nodes = true) => {
-            app.socket.send(app.encode_msg('get_core_info', {
+            app.api.send('get_core_info', {
                 id: id, get_nodes: get_nodes
-            }));
+            });
         },
         get_node_info: id => {
-            app.socket.send(app.encode_msg('get_node_info', id));
+            app.api.send('get_node_info', id);
         },
         set_core_name: (id, name) => {
-            app.socket.send(app.encode_msg('set_core_name', {
+            app.api.send('set_core_name', {
                 id: id,
                 name: name
-            }));
+            });
         },
         set_node_name: (id, name) => {
-            app.socket.send(app.encode_msg('set_node_name', {
+            app.api.send('set_node_name', {
                 id: id,
                 name: name
-            }));
+            });
         },
         delete_core: (id, name) => {
             if (true == confirm(`Confirm—delete core "${name}" and its nodes?`))
-                app.socket.send(app.encode_msg('delete_core', id));
+                app.api.send('delete_core', id);
         },
         delete_node: (id, name) => {
             if (true == confirm(`Confirm—delete node "${name}"?`))
-                app.socket.send(app.encode_msg('delete_node', id));
+                app.api.send('delete_node', id);
+        },
+        get_node_data: (id, field_id) => {
+            app.api.send('get_node_data', {
+                id: id, field: field_id
+            });
+        },
+        update_node_data: (id, field_id, field_val, transitional = false) => {
+            app.api.send('update_node_data', {
+                id: id,
+                field_id: field_id,
+                field_val: field_val,
+                transitional: transitional
+            });
         },
         node_profiles: {
             core: {
@@ -224,15 +241,13 @@ var app = {
 window.addEventListener('load', _ => {
     console.log('loading...');
     setTimeout(_ => {
-        app.block.load(
-            _ => {
+        app.block.load(_ => {
+            app.block.load(_ => {
                 console.log('blocks loaded');
                 console.log('socket connecting');
                 app.api.connect();
-            },
-            'app',
-            'jQuery'
-        );
+            }, 'app', 'jQuery');
+        }, 'blocks', 'jQuery');
     }, 50);
 });
 

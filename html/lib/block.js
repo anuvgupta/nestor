@@ -569,7 +569,7 @@ Block = function () {
                         } else if ($key.substring(0, 1) == '#') {
                             $reservedAttributes.push($key);
                             var $name = $key.substring(1);
-                            var callbackJS = ''
+                            var callbackJS = '';
                             if (Is.obj($blockdata[$key]) && Is.str($blockdata[$key]['__js']))
                                 $callbackJS = $blockdata[$key]['__js'];
                             eval(

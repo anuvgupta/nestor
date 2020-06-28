@@ -1,22 +1,22 @@
 {
-  "name": "nestor",
-  "version": "1.0.0",
-  "description": "smart home module system",
-  "main": "nestor.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Anuv Gupta",
-  "license": "ISC",
-  "dependencies": {
-    "array-move": "^2.2.1",
-    "bcrypt": "^4.0.1",
-    "body-parser": "^1.19.0",
-    "express": "^4.17.1",
-    "mongodb": "^3.5.7",
-    "nodemon": "^2.0.4",
-    "random-number": "0.0.9",
-    "readline": "^1.3.0",
-    "ws": "^7.3.0"
-  }
+    "name": "nestor",
+    "version": "1.0.0",
+    "description": "home automation ecosystem",
+    "main": "nestor.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Anuv Gupta",
+    "license": "ISC",
+    "dependencies": {
+        "array-move": "^2.2.1",
+        "bcrypt": "^4.0.1",
+        "body-parser": "^1.19.0",
+        "express": "^4.17.1",
+        "mongodb": "^3.5.7",
+        "nodemon": "^2.0.4",
+        "random-number": "0.0.9",
+        "readline": "^1.3.0",
+        "ws": "^7.3.0"
+    }
 }

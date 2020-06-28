@@ -1,190 +1,6 @@
     *
 
-// nestor blockfile
-
-// define custom blocks
-!break
-    init
-        {
-            return Block('span').add('br');
-        }
-    load
-        {
-            data('val', val => {
-                for (var i = 1; i < val; i++)
-                    block.add('br');
-            });
-        }
-!text
-    init
-        {
-            return Block('span');
-        }
-    load
-        {
-            data('val', val => {
-                block.node().appendChild(document.createTextNode(val));
-            });
-            data('html', html => {
-                block.html(html);
-            });
-        }
-!image
-    init
-        {
-            return Block('div');
-        }
-    load
-        {
-            var src = data('src');
-            var height = data('height');
-            var width = data('width');
-            var alt = data('alt');
-            if (src != null) {
-                block.css('background-image', "url('" + src + "')")
-                    .css('background-repeat', 'no-repeat')
-                    .css('background-size', 'contain')
-                ;
-            }
-            if (height !== null) block.css('height', height);
-            if (width !== null) block.css('width', width);
-            if (alt !== null) block.attribute('title', alt);
-        }
-!switch
-    init
-        {
-            var block;
-            block = Block('div')
-                .key('state', false)
-                .css({
-                    width: 'auto',
-                    height: '30px',
-                    cursor: 'pointer',
-                    margin: '5px 10px',
-                    fontSize: '17px'
-                })
-                .add(Block('block', 'label')
-                    .css({
-                        display: 'inline-table',
-                        width: 'auto',
-                        minWidth: '70px',
-                        float: 'left',
-                        marginRight: '10px',
-                        cursor: 'inherit',
-                        fontSize: 'inherit'
-                    })
-                    .__child('content')
-                        .css('text-align', 'left')
-                        .__parent()
-                    .add(Block('text', 1)
-                        .data('Label 1: ')
-                    )
-                    .on('click', (e, b, d) => {
-                        if (block.key('enabled')) {
-                            block.key('state', (!block.key('state')));
-                            block.on('modified');
-                        }
-                    })
-                )
-                .add(Block('div', 'main')
-                    .css({
-                        width: '65px',
-                        height: '100%',
-                        position: 'relative',
-                        cursor: 'inherit',
-                        display: 'inline-block'
-                    })
-                    .add(Block('div', 'bg')
-                        .css({
-                            width: '100%',
-                            height: '100%',
-                            borderRadius: '16px',
-                            backgroundColor: '#e4e4e4',
-                            position: 'absolute',
-                            top: '0',
-                            left: '0',
-                            zIndex: '1',
-                            transition: 'background-color 0.2s ease-in-out'
-                        })
-                    )
-                    .add(Block('block', 'circle')
-                        .css({
-                            width: '30px',
-                            height: '100%',
-                            position: 'absolute',
-                            top: '0.5px',
-                            left: '1px',
-                            zIndex: '2',
-                            transition: 'left 0.2s ease-in-out'
-                        })
-                        .add(Block('div')
-                            .css({
-                                width: '75%',
-                                height: '75%',
-                                borderRadius: '100%',
-                                backgroundColor: 'white',
-                                margin: '0 auto'
-                            })
-                        )
-                    )
-                    .on('click', (e, b, d) => {
-                        if (block.key('enabled')) {
-                            block.key('state', (!block.key('state')));
-                            block.on('modified');
-                        }
-                    })
-                )
-                .on('updateUI', (e, b, d) => {
-                    if (block.key('state')) {
-                        block.child('main/circle').css({
-                            left: '34px'
-                        }).sibling('bg').css({
-                            backgroundColor: '#558fed'
-                        });
-                    } else {
-                        block.child('main/circle').css({
-                            left: '1px',
-                        }).sibling('bg').css({
-                            backgroundColor: '#e4e4e4'
-                        });
-                    }
-                })
-                .on('modified', (e, b, d) => {
-                    block.on('updateUI');
-                })
-                .key('enabled', true)
-                .on('enable', (e, b, d) => {
-                    block.key('enabled', true);
-                    block.css({
-                        opacity: '1',
-                        cursor: 'pointer'
-                    });
-                    e.stopPropagation();
-                })
-                .on('disable', (e, b, d) => {
-                    block.key('enabled', false);
-                    block.css({
-                        opacity: '0.6',
-                        cursor: 'default'
-                    });
-                    e.stopPropagation();
-                })
-            ;
-            return block;
-        }
-    load
-        {
-            data('val', (val) => {
-                var v = (val == 'on');
-                if (block.key('state') != v) {
-                    block.key('state', v);
-                    block.on('modified', { locked: true });
-                }
-            });
-            data('label', (label) => {
-                block.child('label/text').html('').data(label);
-            });
-        }
+// nestor main blockfile
 
 // app UI content layer
 app
@@ -193,12 +9,11 @@ app
         opacity 0
         transition opacity 0.4s
         height 100%
-        width 101%
+        width 100.8%
         overflow hidden
         max-width 700px
         margin 0 auto
         box-sizing border-box
-        left -3px
         position relative
     {
         block
@@ -386,6 +201,12 @@ app
                 }
             }
         }
+    #node_data
+        {
+            if (node_data && node_data.core_id == block.child('main/core').key('id') && node_data.id == block.child('main/node').key('id')) {
+                block.child('main/node').data({ node_data: node_data });
+            }
+        }
     block login
         {
             block.css('transition', `opacity ${app.transition_fade_duration}s`);
@@ -545,6 +366,7 @@ app
             background-color #f5f5f5
             borderLeft 1px solid #f2f2f2
             borderRight 1px solid #f2f2f2
+            box-sizing border-box
         div header
             css
                 position absolute
@@ -1076,7 +898,7 @@ app
                         width 100%
                     block wrap
                         css
-                            width 46%
+                            width 30%
                             height 100%
                             padding-top 52px
                             box-sizing border-box
@@ -1104,7 +926,15 @@ app
                                 css
                                     background-color rgba(180, 49, 41, 0.87)
                                     color white
+                            image img
+                                src img/trash_w.png
+                                height 45px
+                                width 45px
+                                css
+                                    margin 0 auto
                             div text
+                                css
+                                    display none
                                 text text
                                     val delete
                                     css
@@ -1126,13 +956,13 @@ app
                                 children[c].remove();
                             }
                         }
-                        for (var n in nodes.nodes) {
-                            var node_id = nodes.nodes[n];
+                        for (var m in nodes.nodes) {
+                            var node_id = nodes.nodes[m];
                             block.add(Block('node-item', node_id)
                                 .key('id', node_id)
-                                .key('node_id', n)
+                                .key('mac', m)
                                 .data({
-                                    title: "Node " + (parseInt(n) + 1),
+                                    title: "Node " + (m.slice(0, 4)),
                                     type: "node"
                                 })
                             );
@@ -1188,25 +1018,25 @@ app
                                         width: '89.5%',
                                         height: '92%',
                                         margin: '0 auto',
-                                        backgroundColor: 'white',
+                                        backgroundColor: '#fbfbfb',
                                         border: '1px solid #f0f0f0',
                                         boxSizing: 'border-box',
                                         borderRadius: '7px',
                                         boxShadow: 'rgba(50, 50, 50, 0.04) 0px 2px 4px',
-                                        transition: 'box-shadow 0.15s ease, background-color 0.1s ease',
+                                        transition: 'box-shadow 0.2s ease, background-color 0.2s ease',
                                         cursor: 'pointer',
                                         position: 'relative'
                                     })
                                     .on('mouseover', (e, b, d) => {
                                         b.css({
-                                            boxShadow: 'rgba(50, 50, 50, 0.08) 0px 2px 4px',
-                                            backgroundColor: '#fbfbfb'
+                                            boxShadow: 'rgba(50, 50, 50, 0.09) 0px 2.5px 5px',
+                                            backgroundColor: '#fff'
                                         });
                                     })
                                     .on('mouseout', (e, b, d) => {
                                         b.css({
                                             boxShadow: 'rgba(50, 50, 50, 0.04) 0px 2px 4px',
-                                            backgroundColor: 'white'
+                                            backgroundColor: '#fbfbfb'
                                         });
                                     })
                                     .add(Block('div', 'img')
@@ -1422,11 +1252,11 @@ app
                         if (id) app.api.get_core_info(id, false);
                     } else {
                         app.api.get_node_info(id);
+                        app.api.get_node_data(id);
                     }
                 }
             #menu_type
                 {
-                    
                     // TODO: set up menu
                     // before here: create custom blocktype for menu item which emits update events (final/transitional)
                     // in here: use custom blocktype, create name edit item and then menu_type based items
@@ -1437,9 +1267,16 @@ app
                         var menu_profile = app.api.node_profiles[menu_type];
                         block.child('menu/status/labels/type/text').html('').data(menu_profile.meta.label);
                         block.child('menu/status/image/img').data({ src: `img/${menu_profile.meta.img}.png` });
-
-                        console.log(menu_profile);
-
+                        var old_children = block.child('menu').children();
+                        for (var c in old_children) {
+                            if (c != "status") block.child('menu').remove(c);
+                        }
+                        for (var i in menu_profile.data) {
+                            var data_field = menu_profile.data[i];
+                            block.child('menu').add(Block('node-menu-item', data_field.id)
+                                .data({ metadata: data_field })
+                            );
+                        }
                         block.child('default').css('display', 'none')
                             .sibling('menu').css('display', 'block');
                     }
@@ -1470,6 +1307,17 @@ app
                             time: node_status.status_time
                         }
                     });
+                }
+            #node_data
+                {
+                    for (var d in node_data.data) {
+                        var child_block = block.child(`menu/${d}`);
+                        if (child_block != null) {
+                            child_block.data({
+                                val: node_data.data[d]
+                            });
+                        }
+                    }
                 }
             div bar
                 css
@@ -1628,11 +1476,83 @@ app
             !node-menu-item
                 init
                     {
-
+                        var block = Block('block');
+                        return block
+                            .css({
+                                width: '100%',
+                                height: '135px',
+                                backgroundColor: 'white',
+                                borderBottom: '1px solid #eee',
+                                position: 'relative'
+                            })
+                            .add(Block('block', 'icon')
+                                .css({
+                                    width: '135px',
+                                    float: 'left'
+                                })               
+                                .add(Block('image', 1)
+                                    .data({
+                                        src: 'img/gear_b.png',
+                                        width: '37px',
+                                        height: '37px',
+                                    })
+                                    .css({
+                                        opacity: '0.65',
+                                        margin: '0 auto'
+                                    })
+                                )
+                            )
+                            .add(Block('block', 'label')
+                                .css({
+                                    width: 'auto',
+                                    float: 'left',
+                                    marginLeft: '-3px',
+                                    display: 'none'
+                                })
+                                .add(Block('text', 1)
+                                    .data('Label: ')
+                                    .css({
+                                        fontSize: '20px'
+                                    })
+                                )
+                            )
+                            .add(Block('div', 'editor')
+                                .css({
+                                    height: '100%',
+                                    width: 'auto',
+                                    minWidth: '50px',
+                                    boxSizing: 'border-box',
+                                    float: 'left'
+                                })
+                            )
+                        ;
                     }
                 load
                     {
-                        
+                        data('metadata', metadata => {
+                            block.key('id', metadata.id);
+                            block.key('value', metadata.initial);
+                            block.key('metadata', metadata);
+                            block.child('icon/image').data({ src: `img/${metadata.img}.png` });
+                            if (metadata.hasOwnProperty('label') && metadata.label)
+                                block.child('label/text').html('').data(`${metadata.label}: `)
+                                    .parent().css('display', 'table');
+                            block.child('editor').add(Block(`${metadata.editor}-e`, 'view')
+                                .data({ metadata: metadata })
+                                .on('update', (event, editor_block, data) => {
+                                    //if (data.hasOwnProperty('value') && data.value != block.key('value')) {
+                                    if (data.hasOwnProperty('value')) {
+                                        block.key('value', data.value);
+                                        app.api.update_node_data(app.block.child('main/node').key('id'), metadata.id, data.value,
+                                            data.hasOwnProperty('transitional') && data.transitional === true);
+                                    }
+                                })
+                            );
+                        });
+                        data('val', value => {
+                            block.key('value', value);
+                            block.child('editor/view').data({ val: value });
+                        });
                     }
             div menu
                 css
@@ -1645,7 +1565,7 @@ app
                 div status
                     css
                         width 100%
-                        height 150px
+                        height 145px
                         background-color white
                         border-bottom 1px solid #ececec
                         position relative
@@ -1731,43 +1651,33 @@ app
                                     padding-top 5px
                     block delete
                         css
-                            width 130px
+                            width 72px
                             position absolute
                             top 0
                             right 45px
-                        image img
-                            src img/trash_b.png
-                            height 45px
-                            width 45px
-                            css
-                                display none
-                                margin 0 auto
-                                opacity 0.61
-                                cursor pointer
-                                transition opacity 0.15s ease
-                            :mouseover
-                                css
-                                    opacity 0.7
-                            :mouseout
-                                css
-                                    opacity 0.61
                         block button
                             css
-                                background-color #ccc
+                                background-color #dedede
                                 width 100%
-                                height 40%
+                                height 44%
                                 color white
                                 border-radius 3px
                                 cursor pointer
                                 transition background-color 0.1s ease
-                            text text
-                                val Delete
+                            //text text
+                            //    val Delete
+                            //    css
+                            //        text-transform uppercase
+                            //        font-size 17px
+                            image img
+                                src img/trash_w.png
+                                height 37px
+                                width 37px
                                 css
-                                    text-transform uppercase
-                                    font-size 17px
+                                    margin 0 auto
                             :mouseout
                                 css
-                                    background-color #ccc
+                                    background-color #dedede
                             :mouseover
                                 css
                                     background-color rgba(190, 49, 41, 0.9)
@@ -1786,3 +1696,5 @@ app
                                         }
                                     }
                                 }
+                node-menu-item temp-item
+                    id temp-id
