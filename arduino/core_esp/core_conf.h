@@ -1,12 +1,15 @@
 /* nestor core device configuration */
 
+#ifndef __C_CONF_H__
+#define __C_CONF_H__
+
 // wifi
 #define WIFI_SSID "ssid"
 #define WIFI_PASS "pass"
 
 // device
-#define DEVICE_CODE "v2euO"
-#define DEVICE_ID "5ef84bb6177ea49fbad133d4"
+#define DEVICE_CODE "0A9Bv"
+#define DEVICE_ID "5efabfca4e12f6ef7eb8736a"
 #define DEVICE_USER "anuv"
 #define DEVICE_PORT 80
 
@@ -21,7 +24,4 @@
 #define LOG_VERBOSE true
 #define ESP_VERBOSE false
 
-// json
-#define CORE_HB_JSON "{\"event\":\"core_hb\"}"
-#define NODE_HB_JSON "{\"event\":\"node_hb\",\"data\":{\"id\":\"%s\"}}"
-#define DEVICE_SYNC_JSON "{\"event\":\"core_sync\",\"data\":{\"code\":\"%s\",\"id\":\"%s\",\"user\":\"%s\",\"ip\":\"%s\",\"mac\":\"%s\"}}"
+#endif

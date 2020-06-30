@@ -272,7 +272,7 @@
                         .on('input', (e, b, d) => {
                             var metadata = block.key('metadata');
                             var val = (b.node().value);
-                            if (metadata.type == "b_int")
+                            if (metadata.type == "int")
                                 val = parseInt(val);
                             if (val === null || isNaN(val)) val = 0;
                             if (block.key('control_flow_debug'))
@@ -303,7 +303,7 @@
                         .on('mouseup', (e, b, d) => {
                             var metadata = block.key('metadata');
                             var val = (b.node().value);
-                            if (metadata.type == "b_int")
+                            if (metadata.type == "int")
                                 val = parseInt(val);
                             if (val === null || isNaN(val)) val = 0;
                             block.child('display/text').html('').data(`${val}`);

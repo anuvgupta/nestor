@@ -451,7 +451,7 @@ var wss = {
         });
         wss.bind('update_node_data', (client, req, db) => {
             var id = `${req.id}`;
-            db.collection('nodes').findOne({ _id: database.o_id(id), user_id: client.o_id }, (err, item) => {
+            db.collection('nodes').findOne({ _id: database.o_id(id) }, (err, item) => {
                 if (err) util.log("mdb", util.ERR, `client ${client.id} error - update node ${id} data`, err);
                 else {
                     if (item == null) {
@@ -472,12 +472,12 @@ var wss = {
                         };
                         var _save = _ => {
                             var set = {};
-                            set[`data.${req.field_id}`] = req.field_val;
+                            set[`data.${req.field_id}`] = app.correct_type(req.field_val, item.type);
                             db.collection('nodes').updateOne({ _id: item._id }, { $set: set }, (err2, result) => {
                                 if (err2) util.log("mdb", util.ERR, `client ${client.id} error - update node ${id} data (update node)`, err2);
                                 else {
                                     util.log("ws", util.INF, `client ${client.id} update node ${id} data`);
-                                    wss.trigger_for_user_except("get_node_data", { id: id, field: req.field_id }, client.o_id, client.id);
+                                    wss.trigger_for_user_except("get_node_data", { id: id, field: req.field_id }, item.user_id, client.id);
                                     db.collection('cores').findOne({ _id: database.o_id(item.core_id), user_id: item.user_id }, (err, item2) => {
                                         if (item2 == null) {
                                             util.log("mdb", util.ERR, `client ${client.id} error - update node ${id} data (send to device - core not found)`);
@@ -495,11 +495,11 @@ var wss = {
                         };
                         if (app.node_drivers[item.type].drivers.hasOwnProperty(id) && app.node_drivers[item.type].drivers[id] &&
                             app.node_drivers[item.type].drivers[id].hasOwnProperty(req.field_id) && app.node_drivers[item.type].drivers[id][req.field_id]) {
-                            app.node_drivers[item.type].drivers[id][req.field_id](item, req.field_val, value => {
+                            app.node_drivers[item.type].drivers[id][req.field_id](item, client, req.field_val, req.hasOwnProperty('transitional') && req.transitional === true, value => {
                                 if (value != undefined)
                                     req.field_val = value;
                                 _next();
-                            }, req.hasOwnProperty('transitional') && req.transitional === true);
+                            });
                         } else _next();
                     }
                 }
@@ -803,6 +803,24 @@ var cli = {
 
 /* MAIN */
 var app = {
+    correct_type: (value, type) => {
+        switch (type) {
+            case "int":
+                value = parseInt(value);
+                break;
+            case "float":
+                value = parseFloat(value);
+                break;
+            case "bool":
+                value = (`${value}`).toLowerCase().trim() === "true" ? true : false;
+                break;
+            case "string":
+            default:
+                value = (`${value}`);
+                break;
+        }
+        return value;
+    },
     node_drivers: {},
     load_node_drivers: _ => {
         fs.readdirSync(path.join(__dirname, "nodes")).forEach(type_id => {

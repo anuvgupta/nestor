@@ -8,15 +8,13 @@
 #include "node_conf.h"
 #include "node.h"
 
-// variables
-#define SERIAL Serial
-// driver
-NodeDriver node_driver;
-// network
+// vars
 WebSocketsClient ws_api_client;
 boolean ws_api_client_online = false;
 WebSocketsClient ws_node_client;
 boolean ws_node_client_online = false;
+// driver
+NodeDriver* node_driver;
 // data
 char wifi_ssid[8] = WIFI_SSID;
 char device_user[25] = DEVICE_USER;
@@ -24,7 +22,7 @@ char core_code[6] = CORE_CODE;
 char node_id[25] = "";
 char node_type[25] = NODE_TYPE;
 char core_ip[16] = "";
-char device_sync_json[200] = DEVICE_SYNC_JSON;
+char device_sync_json[200] = NODE_SYNC_JSON;
 // parsing
 int mb_i = 0;
 char msgbuff[500];
@@ -40,17 +38,19 @@ void setup() {
     if (LOG_VERBOSE) SERIAL.flush();
     delay(1000);
   }
-  if (LOG_VERBOSE) SERIAL.printf("[driver] initializing\n");
-  node_driver.init();
-  if (LOG_VERBOSE) SERIAL.printf("[wifi] connecting to %s\n", &wifi_ssid);
+  if (LOG_VERBOSE) SERIAL.printf("[wifi] connecting to %s\n", & wifi_ssid);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
   while (WiFi.status() != WL_CONNECTED) delay(50);
   if (LOG_VERBOSE) SERIAL.printf("[wifi] connected\n");
   if (LOG_VERBOSE) SERIAL.printf("[wifi] mac address: %s\n", WiFi.macAddress().c_str());
   if (LOG_VERBOSE) SERIAL.printf("[wifi] ip address: %s\n", WiFi.localIP().toString().c_str());
-  sprintf(device_sync_json, DEVICE_SYNC_JSON, core_code, device_user, WiFi.macAddress().c_str(), node_type);
+  if (LOG_VERBOSE) SERIAL.printf("[driver] initializing\n");
+  sprintf(device_sync_json, NODE_SYNC_JSON, core_code, device_user, WiFi.macAddress().c_str(), node_type);
   ws_node_client.setReconnectInterval(5000);
   ws_node_client.enableHeartbeat(5000, 3000, 2);
+  node_driver = new NodeDriver();
+  node_driver->_init(&ws_node_client);
+  node_driver->init();
   if (LOG_VERBOSE) SERIAL.printf("[ws_api_client] connecting\n");
   ws_api_client_online = true;
   ws_api_client.onEvent(wsAPIClientEventHandler);
@@ -60,10 +60,11 @@ void setup() {
 }
 
 void loop() {
-  node_driver.loop();
+  node_driver->_loop(&ws_node_client);
+  node_driver->loop();
   if (ws_api_client_online)
     ws_api_client.loop();
-  if(ws_node_client_online)
+  if (ws_node_client_online)
     ws_node_client.loop();
   // check serial for reset message
   if (SERIAL.available()) {
@@ -95,7 +96,17 @@ void restartESP() {
   ESP.restart();
 }
 
-void wsAPIClientEventHandler(WStype_t type, uint8_t* payload, size_t len) {
+int findDash(uint8_t * buffer, int len, int start) {
+  int dash = 0;
+  for (int i = start; i < len; i++) {
+    if (buffer[i] == '-') {
+      if (dash == 0) return i;
+    }
+  }
+  return -1;
+}
+
+void wsAPIClientEventHandler(WStype_t type, uint8_t * payload, size_t len) {
   switch (type) {
     case WStype_DISCONNECTED:
       ws_api_client_online = false;
@@ -115,16 +126,10 @@ void wsAPIClientEventHandler(WStype_t type, uint8_t* payload, size_t len) {
       } else if (memcmp(payload, "@sync-t", 7) == 0) {
         if (LOG_VERBOSE) SERIAL.printf("[ws_api_client] synced as node\n");
       } else if (memcmp(payload, "@info", 5) == 0) {
-        int dash = 0;
-        for (int i = 6; i < len; i++) {
-          if (payload[i] == '-') {
-            if (dash == 0) dash = i;
-            break;
-          }
-        }
+        int dash = findDash(payload, len, 6);
         payload[dash] = '\0';
-        strcpy(core_ip, ((const char *) (payload + 6)));
-        strcpy(node_id, ((const char *) (payload + dash + 1)));
+        strcpy(core_ip, ((const char * )(payload + 6)));
+        strcpy(node_id, ((const char * )(payload + dash + 1)));
         if (LOG_VERBOSE) SERIAL.printf("[ws_api_client] core ip received: %s\n", core_ip);
         if (LOG_VERBOSE) SERIAL.printf("[ws_api_client] node id received: %s\n", node_id);
         ws_api_client.disconnect();
@@ -141,7 +146,7 @@ void wsAPIClientEventHandler(WStype_t type, uint8_t* payload, size_t len) {
   }
 }
 
-void wsNodeClientEventHandler(WStype_t type, uint8_t* payload, size_t len) {
+void wsNodeClientEventHandler(WStype_t type, uint8_t * payload, size_t len) {
   switch (type) {
     case WStype_DISCONNECTED:
       ws_node_client_online = false;
@@ -163,20 +168,14 @@ void wsNodeClientEventHandler(WStype_t type, uint8_t* payload, size_t len) {
         if (LOG_VERBOSE && LOG_HB) SERIAL.printf("[ws_node_client] heartbeat\n");
         ws_node_client.sendTXT("@hb");
       } else if (memcmp(payload, "@data", 5) == 0) {
-        int dash = 0;
-        for (int i = 6; i < len; i++) {
-          if (payload[i] == '-') {
-            if (dash == 0) dash = i;
-            break;
-          }
-        }
+        int dash = findDash(payload, len, 6);
         payload[dash] = '\0';
         char field_id[25];
         char field_val[200];
-        strcpy(field_id, ((const char *) (payload + 6)));
-        strcpy(field_val, ((const char *) (payload + dash + 1)));
+        strcpy(field_id, ((const char * )(payload + 6)));
+        strcpy(field_val, ((const char * )(payload + dash + 1)));
         if (LOG_VERBOSE) SERIAL.printf("[ws_node_client] data received: %s %s\n", field_id, field_val);
-        node_driver.data(field_id, field_val);
+        node_driver->data(field_id, field_val);
       }
       break;
     case WStype_BIN:

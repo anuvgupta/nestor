@@ -10,7 +10,7 @@
 // device
 #define DEVICE_USER "anuv"
 #define NODE_TYPE "simple-led"
-#define CORE_CODE "v2euO"
+#define CORE_CODE "0A9Bv"
 #define CORE_PORT 80
 
 // api
@@ -23,8 +23,5 @@
 #define LOG_HB false
 #define LOG_VERBOSE true
 #define ESP_VERBOSE false
-
-// json
-#define DEVICE_SYNC_JSON "{\"event\":\"node_sync\",\"data\":{\"core_code\":\"%s\",\"user\":\"%s\",\"mac\":\"%s\",\"node_type\":\"%s\"}}"
 
 #endif

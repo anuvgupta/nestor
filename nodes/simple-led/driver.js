@@ -2,16 +2,16 @@
 
 module.exports = _ => {
     return {
-        switch1: (node, value, next, transitional) => {
+        switch1: (node, client, value, transitional, next) => {
             next();
         },
-        switch2: (node, value, next, transitional) => {
+        switch2: (node, client, value, transitional, next) => {
             next();
         },
-        brightness1: (node, value, next, transitional) => {
+        brightness1: (node, client, value, transitional, next) => {
             next();
         },
-        brightness2: (node, value, next, transitional) => {
+        brightness2: (node, client, value, transitional, next) => {
             next();
         }
     };

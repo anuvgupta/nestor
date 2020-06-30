@@ -16,7 +16,7 @@
         {
             "id": "brightness1",
             "img": "sun_b",
-            "type": "b_int",
+            "type": "int",
             "initial": 25,
             "editor": "slider",
             "bounds": [0, 50],
@@ -34,7 +34,7 @@
         {
             "id": "brightness2",
             "img": "sun_b",
-            "type": "b_int",
+            "type": "int",
             "initial": 25,
             "editor": "slider",
             "bounds": [0, 50],
