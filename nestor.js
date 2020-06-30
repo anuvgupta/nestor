@@ -522,7 +522,7 @@ var wss = {
                                 else {
                                     db.collection('cores').updateOne({ _id: mongodb.ObjectId(req.id), code: req.code }, {
                                         $set: {
-                                            name: item.name == item.code ? "C-" + (req.mac.slice(0, 5)) : item.name,
+                                            name: item.name == item.code ? "C-" + (req.mac.slice(req.mac.length - 5)) : item.name,
                                             status: "online",
                                             status_time: (new Date()).getTime(),
                                             ipi: req.ip,
@@ -631,7 +631,7 @@ var wss = {
                                             node_data[value_profile.id] = value_profile.initial;
                                         }
                                         var node = {
-                                            name: "N-" + (req.mac.slice(0, 5)),
+                                            name: "N-" + (req.mac.slice(req.mac.length - 5)),
                                             core_id: item._id.toString(),
                                             core_code: item.code,
                                             mac: req.mac,

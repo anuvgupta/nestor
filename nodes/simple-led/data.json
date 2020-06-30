@@ -10,7 +10,8 @@
             "type": "bool",
             "initial": true,
             "editor": "switch",
-            "label": "LED 1 Power"
+            "label": "Power",
+            "header": "LED A"
         },
         {
             "id": "brightness1",
@@ -19,7 +20,7 @@
             "initial": 25,
             "editor": "slider",
             "bounds": [0, 50],
-            "label": "LED 1 Brightness"
+            "label": "Brightness"
         },
         {
             "id": "switch2",
@@ -27,7 +28,8 @@
             "type": "bool",
             "initial": true,
             "editor": "switch",
-            "label": "LED 2 Power"
+            "label": "Power",
+            "header": "LED B"
         },
         {
             "id": "brightness2",
@@ -36,7 +38,7 @@
             "initial": 25,
             "editor": "slider",
             "bounds": [0, 50],
-            "label": "LED 2 Brightness"
+            "label": "Brightness"
         }
     ]
 }

@@ -247,10 +247,14 @@
                 })
                 .add(Block('block', 'input')
                     .css({
-                        width: '310px',
+                        width: 'calc(100% - 35px)',
+                        maxWidth: '310px',
                         float: 'left',
                         paddingLeft: '8px',
                         boxSizing: 'border-box'
+                    })
+                    .query('window width != 0', function (event, block) {
+                        
                     })
                     .add(Block('input', 1)
                         .css({

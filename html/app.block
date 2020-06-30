@@ -912,7 +912,7 @@ app
                                     }
                                 }
                             css
-                                background-color rgb(185, 185, 185)
+                                background-color rgb(215, 215, 215)
                                 color white
                                 cursor pointer
                                 transition background-color 0.15s ease, color 0.15s ease
@@ -920,7 +920,7 @@ app
                                 border 1px solid #ddd
                             :mouseout
                                 css
-                                    background-color rgb(185, 185, 185)
+                                    background-color rgb(215, 215, 215)
                                     color white
                             :mouseover
                                 css
@@ -1257,12 +1257,6 @@ app
                 }
             #menu_type
                 {
-                    // TODO: set up menu
-                    // before here: create custom blocktype for menu item which emits update events (final/transitional)
-                    // in here: use custom blocktype, create name edit item and then menu_type based items
-                    // in here: bind name edit item's update event to the corresponding core/node name update ws event
-                    // in here: bind menu_type based items' update events to the node data update ws event
-                    // before (but can be done later): build default core menu_type builtin
                     if (app.api.node_profiles.hasOwnProperty(menu_type) && app.api.node_profiles[menu_type]) {
                         var menu_profile = app.api.node_profiles[menu_type];
                         block.child('menu/status/labels/type/text').html('').data(menu_profile.meta.label);
@@ -1276,6 +1270,11 @@ app
                             block.child('menu').add(Block('node-menu-item', data_field.id)
                                 .data({ metadata: data_field })
                             );
+                            if (data_field.hasOwnProperty('header') && data_field.header) {
+                                block.child('menu').add(Block('node-menu-header', `${data_field.id}-header`)
+                                    .data({ val: data_field.header })
+                                , data_field.id);
+                            }
                         }
                         block.child('default').css('display', 'none')
                             .sibling('menu').css('display', 'block');
@@ -1286,6 +1285,9 @@ app
                             block.child('menu/code').data({ val: core_info.code });
                         }
                     }
+                    setTimeout(_ => {
+                        Block.queries();
+                    }, 10);
                 }
             #node_info
                 {
@@ -1526,10 +1528,15 @@ app
                             .add(Block('div', 'editor')
                                 .css({
                                     height: '100%',
-                                    width: 'auto',
+                                    width: 'calc(100% - 135px)',
                                     minWidth: '50px',
                                     boxSizing: 'border-box',
                                     float: 'left'
+                                })
+                                .query('window width != 0', function (event, block, data) {
+                                    var lbl = block.sibling('label');
+                                    var new_width = `calc(100% - 135px - (${lbl.$().width()}px))`;
+                                    block.css('width', new_width);
                                 })
                             )
                         ;
@@ -1559,6 +1566,36 @@ app
                         data('val', value => {
                             block.key('value', value);
                             block.child('editor/view').data({ val: value });
+                        });
+                    }
+            !node-menu-header
+                init
+                    {
+                        var block = Block('block');
+                        return block
+                            .css({
+                                height: '45px',
+                                backgroundColor: '#f8f8f8',
+                                borderBottom: '1px solid #efefef',
+                                boxSizing: 'border-box',
+                                paddingLeft: '47px'
+                            })
+                            .__child('content')
+                                .css('text-align', 'left')
+                                .__parent()
+                            .add(Block('text', 1)
+                                .data('text')
+                                .css({
+                                    fontSize: '21px',
+                                    color: '#333'
+                                })
+                            )
+                        ;
+                    }
+                load
+                    {
+                        data('val', val => {
+                            block.child('text').html('').data(val);
                         });
                     }
             div menu
@@ -1664,7 +1701,7 @@ app
                             right 45px
                         block button
                             css
-                                background-color #dedede
+                                background-color #e4e4e4
                                 width 100%
                                 height 44%
                                 color white
@@ -1684,7 +1721,8 @@ app
                                     margin 0 auto
                             :mouseout
                                 css
-                                    background-color #dedede
+                                    //background-color #dedede
+                                    background-color #e4e4e4
                             :mouseover
                                 css
                                     background-color rgba(190, 49, 41, 0.9)
