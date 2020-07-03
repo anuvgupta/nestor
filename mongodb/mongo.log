@@ -7029,3 +7029,349 @@
 2020-06-30T03:16:11.423-0700 I  NETWORK  [conn730] received client metadata from 127.0.0.1:59395 conn730: { driver: { name: "nodejs", version: "3.5.7" }, os: { type: "Darwin", name: "darwin", architecture: "x64", version: "19.4.0" }, platform: "'Node.js v11.15.0, LE (unified)" }
 2020-06-30T03:16:11.424-0700 I  NETWORK  [conn731] received client metadata from 127.0.0.1:59396 conn731: { driver: { name: "nodejs", version: "3.5.7" }, os: { type: "Darwin", name: "darwin", architecture: "x64", version: "19.4.0" }, platform: "'Node.js v11.15.0, LE (unified)" }
 2020-06-30T03:16:11.425-0700 I  NETWORK  [conn732] received client metadata from 127.0.0.1:59397 conn732: { driver: { name: "nodejs", version: "3.5.7" }, os: { type: "Darwin", name: "darwin", architecture: "x64", version: "19.4.0" }, platform: "'Node.js v11.15.0, LE (unified)" }
+2020-06-30T20:16:31.314-0700 I  NETWORK  [conn732] end connection 127.0.0.1:59397 (6 connections now open)
+2020-06-30T20:16:31.314-0700 I  NETWORK  [conn727] end connection 127.0.0.1:59388 (1 connection now open)
+2020-06-30T20:16:31.314-0700 I  NETWORK  [conn728] end connection 127.0.0.1:59393 (4 connections now open)
+2020-06-30T20:16:31.314-0700 I  NETWORK  [conn731] end connection 127.0.0.1:59396 (3 connections now open)
+2020-06-30T20:16:31.314-0700 I  NETWORK  [conn729] end connection 127.0.0.1:59394 (2 connections now open)
+2020-06-30T20:16:31.314-0700 I  NETWORK  [conn730] end connection 127.0.0.1:59395 (5 connections now open)
+2020-06-30T20:16:31.320-0700 I  NETWORK  [conn264] end connection 127.0.0.1:58225 (0 connections now open)
+2020-07-01T07:02:15.648-0700 I  CONTROL  [main] ***** SERVER RESTARTED *****
+2020-07-01T07:02:15.656-0700 I  CONTROL  [main] Automatically disabling TLS 1.0, to force-enable TLS 1.0 specify --sslDisabledProtocols 'none'
+2020-07-01T07:02:15.684-0700 W  ASIO     [main] No TransportLayer configured during NetworkInterface startup
+2020-07-01T07:02:15.687-0700 I  CONTROL  [initandlisten] MongoDB starting : pid=11585 port=27017 dbpath=/Users/anuv/Documents/GitHub/nestor/mongodb/database 64-bit host=anuvs-mbp-6.lan
+2020-07-01T07:02:15.687-0700 I  CONTROL  [initandlisten] db version v4.2.6
+2020-07-01T07:02:15.688-0700 I  CONTROL  [initandlisten] git version: 20364840b8f1af16917e4c23c1b5f5efd8b352f8
+2020-07-01T07:02:15.688-0700 I  CONTROL  [initandlisten] allocator: system
+2020-07-01T07:02:15.689-0700 I  CONTROL  [initandlisten] modules: none
+2020-07-01T07:02:15.690-0700 I  CONTROL  [initandlisten] build environment:
+2020-07-01T07:02:15.691-0700 I  CONTROL  [initandlisten]     distarch: x86_64
+2020-07-01T07:02:15.691-0700 I  CONTROL  [initandlisten]     target_arch: x86_64
+2020-07-01T07:02:15.692-0700 I  CONTROL  [initandlisten] options: { config: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongod-nestor-dev.conf", net: { bindIp: "127.0.0.1", port: 27017 }, processManagement: { fork: true }, storage: { dbPath: "/Users/anuv/Documents/GitHub/nestor/mongodb/database" }, systemLog: { destination: "file", logAppend: true, path: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongo.log" } }
+2020-07-01T07:02:15.694-0700 W  STORAGE  [initandlisten] Detected unclean shutdown - /Users/anuv/Documents/GitHub/nestor/mongodb/database/mongod.lock is not empty.
+2020-07-01T07:02:15.695-0700 I  STORAGE  [initandlisten] Detected data files in /Users/anuv/Documents/GitHub/nestor/mongodb/database created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2020-07-01T07:02:15.696-0700 W  STORAGE  [initandlisten] Recovering data from the last clean checkpoint.
+2020-07-01T07:02:15.696-0700 I  STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=7680M,cache_overflow=(file_max=0M),session_max=33000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000,close_scan_interval=10,close_handle_minimum=250),statistics_log=(wait=0),verbose=[recovery_progress,checkpoint_progress],
+2020-07-01T07:02:16.232-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612136:232905][11585:0x10c061dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612136:232905][11585:0x10c061dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:02:16.234-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612136:234468][11585:0x10c061dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612136:234468][11585:0x10c061dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:02:16.235-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612136:235499][11585:0x10c061dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612136:235499][11585:0x10c061dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:02:16.236-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612136:236493][11585:0x10c061dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612136:236493][11585:0x10c061dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:02:16.237-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612136:237506][11585:0x10c061dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612136:237506][11585:0x10c061dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:02:16.238-0700 W  STORAGE  [initandlisten] Failed to start up WiredTiger under any compatibility version.
+2020-07-01T07:02:16.239-0700 F  STORAGE  [initandlisten] Reason: 13: Permission denied
+2020-07-01T07:02:16.239-0700 F  -        [initandlisten] Fatal Assertion 28595 at src/mongo/db/storage/wiredtiger/wiredtiger_kv_engine.cpp 915
+2020-07-01T07:02:16.240-0700 F  -        [initandlisten] 
+
+***aborting after fassert() failure
+
+
+2020-07-01T07:02:27.049-0700 I  CONTROL  [main] ***** SERVER RESTARTED *****
+2020-07-01T07:02:27.055-0700 I  CONTROL  [main] Automatically disabling TLS 1.0, to force-enable TLS 1.0 specify --sslDisabledProtocols 'none'
+2020-07-01T07:02:27.060-0700 W  ASIO     [main] No TransportLayer configured during NetworkInterface startup
+2020-07-01T07:02:27.061-0700 I  CONTROL  [initandlisten] MongoDB starting : pid=11586 port=27017 dbpath=/Users/anuv/Documents/GitHub/nestor/mongodb/database 64-bit host=anuvs-mbp-6.lan
+2020-07-01T07:02:27.061-0700 I  CONTROL  [initandlisten] db version v4.2.6
+2020-07-01T07:02:27.061-0700 I  CONTROL  [initandlisten] git version: 20364840b8f1af16917e4c23c1b5f5efd8b352f8
+2020-07-01T07:02:27.061-0700 I  CONTROL  [initandlisten] allocator: system
+2020-07-01T07:02:27.061-0700 I  CONTROL  [initandlisten] modules: none
+2020-07-01T07:02:27.061-0700 I  CONTROL  [initandlisten] build environment:
+2020-07-01T07:02:27.061-0700 I  CONTROL  [initandlisten]     distarch: x86_64
+2020-07-01T07:02:27.061-0700 I  CONTROL  [initandlisten]     target_arch: x86_64
+2020-07-01T07:02:27.061-0700 I  CONTROL  [initandlisten] options: { config: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongod-nestor-dev.conf", net: { bindIp: "127.0.0.1", port: 27017 }, storage: { dbPath: "/Users/anuv/Documents/GitHub/nestor/mongodb/database" }, systemLog: { destination: "file", logAppend: true, path: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongo.log" } }
+2020-07-01T07:02:27.061-0700 W  STORAGE  [initandlisten] Detected unclean shutdown - /Users/anuv/Documents/GitHub/nestor/mongodb/database/mongod.lock is not empty.
+2020-07-01T07:02:27.062-0700 I  STORAGE  [initandlisten] Detected data files in /Users/anuv/Documents/GitHub/nestor/mongodb/database created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2020-07-01T07:02:27.062-0700 W  STORAGE  [initandlisten] Recovering data from the last clean checkpoint.
+2020-07-01T07:02:27.062-0700 I  STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=7680M,cache_overflow=(file_max=0M),session_max=33000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000,close_scan_interval=10,close_handle_minimum=250),statistics_log=(wait=0),verbose=[recovery_progress,checkpoint_progress],
+2020-07-01T07:02:27.656-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612147:656734][11586:0x10e4c6dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612147:656734][11586:0x10e4c6dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:02:27.657-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612147:657001][11586:0x10e4c6dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612147:657001][11586:0x10e4c6dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:02:27.657-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612147:657190][11586:0x10e4c6dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612147:657190][11586:0x10e4c6dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:02:27.657-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612147:657370][11586:0x10e4c6dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612147:657370][11586:0x10e4c6dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:02:27.657-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612147:657550][11586:0x10e4c6dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612147:657550][11586:0x10e4c6dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:02:27.657-0700 W  STORAGE  [initandlisten] Failed to start up WiredTiger under any compatibility version.
+2020-07-01T07:02:27.657-0700 F  STORAGE  [initandlisten] Reason: 13: Permission denied
+2020-07-01T07:02:27.657-0700 F  -        [initandlisten] Fatal Assertion 28595 at src/mongo/db/storage/wiredtiger/wiredtiger_kv_engine.cpp 915
+2020-07-01T07:02:27.657-0700 F  -        [initandlisten] 
+
+***aborting after fassert() failure
+
+
+2020-07-01T07:02:31.291-0700 I  CONTROL  [main] ***** SERVER RESTARTED *****
+2020-07-01T07:02:31.295-0700 I  CONTROL  [main] Automatically disabling TLS 1.0, to force-enable TLS 1.0 specify --sslDisabledProtocols 'none'
+2020-07-01T07:02:31.300-0700 W  ASIO     [main] No TransportLayer configured during NetworkInterface startup
+2020-07-01T07:02:31.300-0700 I  CONTROL  [initandlisten] MongoDB starting : pid=11587 port=27017 dbpath=/Users/anuv/Documents/GitHub/nestor/mongodb/database 64-bit host=anuvs-mbp-6.lan
+2020-07-01T07:02:31.300-0700 I  CONTROL  [initandlisten] db version v4.2.6
+2020-07-01T07:02:31.300-0700 I  CONTROL  [initandlisten] git version: 20364840b8f1af16917e4c23c1b5f5efd8b352f8
+2020-07-01T07:02:31.301-0700 I  CONTROL  [initandlisten] allocator: system
+2020-07-01T07:02:31.301-0700 I  CONTROL  [initandlisten] modules: none
+2020-07-01T07:02:31.301-0700 I  CONTROL  [initandlisten] build environment:
+2020-07-01T07:02:31.301-0700 I  CONTROL  [initandlisten]     distarch: x86_64
+2020-07-01T07:02:31.301-0700 I  CONTROL  [initandlisten]     target_arch: x86_64
+2020-07-01T07:02:31.301-0700 I  CONTROL  [initandlisten] options: { config: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongod-nestor-dev.conf", net: { bindIp: "127.0.0.1", port: 27017 }, storage: { dbPath: "/Users/anuv/Documents/GitHub/nestor/mongodb/database" }, systemLog: { destination: "file", logAppend: true, path: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongo.log" } }
+2020-07-01T07:02:31.301-0700 W  STORAGE  [initandlisten] Detected unclean shutdown - /Users/anuv/Documents/GitHub/nestor/mongodb/database/mongod.lock is not empty.
+2020-07-01T07:02:31.301-0700 I  STORAGE  [initandlisten] Detected data files in /Users/anuv/Documents/GitHub/nestor/mongodb/database created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2020-07-01T07:02:31.301-0700 W  STORAGE  [initandlisten] Recovering data from the last clean checkpoint.
+2020-07-01T07:02:31.301-0700 I  STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=7680M,cache_overflow=(file_max=0M),session_max=33000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000,close_scan_interval=10,close_handle_minimum=250),statistics_log=(wait=0),verbose=[recovery_progress,checkpoint_progress],
+2020-07-01T07:02:31.902-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612151:902222][11587:0x11457edc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612151:902222][11587:0x11457edc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:02:31.902-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612151:902488][11587:0x11457edc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612151:902488][11587:0x11457edc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:02:31.902-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612151:902678][11587:0x11457edc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612151:902678][11587:0x11457edc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:02:31.902-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612151:902861][11587:0x11457edc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612151:902861][11587:0x11457edc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:02:31.903-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612151:903042][11587:0x11457edc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612151:903042][11587:0x11457edc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:02:31.903-0700 W  STORAGE  [initandlisten] Failed to start up WiredTiger under any compatibility version.
+2020-07-01T07:02:31.903-0700 F  STORAGE  [initandlisten] Reason: 13: Permission denied
+2020-07-01T07:02:31.903-0700 F  -        [initandlisten] Fatal Assertion 28595 at src/mongo/db/storage/wiredtiger/wiredtiger_kv_engine.cpp 915
+2020-07-01T07:02:31.903-0700 F  -        [initandlisten] 
+
+***aborting after fassert() failure
+
+
+2020-07-01T07:03:07.704-0700 I  CONTROL  [main] ***** SERVER RESTARTED *****
+2020-07-01T07:03:07.712-0700 I  CONTROL  [main] Automatically disabling TLS 1.0, to force-enable TLS 1.0 specify --sslDisabledProtocols 'none'
+2020-07-01T07:03:07.714-0700 W  ASIO     [main] No TransportLayer configured during NetworkInterface startup
+2020-07-01T07:03:07.714-0700 I  CONTROL  [initandlisten] MongoDB starting : pid=11591 port=27017 dbpath=/Users/anuv/Documents/GitHub/nestor/mongodb/database 64-bit host=anuvs-mbp-6.lan
+2020-07-01T07:03:07.714-0700 I  CONTROL  [initandlisten] db version v4.2.6
+2020-07-01T07:03:07.714-0700 I  CONTROL  [initandlisten] git version: 20364840b8f1af16917e4c23c1b5f5efd8b352f8
+2020-07-01T07:03:07.714-0700 I  CONTROL  [initandlisten] allocator: system
+2020-07-01T07:03:07.714-0700 I  CONTROL  [initandlisten] modules: none
+2020-07-01T07:03:07.714-0700 I  CONTROL  [initandlisten] build environment:
+2020-07-01T07:03:07.714-0700 I  CONTROL  [initandlisten]     distarch: x86_64
+2020-07-01T07:03:07.714-0700 I  CONTROL  [initandlisten]     target_arch: x86_64
+2020-07-01T07:03:07.715-0700 I  CONTROL  [initandlisten] options: { config: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongod-nestor-dev.conf", net: { bindIp: "127.0.0.1", port: 27017 }, storage: { dbPath: "/Users/anuv/Documents/GitHub/nestor/mongodb/database" }, systemLog: { destination: "file", logAppend: true, path: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongo.log" } }
+2020-07-01T07:03:07.715-0700 W  STORAGE  [initandlisten] Detected unclean shutdown - /Users/anuv/Documents/GitHub/nestor/mongodb/database/mongod.lock is not empty.
+2020-07-01T07:03:07.715-0700 I  STORAGE  [initandlisten] Detected data files in /Users/anuv/Documents/GitHub/nestor/mongodb/database created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2020-07-01T07:03:07.715-0700 W  STORAGE  [initandlisten] Recovering data from the last clean checkpoint.
+2020-07-01T07:03:07.715-0700 I  STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=7680M,cache_overflow=(file_max=0M),session_max=33000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000,close_scan_interval=10,close_handle_minimum=250),statistics_log=(wait=0),verbose=[recovery_progress,checkpoint_progress],
+2020-07-01T07:03:08.309-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612188:309594][11591:0x10bb20dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612188:309594][11591:0x10bb20dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:03:08.309-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612188:309866][11591:0x10bb20dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612188:309866][11591:0x10bb20dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:03:08.310-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612188:310059][11591:0x10bb20dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612188:310059][11591:0x10bb20dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:03:08.310-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612188:310248][11591:0x10bb20dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612188:310248][11591:0x10bb20dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:03:08.310-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612188:310426][11591:0x10bb20dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612188:310426][11591:0x10bb20dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:03:08.310-0700 W  STORAGE  [initandlisten] Failed to start up WiredTiger under any compatibility version.
+2020-07-01T07:03:08.310-0700 F  STORAGE  [initandlisten] Reason: 13: Permission denied
+2020-07-01T07:03:08.310-0700 F  -        [initandlisten] Fatal Assertion 28595 at src/mongo/db/storage/wiredtiger/wiredtiger_kv_engine.cpp 915
+2020-07-01T07:03:08.310-0700 F  -        [initandlisten] 
+
+***aborting after fassert() failure
+
+
+2020-07-01T07:04:41.827-0700 I  CONTROL  [main] ***** SERVER RESTARTED *****
+2020-07-01T07:04:41.830-0700 I  CONTROL  [main] Automatically disabling TLS 1.0, to force-enable TLS 1.0 specify --sslDisabledProtocols 'none'
+2020-07-01T07:04:41.838-0700 W  ASIO     [main] No TransportLayer configured during NetworkInterface startup
+2020-07-01T07:04:41.838-0700 I  CONTROL  [initandlisten] MongoDB starting : pid=11817 port=27017 dbpath=/Users/anuv/Documents/GitHub/nestor/mongodb/database 64-bit host=anuvs-mbp-6.lan
+2020-07-01T07:04:41.838-0700 I  CONTROL  [initandlisten] db version v4.2.6
+2020-07-01T07:04:41.838-0700 I  CONTROL  [initandlisten] git version: 20364840b8f1af16917e4c23c1b5f5efd8b352f8
+2020-07-01T07:04:41.838-0700 I  CONTROL  [initandlisten] allocator: system
+2020-07-01T07:04:41.838-0700 I  CONTROL  [initandlisten] modules: none
+2020-07-01T07:04:41.838-0700 I  CONTROL  [initandlisten] build environment:
+2020-07-01T07:04:41.838-0700 I  CONTROL  [initandlisten]     distarch: x86_64
+2020-07-01T07:04:41.838-0700 I  CONTROL  [initandlisten]     target_arch: x86_64
+2020-07-01T07:04:41.839-0700 I  CONTROL  [initandlisten] options: { config: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongod-nestor-dev.conf", net: { bindIp: "127.0.0.1", port: 27017 }, storage: { dbPath: "/Users/anuv/Documents/GitHub/nestor/mongodb/database" }, systemLog: { destination: "file", logAppend: true, path: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongo.log" } }
+2020-07-01T07:04:41.839-0700 W  STORAGE  [initandlisten] Detected unclean shutdown - /Users/anuv/Documents/GitHub/nestor/mongodb/database/mongod.lock is not empty.
+2020-07-01T07:04:41.839-0700 I  STORAGE  [initandlisten] Detected data files in /Users/anuv/Documents/GitHub/nestor/mongodb/database created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2020-07-01T07:04:41.839-0700 W  STORAGE  [initandlisten] Recovering data from the last clean checkpoint.
+2020-07-01T07:04:41.839-0700 I  STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=7680M,cache_overflow=(file_max=0M),session_max=33000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000,close_scan_interval=10,close_handle_minimum=250),statistics_log=(wait=0),verbose=[recovery_progress,checkpoint_progress],
+2020-07-01T07:04:42.433-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612282:433123][11817:0x1141cadc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612282:433123][11817:0x1141cadc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:04:42.433-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612282:433379][11817:0x1141cadc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612282:433379][11817:0x1141cadc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:04:42.433-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612282:433563][11817:0x1141cadc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612282:433563][11817:0x1141cadc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:04:42.433-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612282:433740][11817:0x1141cadc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612282:433740][11817:0x1141cadc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:04:42.433-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612282:433915][11817:0x1141cadc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612282:433915][11817:0x1141cadc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:04:42.433-0700 W  STORAGE  [initandlisten] Failed to start up WiredTiger under any compatibility version.
+2020-07-01T07:04:42.433-0700 F  STORAGE  [initandlisten] Reason: 13: Permission denied
+2020-07-01T07:04:42.434-0700 F  -        [initandlisten] Fatal Assertion 28595 at src/mongo/db/storage/wiredtiger/wiredtiger_kv_engine.cpp 915
+2020-07-01T07:04:42.434-0700 F  -        [initandlisten] 
+
+***aborting after fassert() failure
+
+
+2020-07-01T07:05:25.714-0700 I  CONTROL  [main] ***** SERVER RESTARTED *****
+2020-07-01T07:05:25.722-0700 I  CONTROL  [main] Automatically disabling TLS 1.0, to force-enable TLS 1.0 specify --sslDisabledProtocols 'none'
+2020-07-01T07:05:25.724-0700 W  ASIO     [main] No TransportLayer configured during NetworkInterface startup
+2020-07-01T07:05:25.725-0700 I  CONTROL  [initandlisten] MongoDB starting : pid=11823 port=27017 dbpath=/Users/anuv/Documents/GitHub/nestor/mongodb/database 64-bit host=anuvs-mbp-6.lan
+2020-07-01T07:05:25.725-0700 I  CONTROL  [initandlisten] db version v4.2.6
+2020-07-01T07:05:25.725-0700 I  CONTROL  [initandlisten] git version: 20364840b8f1af16917e4c23c1b5f5efd8b352f8
+2020-07-01T07:05:25.725-0700 I  CONTROL  [initandlisten] allocator: system
+2020-07-01T07:05:25.725-0700 I  CONTROL  [initandlisten] modules: none
+2020-07-01T07:05:25.725-0700 I  CONTROL  [initandlisten] build environment:
+2020-07-01T07:05:25.725-0700 I  CONTROL  [initandlisten]     distarch: x86_64
+2020-07-01T07:05:25.725-0700 I  CONTROL  [initandlisten]     target_arch: x86_64
+2020-07-01T07:05:25.725-0700 I  CONTROL  [initandlisten] options: { config: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongod-nestor-dev.conf", net: { bindIp: "127.0.0.1", port: 27017 }, storage: { dbPath: "/Users/anuv/Documents/GitHub/nestor/mongodb/database" }, systemLog: { destination: "file", logAppend: true, path: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongo.log" } }
+2020-07-01T07:05:25.726-0700 W  STORAGE  [initandlisten] Detected unclean shutdown - /Users/anuv/Documents/GitHub/nestor/mongodb/database/mongod.lock is not empty.
+2020-07-01T07:05:25.726-0700 I  STORAGE  [initandlisten] Detected data files in /Users/anuv/Documents/GitHub/nestor/mongodb/database created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2020-07-01T07:05:25.726-0700 W  STORAGE  [initandlisten] Recovering data from the last clean checkpoint.
+2020-07-01T07:05:25.726-0700 I  STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=7680M,cache_overflow=(file_max=0M),session_max=33000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000,close_scan_interval=10,close_handle_minimum=250),statistics_log=(wait=0),verbose=[recovery_progress,checkpoint_progress],
+2020-07-01T07:05:26.325-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612326:325644][11823:0x119e99dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612326:325644][11823:0x119e99dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:05:26.325-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612326:325914][11823:0x119e99dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612326:325914][11823:0x119e99dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:05:26.326-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612326:326104][11823:0x119e99dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612326:326104][11823:0x119e99dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:05:26.326-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612326:326285][11823:0x119e99dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612326:326285][11823:0x119e99dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:05:26.326-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612326:326464][11823:0x119e99dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612326:326464][11823:0x119e99dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:05:26.326-0700 W  STORAGE  [initandlisten] Failed to start up WiredTiger under any compatibility version.
+2020-07-01T07:05:26.326-0700 F  STORAGE  [initandlisten] Reason: 13: Permission denied
+2020-07-01T07:05:26.326-0700 F  -        [initandlisten] Fatal Assertion 28595 at src/mongo/db/storage/wiredtiger/wiredtiger_kv_engine.cpp 915
+2020-07-01T07:05:26.326-0700 F  -        [initandlisten] 
+
+***aborting after fassert() failure
+
+
+2020-07-01T07:05:33.347-0700 I  CONTROL  [main] ***** SERVER RESTARTED *****
+2020-07-01T07:05:33.354-0700 I  CONTROL  [main] Automatically disabling TLS 1.0, to force-enable TLS 1.0 specify --sslDisabledProtocols 'none'
+2020-07-01T07:05:33.357-0700 W  ASIO     [main] No TransportLayer configured during NetworkInterface startup
+2020-07-01T07:05:33.358-0700 I  CONTROL  [initandlisten] MongoDB starting : pid=11824 port=27017 dbpath=/Users/anuv/Documents/GitHub/nestor/mongodb/database 64-bit host=anuvs-mbp-6.lan
+2020-07-01T07:05:33.358-0700 I  CONTROL  [initandlisten] db version v4.2.6
+2020-07-01T07:05:33.358-0700 I  CONTROL  [initandlisten] git version: 20364840b8f1af16917e4c23c1b5f5efd8b352f8
+2020-07-01T07:05:33.358-0700 I  CONTROL  [initandlisten] allocator: system
+2020-07-01T07:05:33.358-0700 I  CONTROL  [initandlisten] modules: none
+2020-07-01T07:05:33.358-0700 I  CONTROL  [initandlisten] build environment:
+2020-07-01T07:05:33.358-0700 I  CONTROL  [initandlisten]     distarch: x86_64
+2020-07-01T07:05:33.358-0700 I  CONTROL  [initandlisten]     target_arch: x86_64
+2020-07-01T07:05:33.358-0700 I  CONTROL  [initandlisten] options: { config: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongod-nestor-dev.conf", net: { bindIp: "127.0.0.1", port: 27017 }, storage: { dbPath: "/Users/anuv/Documents/GitHub/nestor/mongodb/database" }, systemLog: { destination: "file", logAppend: true, path: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongo.log" } }
+2020-07-01T07:05:33.359-0700 W  STORAGE  [initandlisten] Detected unclean shutdown - /Users/anuv/Documents/GitHub/nestor/mongodb/database/mongod.lock is not empty.
+2020-07-01T07:05:33.359-0700 I  STORAGE  [initandlisten] Detected data files in /Users/anuv/Documents/GitHub/nestor/mongodb/database created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2020-07-01T07:05:33.359-0700 W  STORAGE  [initandlisten] Recovering data from the last clean checkpoint.
+2020-07-01T07:05:33.359-0700 I  STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=7680M,cache_overflow=(file_max=0M),session_max=33000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000,close_scan_interval=10,close_handle_minimum=250),statistics_log=(wait=0),verbose=[recovery_progress,checkpoint_progress],
+2020-07-01T07:05:33.957-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612333:957397][11824:0x1147b9dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612333:957397][11824:0x1147b9dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:05:33.957-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612333:957666][11824:0x1147b9dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612333:957666][11824:0x1147b9dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:05:33.957-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612333:957855][11824:0x1147b9dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612333:957855][11824:0x1147b9dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:05:33.958-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612333:958038][11824:0x1147b9dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612333:958038][11824:0x1147b9dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:05:33.958-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612333:958224][11824:0x1147b9dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612333:958224][11824:0x1147b9dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:05:33.958-0700 W  STORAGE  [initandlisten] Failed to start up WiredTiger under any compatibility version.
+2020-07-01T07:05:33.958-0700 F  STORAGE  [initandlisten] Reason: 13: Permission denied
+2020-07-01T07:05:33.958-0700 F  -        [initandlisten] Fatal Assertion 28595 at src/mongo/db/storage/wiredtiger/wiredtiger_kv_engine.cpp 915
+2020-07-01T07:05:33.958-0700 F  -        [initandlisten] 
+
+***aborting after fassert() failure
+
+
+2020-07-01T07:06:22.078-0700 I  CONTROL  [main] ***** SERVER RESTARTED *****
+2020-07-01T07:06:22.085-0700 I  CONTROL  [main] Automatically disabling TLS 1.0, to force-enable TLS 1.0 specify --sslDisabledProtocols 'none'
+2020-07-01T07:06:22.088-0700 W  ASIO     [main] No TransportLayer configured during NetworkInterface startup
+2020-07-01T07:06:22.089-0700 I  CONTROL  [initandlisten] MongoDB starting : pid=11841 port=27017 dbpath=/Users/anuv/Documents/GitHub/nestor/mongodb/database 64-bit host=anuvs-mbp-6.lan
+2020-07-01T07:06:22.089-0700 I  CONTROL  [initandlisten] db version v4.2.6
+2020-07-01T07:06:22.089-0700 I  CONTROL  [initandlisten] git version: 20364840b8f1af16917e4c23c1b5f5efd8b352f8
+2020-07-01T07:06:22.089-0700 I  CONTROL  [initandlisten] allocator: system
+2020-07-01T07:06:22.089-0700 I  CONTROL  [initandlisten] modules: none
+2020-07-01T07:06:22.089-0700 I  CONTROL  [initandlisten] build environment:
+2020-07-01T07:06:22.089-0700 I  CONTROL  [initandlisten]     distarch: x86_64
+2020-07-01T07:06:22.089-0700 I  CONTROL  [initandlisten]     target_arch: x86_64
+2020-07-01T07:06:22.089-0700 I  CONTROL  [initandlisten] options: { config: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongod-nestor-dev.conf", net: { bindIp: "127.0.0.1", port: 27017 }, storage: { dbPath: "/Users/anuv/Documents/GitHub/nestor/mongodb/database" }, systemLog: { destination: "file", logAppend: true, path: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongo.log" } }
+2020-07-01T07:06:22.095-0700 W  STORAGE  [initandlisten] Detected unclean shutdown - /Users/anuv/Documents/GitHub/nestor/mongodb/database/mongod.lock is not empty.
+2020-07-01T07:06:22.096-0700 I  STORAGE  [initandlisten] Detected data files in /Users/anuv/Documents/GitHub/nestor/mongodb/database created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2020-07-01T07:06:22.096-0700 W  STORAGE  [initandlisten] Recovering data from the last clean checkpoint.
+2020-07-01T07:06:22.096-0700 I  STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=7680M,cache_overflow=(file_max=0M),session_max=33000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000,close_scan_interval=10,close_handle_minimum=250),statistics_log=(wait=0),verbose=[recovery_progress,checkpoint_progress],
+2020-07-01T07:06:22.693-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612382:693624][11841:0x10fedcdc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612382:693624][11841:0x10fedcdc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:06:22.693-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612382:693895][11841:0x10fedcdc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612382:693895][11841:0x10fedcdc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:06:22.694-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612382:694087][11841:0x10fedcdc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612382:694087][11841:0x10fedcdc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:06:22.694-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612382:694268][11841:0x10fedcdc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612382:694268][11841:0x10fedcdc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:06:22.694-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612382:694446][11841:0x10fedcdc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612382:694446][11841:0x10fedcdc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:06:22.694-0700 W  STORAGE  [initandlisten] Failed to start up WiredTiger under any compatibility version.
+2020-07-01T07:06:22.694-0700 F  STORAGE  [initandlisten] Reason: 13: Permission denied
+2020-07-01T07:06:22.694-0700 F  -        [initandlisten] Fatal Assertion 28595 at src/mongo/db/storage/wiredtiger/wiredtiger_kv_engine.cpp 915
+2020-07-01T07:06:22.694-0700 F  -        [initandlisten] 
+
+***aborting after fassert() failure
+
+
+2020-07-01T07:07:38.968-0700 I  CONTROL  [main] ***** SERVER RESTARTED *****
+2020-07-01T07:07:38.975-0700 I  CONTROL  [main] Automatically disabling TLS 1.0, to force-enable TLS 1.0 specify --sslDisabledProtocols 'none'
+2020-07-01T07:07:38.979-0700 W  ASIO     [main] No TransportLayer configured during NetworkInterface startup
+2020-07-01T07:07:38.979-0700 I  CONTROL  [initandlisten] MongoDB starting : pid=12053 port=27017 dbpath=/Users/anuv/Documents/GitHub/nestor/mongodb/database 64-bit host=anuvs-mbp-6.lan
+2020-07-01T07:07:38.979-0700 I  CONTROL  [initandlisten] db version v4.2.6
+2020-07-01T07:07:38.979-0700 I  CONTROL  [initandlisten] git version: 20364840b8f1af16917e4c23c1b5f5efd8b352f8
+2020-07-01T07:07:38.979-0700 I  CONTROL  [initandlisten] allocator: system
+2020-07-01T07:07:38.979-0700 I  CONTROL  [initandlisten] modules: none
+2020-07-01T07:07:38.979-0700 I  CONTROL  [initandlisten] build environment:
+2020-07-01T07:07:38.979-0700 I  CONTROL  [initandlisten]     distarch: x86_64
+2020-07-01T07:07:38.979-0700 I  CONTROL  [initandlisten]     target_arch: x86_64
+2020-07-01T07:07:38.979-0700 I  CONTROL  [initandlisten] options: { config: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongod-nestor-dev.conf", net: { bindIp: "127.0.0.1", port: 27017 }, storage: { dbPath: "/Users/anuv/Documents/GitHub/nestor/mongodb/database" }, systemLog: { destination: "file", logAppend: true, path: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongo.log" } }
+2020-07-01T07:07:38.980-0700 W  STORAGE  [initandlisten] Detected unclean shutdown - /Users/anuv/Documents/GitHub/nestor/mongodb/database/mongod.lock is not empty.
+2020-07-01T07:07:38.980-0700 I  STORAGE  [initandlisten] Detected data files in /Users/anuv/Documents/GitHub/nestor/mongodb/database created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2020-07-01T07:07:38.980-0700 W  STORAGE  [initandlisten] Recovering data from the last clean checkpoint.
+2020-07-01T07:07:38.980-0700 I  STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=7680M,cache_overflow=(file_max=0M),session_max=33000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000,close_scan_interval=10,close_handle_minimum=250),statistics_log=(wait=0),verbose=[recovery_progress,checkpoint_progress],
+2020-07-01T07:07:39.576-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612459:576891][12053:0x10f696dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612459:576891][12053:0x10f696dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:07:39.577-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612459:577169][12053:0x10f696dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612459:577169][12053:0x10f696dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:07:39.577-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612459:577363][12053:0x10f696dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612459:577363][12053:0x10f696dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:07:39.577-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612459:577566][12053:0x10f696dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612459:577566][12053:0x10f696dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:07:39.577-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612459:577750][12053:0x10f696dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612459:577750][12053:0x10f696dc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:07:39.577-0700 W  STORAGE  [initandlisten] Failed to start up WiredTiger under any compatibility version.
+2020-07-01T07:07:39.577-0700 F  STORAGE  [initandlisten] Reason: 13: Permission denied
+2020-07-01T07:07:39.577-0700 F  -        [initandlisten] Fatal Assertion 28595 at src/mongo/db/storage/wiredtiger/wiredtiger_kv_engine.cpp 915
+2020-07-01T07:07:39.577-0700 F  -        [initandlisten] 
+
+***aborting after fassert() failure
+
+
+2020-07-01T07:07:43.381-0700 I  CONTROL  [main] ***** SERVER RESTARTED *****
+2020-07-01T07:07:43.384-0700 I  CONTROL  [main] Automatically disabling TLS 1.0, to force-enable TLS 1.0 specify --sslDisabledProtocols 'none'
+2020-07-01T07:07:43.394-0700 W  ASIO     [main] No TransportLayer configured during NetworkInterface startup
+2020-07-01T07:07:43.395-0700 I  CONTROL  [initandlisten] MongoDB starting : pid=12056 port=27017 dbpath=/Users/anuv/Documents/GitHub/nestor/mongodb/database 64-bit host=anuvs-mbp-6.lan
+2020-07-01T07:07:43.396-0700 I  CONTROL  [initandlisten] db version v4.2.6
+2020-07-01T07:07:43.397-0700 I  CONTROL  [initandlisten] git version: 20364840b8f1af16917e4c23c1b5f5efd8b352f8
+2020-07-01T07:07:43.398-0700 I  CONTROL  [initandlisten] allocator: system
+2020-07-01T07:07:43.398-0700 I  CONTROL  [initandlisten] modules: none
+2020-07-01T07:07:43.399-0700 I  CONTROL  [initandlisten] build environment:
+2020-07-01T07:07:43.400-0700 I  CONTROL  [initandlisten]     distarch: x86_64
+2020-07-01T07:07:43.401-0700 I  CONTROL  [initandlisten]     target_arch: x86_64
+2020-07-01T07:07:43.402-0700 I  CONTROL  [initandlisten] options: { config: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongod-nestor-dev.conf", net: { bindIp: "127.0.0.1", port: 27017 }, processManagement: { fork: true }, storage: { dbPath: "/Users/anuv/Documents/GitHub/nestor/mongodb/database" }, systemLog: { destination: "file", logAppend: true, path: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongo.log" } }
+2020-07-01T07:07:43.403-0700 W  STORAGE  [initandlisten] Detected unclean shutdown - /Users/anuv/Documents/GitHub/nestor/mongodb/database/mongod.lock is not empty.
+2020-07-01T07:07:43.404-0700 I  STORAGE  [initandlisten] Detected data files in /Users/anuv/Documents/GitHub/nestor/mongodb/database created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2020-07-01T07:07:43.405-0700 W  STORAGE  [initandlisten] Recovering data from the last clean checkpoint.
+2020-07-01T07:07:43.406-0700 I  STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=7680M,cache_overflow=(file_max=0M),session_max=33000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000,close_scan_interval=10,close_handle_minimum=250),statistics_log=(wait=0),verbose=[recovery_progress,checkpoint_progress],
+2020-07-01T07:07:44.003-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612464:3272][12056:0x11b87adc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612464:3272][12056:0x11b87adc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:07:44.004-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612464:4311][12056:0x11b87adc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612464:4311][12056:0x11b87adc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:07:44.005-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612464:5748][12056:0x11b87adc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612464:5748][12056:0x11b87adc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:07:44.006-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612464:6748][12056:0x11b87adc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612464:6748][12056:0x11b87adc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:07:44.007-0700 E  STORAGE  [initandlisten] WiredTiger error (13) [1593612464:7678][12056:0x11b87adc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied Raw: [1593612464:7678][12056:0x11b87adc0], wiredtiger_open: __posix_open_file, 667: /Users/anuv/Documents/GitHub/nestor/mongodb/database/WiredTiger.turtle: handle-open: open: Permission denied
+2020-07-01T07:07:44.008-0700 W  STORAGE  [initandlisten] Failed to start up WiredTiger under any compatibility version.
+2020-07-01T07:07:44.009-0700 F  STORAGE  [initandlisten] Reason: 13: Permission denied
+2020-07-01T07:07:44.009-0700 F  -        [initandlisten] Fatal Assertion 28595 at src/mongo/db/storage/wiredtiger/wiredtiger_kv_engine.cpp 915
+2020-07-01T07:07:44.010-0700 F  -        [initandlisten] 
+
+***aborting after fassert() failure
+
+
+2020-07-01T07:08:18.500-0700 I  CONTROL  [main] ***** SERVER RESTARTED *****
+2020-07-01T07:08:18.508-0700 I  CONTROL  [main] Automatically disabling TLS 1.0, to force-enable TLS 1.0 specify --sslDisabledProtocols 'none'
+2020-07-01T07:08:18.511-0700 W  ASIO     [main] No TransportLayer configured during NetworkInterface startup
+2020-07-01T07:08:18.511-0700 I  CONTROL  [initandlisten] MongoDB starting : pid=12106 port=27017 dbpath=/Users/anuv/Documents/GitHub/nestor/mongodb/database 64-bit host=anuvs-mbp-6.lan
+2020-07-01T07:08:18.512-0700 I  CONTROL  [initandlisten] db version v4.2.6
+2020-07-01T07:08:18.512-0700 I  CONTROL  [initandlisten] git version: 20364840b8f1af16917e4c23c1b5f5efd8b352f8
+2020-07-01T07:08:18.512-0700 I  CONTROL  [initandlisten] allocator: system
+2020-07-01T07:08:18.512-0700 I  CONTROL  [initandlisten] modules: none
+2020-07-01T07:08:18.512-0700 I  CONTROL  [initandlisten] build environment:
+2020-07-01T07:08:18.512-0700 I  CONTROL  [initandlisten]     distarch: x86_64
+2020-07-01T07:08:18.512-0700 I  CONTROL  [initandlisten]     target_arch: x86_64
+2020-07-01T07:08:18.512-0700 I  CONTROL  [initandlisten] options: { config: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongod-nestor-dev.conf", net: { bindIp: "127.0.0.1", port: 27017 }, processManagement: { fork: true }, storage: { dbPath: "/Users/anuv/Documents/GitHub/nestor/mongodb/database" }, systemLog: { destination: "file", logAppend: true, path: "/Users/anuv/Documents/GitHub/nestor/mongodb/mongo.log" } }
+2020-07-01T07:08:18.513-0700 W  STORAGE  [initandlisten] Detected unclean shutdown - /Users/anuv/Documents/GitHub/nestor/mongodb/database/mongod.lock is not empty.
+2020-07-01T07:08:18.513-0700 I  STORAGE  [initandlisten] Detected data files in /Users/anuv/Documents/GitHub/nestor/mongodb/database created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2020-07-01T07:08:18.513-0700 W  STORAGE  [initandlisten] Recovering data from the last clean checkpoint.
+2020-07-01T07:08:18.513-0700 I  STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=7680M,cache_overflow=(file_max=0M),session_max=33000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000,close_scan_interval=10,close_handle_minimum=250),statistics_log=(wait=0),verbose=[recovery_progress,checkpoint_progress],
+2020-07-01T07:08:19.143-0700 I  STORAGE  [initandlisten] WiredTiger message [1593612499:143472][12106:0x117520dc0], txn-recover: Recovering log 6 through 7
+2020-07-01T07:08:19.189-0700 I  STORAGE  [initandlisten] WiredTiger message [1593612499:188995][12106:0x117520dc0], txn-recover: Recovering log 7 through 7
+2020-07-01T07:08:19.249-0700 I  STORAGE  [initandlisten] WiredTiger message [1593612499:249821][12106:0x117520dc0], txn-recover: Main recovery loop: starting at 6/24311424 to 7/256
+2020-07-01T07:08:19.250-0700 I  STORAGE  [initandlisten] WiredTiger message [1593612499:250640][12106:0x117520dc0], txn-recover: Recovering log 6 through 7
+2020-07-01T07:08:19.314-0700 I  STORAGE  [initandlisten] WiredTiger message [1593612499:314915][12106:0x117520dc0], file:sizeStorer.wt, txn-recover: Recovering log 7 through 7
+2020-07-01T07:08:19.353-0700 I  STORAGE  [initandlisten] WiredTiger message [1593612499:353339][12106:0x117520dc0], file:sizeStorer.wt, txn-recover: Set global recovery timestamp: (0, 0)
+2020-07-01T07:08:19.441-0700 I  RECOVERY [initandlisten] WiredTiger recoveryTimestamp. Ts: Timestamp(0, 0)
+2020-07-01T07:08:19.452-0700 I  STORAGE  [initandlisten] Timestamp monitor starting
+2020-07-01T07:08:19.453-0700 I  CONTROL  [initandlisten] 
+2020-07-01T07:08:19.453-0700 I  CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2020-07-01T07:08:19.453-0700 I  CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2020-07-01T07:08:19.453-0700 I  CONTROL  [initandlisten] ** WARNING: You are running this process as the root user, which is not recommended.
+2020-07-01T07:08:19.453-0700 I  CONTROL  [initandlisten] 
+2020-07-01T07:08:19.459-0700 I  SHARDING [initandlisten] Marking collection local.system.replset as collection version: <unsharded>
+2020-07-01T07:08:19.464-0700 I  STORAGE  [initandlisten] Flow Control is enabled on this deployment.
+2020-07-01T07:08:19.465-0700 I  SHARDING [initandlisten] Marking collection admin.system.roles as collection version: <unsharded>
+2020-07-01T07:08:19.465-0700 I  SHARDING [initandlisten] Marking collection admin.system.version as collection version: <unsharded>
+2020-07-01T07:08:19.468-0700 I  SHARDING [initandlisten] Marking collection local.startup_log as collection version: <unsharded>
+2020-07-01T07:08:19.468-0700 I  FTDC     [initandlisten] Initializing full-time diagnostic data capture with directory '/Users/anuv/Documents/GitHub/nestor/mongodb/database/diagnostic.data'
+2020-07-01T07:08:19.470-0700 I  SHARDING [LogicalSessionCacheRefresh] Marking collection config.system.sessions as collection version: <unsharded>
+2020-07-01T07:08:19.470-0700 I  NETWORK  [listener] Listening on /tmp/mongodb-27017.sock
+2020-07-01T07:08:19.470-0700 I  NETWORK  [listener] Listening on 127.0.0.1
+2020-07-01T07:08:19.470-0700 I  NETWORK  [listener] waiting for connections on port 27017
+2020-07-01T07:08:19.471-0700 I  SHARDING [LogicalSessionCacheReap] Marking collection config.transactions as collection version: <unsharded>
+2020-07-01T07:08:20.034-0700 I  FTDC     [ftdc] Unclean full-time diagnostic data capture shutdown detected, found interim file, some metrics may have been lost. OK
+2020-07-01T07:08:20.124-0700 I  SHARDING [ftdc] Marking collection local.oplog.rs as collection version: <unsharded>
+2020-07-01T07:08:33.539-0700 I  NETWORK  [listener] connection accepted from 127.0.0.1:61787 #1 (1 connection now open)
+2020-07-01T07:08:33.540-0700 I  NETWORK  [conn1] received client metadata from 127.0.0.1:61787 conn1: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.6" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "19.4.0" } }
+2020-07-01T07:08:49.453-0700 I  SHARDING [conn1] Marking collection nestor.users as collection version: <unsharded>
+2020-07-01T07:08:58.160-0700 I  NETWORK  [listener] connection accepted from 127.0.0.1:61888 #2 (2 connections now open)
+2020-07-01T07:08:58.161-0700 I  NETWORK  [conn2] received client metadata from 127.0.0.1:61888 conn2: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.6" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "19.4.0" } }
+2020-07-01T07:08:58.163-0700 I  NETWORK  [conn2] end connection 127.0.0.1:61888 (1 connection now open)
+2020-07-01T07:08:58.166-0700 I  NETWORK  [conn1] end connection 127.0.0.1:61787 (0 connections now open)

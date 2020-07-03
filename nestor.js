@@ -11,9 +11,9 @@ const body_parser = require("body-parser");
 /* CONSTANTS */
 const util = require("./util");
 const debug = process.argv.slice(2)[0] == "dev";
-const wss_port = debug ? 30007 : 3007;
-const http_port = debug ? 30008 : 3008;
-const mdb_port = debug ? 27017 : 3009;
+const wss_port = debug ? 30008 : 3008;
+const http_port = debug ? 30009 : 3009;
+const mdb_port = debug ? 27017 : 3010;
 // util.LEVEL = debug ? util.REP : util.IMP;
 util.LEVEL = debug ? util.INF : util.IMP;
 

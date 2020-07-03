@@ -4,10 +4,12 @@ var app = {
     auth: null,
     socket: null,
     wsurl:
-        'ws://' +
+        (location.protocol === 'https:'
+            ? 'wss://'
+            : 'ws://') +
         document.domain +
-        ':' +
-        (document.domain == 'nestor.anuv.me' ? 3007 : 30007),
+        (location.protocol === 'https:' ? ':443' : ':80') +
+        '/socket',
     encode_msg: (e, d) => {
         return JSON.stringify({
             event: e,
