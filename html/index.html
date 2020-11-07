@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <title>Nestor</title>
-        <meta charset="utf-8" />
+        <meta charset="UTF-8" />
         <meta name="author" content="Anuv Gupta" />
         <meta name="copyright" content="Copyright (c) 2020 Anuv Gupta" />
         <meta
@@ -19,43 +19,29 @@
         />
         <link rel="apple-touch-startup-image" href="img/nestor_app.png" />
         <link rel="icon" href="img/nestor_w.png" />
-        <style type="text/css">
-            @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:300italic,600italic,300,600');
-            * {
-                font-family: 'Source Sans Pro', Trebuchet, Verdana, Helvetica,
-                    Arial, sans-serif;
-            }
-            html,
-            body {
-                height: 100%;
-                width: 100%;
-                margin: 0;
-                background-color: #fff;
-                overflow: hidden;
-                font-size: 0;
-            }
-            a {
-                text-decoration: none;
-                transition: color 0.15s ease;
-            }
-        </style>
-        <script
-            type="text/javascript"
-            src="https://code.jquery.com/jquery-3.3.1.min.js"
-            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-            crossorigin="anonymous"
-        ></script>
-        <script type="text/javascript" src="lib/sha256.min.js">
-            // https://geraintluff.github.io/sha256/
-        </script>
+        <link rel="stylesheet" href="style.css" />
+        <script type="text/javascript" src="lib/jquery-3.5.1.min.js"></script>
+        <script type="text/javascript" src="lib/sha256.min.js"></script>
         <script type="text/javascript" src="lib/block.js"></script>
+        <script type="text/javascript" src="lib/util.js"></script>
         <script type="text/javascript" src="app.js"></script>
     </head>
+
     <body>
-        <!-- control panel -->
+        <!-- nestor -->
         <div
             id="loading"
-            style="position: absolute; top: 0; left; 0; width: 100%; height: 100%; display: table; text-align: center; opacity: 1; transition: opacity 0.1s ease;"
+            style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                display: table;
+                text-align: center;
+                opacity: 1;
+                transition: opacity 0.1s ease;
+            "
         >
             <div
                 style="

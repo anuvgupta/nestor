@@ -26,33 +26,25 @@ app
     }
     #auth
         {
-            var login = false;
             if (auth === true) {
-                if (app.auth) {
-                    app.util.cookie('username', app.auth.username, `${app.auth_cookie_expiration}`);
-                    app.util.cookie('password', app.auth.password, `${app.auth_cookie_expiration}`);
+                if (app.ws.api.auth) {
+                    util.cookie('username', app.ws.api.auth.username, "__indefinite__");
+                    util.cookie('password', app.ws.api.auth.password, "__indefinite__");
                 }
-                login = true;
-                app.api.get_core_list(true);
-            } else {
-                if (app.hasOwnProperty('_temp_prelogin') && app._temp_prelogin) {
-                    app._temp_prelogin = false;
-                } else {
-                    login = false;
-                }
-            }
-            if (login) {
+                app.ws.api.get_core_list(true);
                 block.child('login').on('hide', { concurrent: _ => {
-                    app.block.child('main').on('show');
+                    app.ui.block.child('main').on('show');
                 } });
             } else {
-                block.child('login/content/error/text').css('display', 'inline-block');
+                if (app.ws.api.hasOwnProperty('_temp_prelogin') && app.ws.api._temp_prelogin) {
+                    app.ws.api._temp_prelogin = false;
+                } else block.child('login/content/error/text').css('display', 'inline-block');
             }
         }
     #node_profiles
         {
             for (var np in node_profiles) {
-                app.api.node_profiles[np] = node_profiles[np];
+                app.ws.api.node_profiles[np] = node_profiles[np];
             }
         }
     #core_list
@@ -181,11 +173,11 @@ app
             if (delete_core) {
                 if (delete_core == block.child('main/core').key('id')) {
                     block.child('main/core').on('hide', { next: _ => {
-                        app.block.child('main/cores').on('show');
+                        app.ui.block.child('main/cores').on('show');
                     } });
                     if ("core" == block.child('main/node').key('id')) {
                         block.child('main/node').on('hide', { next: _ => {
-                            app.block.child('main/cores').on('show');
+                            app.ui.block.child('main/cores').on('show');
                         } });
                     }
                 }
@@ -196,7 +188,7 @@ app
             if (delete_node) {
                 if (delete_node == block.child('main/node').key('id')) {
                     block.child('main/node').on('hide', { next: _ => {
-                        app.block.child('main/core').on('show');
+                        app.ui.block.child('main/core').on('show');
                     } });
                 }
             }
@@ -209,7 +201,7 @@ app
         }
     block login
         {
-            block.css('transition', `opacity ${app.transition_fade_duration}s`);
+            block.css('transition', `opacity ${app.ui.transition_fade_duration}s`);
         }
         :show
             {
@@ -220,7 +212,7 @@ app
                 }, 1);
                 setTimeout(_ => {
                     if (data.next) data.next()
-                }, app.transition_fade_duration * 1000);
+                }, app.ui.transition_fade_duration * 1000);
                 event.stopPropagation();
             }
         :hide
@@ -232,7 +224,7 @@ app
                 setTimeout(_ => {
                     block.css('display', 'none');
                     if (data && data.next) data.next();
-                }, app.transition_fade_duration * 1000);
+                }, app.ui.transition_fade_duration * 1000);
                 event.stopPropagation();
             }
         css
@@ -317,8 +309,8 @@ app
                             username = username.trim();
                             password = password.trim();
                             if (username != "" && password != "") {
-                                app.util.sha256(password, hashed_password => {
-                                    app.api.login(username, hashed_password);
+                                util.sha256(password, hashed_password => {
+                                    app.ws.api.login(username, hashed_password);
                                 });
                             }
                         }
@@ -331,7 +323,7 @@ app
                         background-color #f6f6f6
     div main
         {
-            block.css('transition', `opacity ${app.transition_fade_duration}s`);
+            block.css('transition', `opacity ${app.ui.transition_fade_duration}s`);
         }
         :show
             {
@@ -342,7 +334,7 @@ app
                 }, 1);
                 setTimeout(_ => {
                     if (data.next) data.next()
-                }, app.transition_fade_duration * 1000);
+                }, app.ui.transition_fade_duration * 1000);
                 event.stopPropagation();
             }
         :hide
@@ -354,7 +346,7 @@ app
                 setTimeout(_ => {
                     block.css('display', 'none');
                     if (data && data.next) data.next();
-                }, app.transition_fade_duration * 1000);
+                }, app.ui.transition_fade_duration * 1000);
                 event.stopPropagation();
             }
         css
@@ -421,7 +413,7 @@ app
                             opacity 0.9
                     :click
                         {
-                            app.api.logout();
+                            app.ws.api.logout();
                         }
                     image img
                         src img/power_w.png
@@ -429,7 +421,7 @@ app
                         height 42px
         div cores
             {
-                block.css('transition', `opacity ${app.transition_fade_duration}s`);
+                block.css('transition', `opacity ${app.ui.transition_fade_duration}s`);
             }
             :show
                 {
@@ -440,7 +432,7 @@ app
                     }, 1);
                     setTimeout(_ => {
                         if (data.next) data.next()
-                    }, app.transition_fade_duration * 1000);
+                    }, app.ui.transition_fade_duration * 1000);
                     event.stopPropagation();
                 }
             :hide
@@ -452,7 +444,7 @@ app
                     setTimeout(_ => {
                         block.css('display', 'none');
                         if (data && data.next) data.next();
-                    }, app.transition_fade_duration * 1000);
+                    }, app.ui.transition_fade_duration * 1000);
                     event.stopPropagation();
                 }
             css
@@ -494,7 +486,7 @@ app
                                 })
                                 .add(Block('block', 'img')
                                     .css({
-                                        opacity: '0.6',
+                                        opacity: '0.7',
                                         width: '90px',
                                         height: '110px',
                                         float: 'left',
@@ -531,7 +523,7 @@ app
                                     .css({
                                         width: '50px',
                                         height: '110px',
-                                        opacity: '0.55',
+                                        opacity: '0.65',
                                         position: 'absolute',
                                         right: '15px',
                                     })
@@ -572,20 +564,20 @@ app
                             data('status', status => {
                                 switch (status.status) {
                                     case "online":
-                                        block.child('status/circle').css('background-color', app.block.key('statusGreen'));
+                                        block.child('status/circle').css('background-color', app.ui.block.key('statusGreen'));
                                         break;
                                     case "offline":
-                                        block.child('status/circle').css('background-color', app.block.key('deleteRed'));
+                                        block.child('status/circle').css('background-color', app.ui.block.key('deleteRed'));
                                         break;
                                     case "desync":
-                                        block.child('status/circle').css('background-color', app.block.key('slowYellow'));
+                                        block.child('status/circle').css('background-color', app.ui.block.key('slowYellow'));
                                         break;
                                     case "intermediate":
-                                        block.child('status/circle').css('background-color', app.block.key('buttonBlue'));
+                                        block.child('status/circle').css('background-color', app.ui.block.key('buttonBlue'));
                                         break;
                                     case "new":
                                     default:
-                                        block.child('status/circle').css('background-color', app.block.key('stalledGrey'));
+                                        block.child('status/circle').css('background-color', app.ui.block.key('stalledGrey'));
                                         break;
                                 }
                             });
@@ -617,7 +609,7 @@ app
                             opacity 0.9
                 :click
                     {
-                        app.api.new_core();
+                        app.ws.api.new_core();
                     }
                 div img
                     css
@@ -633,7 +625,7 @@ app
                         height 60px
         div core
             {
-                block.css('transition', `opacity ${app.transition_fade_duration}s`);
+                block.css('transition', `opacity ${app.ui.transition_fade_duration}s`);
             }
             :show
                 {
@@ -644,7 +636,7 @@ app
                     }, 1);
                     setTimeout(_ => {
                         if (data.next) data.next()
-                    }, app.transition_fade_duration * 1000);
+                    }, app.ui.transition_fade_duration * 1000);
                     event.stopPropagation();
                 }
             :hide
@@ -656,7 +648,7 @@ app
                     setTimeout(_ => {
                         block.css('display', 'none');
                         if (data && data.next) data.next();
-                    }, app.transition_fade_duration * 1000);
+                    }, app.ui.transition_fade_duration * 1000);
                     event.stopPropagation();
                 }
             css
@@ -670,7 +662,7 @@ app
                 {
                     block.key('id', id);
                     block.key('core_info', null);
-                    app.api.get_core_info(id);
+                    app.ws.api.get_core_info(id);
                 }
             #core_info
                 {
@@ -777,7 +769,7 @@ app
                                 display block
                                 float left
                                 margin-right 4px
-                                opacity 0.8
+                                opacity 0.7
                             width 40px
                             height 40px
                         text text
@@ -827,20 +819,20 @@ app
                             }
                             switch (agg_status.code) {
                                 case "online":
-                                    block.child('light').css('background-color', app.block.key('statusGreen'));
+                                    block.child('light').css('background-color', app.ui.block.key('statusGreen'));
                                     break;
                                 case "offline":
-                                    block.child('light').css('background-color', app.block.key('deleteRed'));
+                                    block.child('light').css('background-color', app.ui.block.key('deleteRed'));
                                     break;
                                 case "desync":
-                                    block.child('light').css('background-color', app.block.key('slowYellow'));
+                                    block.child('light').css('background-color', app.ui.block.key('slowYellow'));
                                     break;
                                 case "intermediate":
-                                    block.child('light').css('background-color', app.block.key('buttonBlue'));
+                                    block.child('light').css('background-color', app.ui.block.key('buttonBlue'));
                                     break;
                                 case "new":
                                 default:
-                                    block.child('light').css('background-color', app.block.key('stalledGrey'));
+                                    block.child('light').css('background-color', app.ui.block.key('stalledGrey'));
                                     break;
                             }
                         }
@@ -908,7 +900,7 @@ app
                                 {
                                     var core_info = block.parent(3).key('core_info');
                                     if (core_info && core_info.name && core_info.id) {
-                                        app.api.delete_core(core_info.id, core_info.name);
+                                        app.ws.api.delete_core(core_info.id, core_info.name);
                                     }
                                 }
                             css
@@ -966,7 +958,7 @@ app
                                     type: "node"
                                 })
                             );
-                            app.api.get_node_info(node_id);
+                            app.ws.api.get_node_info(node_id);
                         }
                         Block.queries();
                     }
@@ -1160,25 +1152,25 @@ app
                                 block.child('content/title/text').html('').data(title);
                             });
                             data('type', type => {
-                                block.child('content/img').data({ load: 'img/' + app.api.node_profiles[type].meta.img + '.png' });
-                                block.child('content/status/labels/type/text').html('').data(app.api.node_profiles[type].meta.label);
+                                block.child('content/img').data({ load: 'img/' + app.ws.api.node_profiles[type].meta.img + '.png' });
+                                block.child('content/status/labels/type/text').html('').data(app.ws.api.node_profiles[type].meta.label);
                             });
                             data('status', status => {
                                 block.key('status', status);
-                                block.child('content/status/labels/status/text').html('').data(status.code.charAt(0).toUpperCase() + status.code.slice(1) + " " + (status.code == "online" ? "now" : app.util.duration_desc(status.time)));
+                                block.child('content/status/labels/status/text').html('').data(status.code.charAt(0).toUpperCase() + status.code.slice(1) + " " + (status.code == "online" ? "now" : util.duration_desc(status.time)));
                                 switch (status.code) {
                                     case "online":
-                                        block.child('content/status/light/circle').css('background-color', app.block.key('statusGreen'));
+                                        block.child('content/status/light/circle').css('background-color', app.ui.block.key('statusGreen'));
                                         break;
                                     case "offline":
-                                        block.child('content/status/light/circle').css('background-color', app.block.key('deleteRed'));
+                                        block.child('content/status/light/circle').css('background-color', app.ui.block.key('deleteRed'));
                                         break;
                                     case "desync":
-                                        block.child('content/status/light/circle').css('background-color', app.block.key('slowYellow'));
+                                        block.child('content/status/light/circle').css('background-color', app.ui.block.key('slowYellow'));
                                         break;
                                     case "new":
                                     default:
-                                        block.child('content/status/light/circle').css('background-color', app.block.key('stalledGrey'));
+                                        block.child('content/status/light/circle').css('background-color', app.ui.block.key('stalledGrey'));
                                         break;
                                 }
                             });
@@ -1208,7 +1200,7 @@ app
                     id core
         div node
             {
-                block.css('transition', `opacity ${app.transition_fade_duration}s`);
+                block.css('transition', `opacity ${app.ui.transition_fade_duration}s`);
             }
             :show
                 {
@@ -1219,7 +1211,7 @@ app
                     }, 1);
                     setTimeout(_ => {
                         if (data.next) data.next()
-                    }, app.transition_fade_duration * 1000);
+                    }, app.ui.transition_fade_duration * 1000);
                     event.stopPropagation();
                 }
             :hide
@@ -1231,7 +1223,7 @@ app
                     setTimeout(_ => {
                         block.css('display', 'none');
                         if (data && data.next) data.next();
-                    }, app.transition_fade_duration * 1000);
+                    }, app.ui.transition_fade_duration * 1000);
                     event.stopPropagation();
                 }
             css
@@ -1249,16 +1241,16 @@ app
                         .sibling('default').css('display', 'table');
                     if (id == "core") {
                         var id = block.sibling('core').key('id');
-                        if (id) app.api.get_core_info(id, false);
+                        if (id) app.ws.api.get_core_info(id, false);
                     } else {
-                        app.api.get_node_info(id);
-                        app.api.get_node_data(id);
+                        app.ws.api.get_node_info(id);
+                        app.ws.api.get_node_data(id);
                     }
                 }
             #menu_type
                 {
-                    if (app.api.node_profiles.hasOwnProperty(menu_type) && app.api.node_profiles[menu_type]) {
-                        var menu_profile = app.api.node_profiles[menu_type];
+                    if (app.ws.api.node_profiles.hasOwnProperty(menu_type) && app.ws.api.node_profiles[menu_type]) {
+                        var menu_profile = app.ws.api.node_profiles[menu_type];
                         block.child('menu/status/labels/type/text').html('').data(menu_profile.meta.label);
                         block.child('menu/status/image/img').data({ src: `img/${menu_profile.meta.img}.png` });
                         var old_children = block.child('menu').children();
@@ -1280,7 +1272,7 @@ app
                             .sibling('menu').css('display', 'block');
                     }
                     if (menu_type == "core") {
-                        var core_info = app.block.child('main/core').key('core_info');
+                        var core_info = app.ui.block.child('main/core').key('core_info');
                         if (core_info) {
                             block.child('menu/code').data({ val: core_info.code });
                         }
@@ -1385,8 +1377,8 @@ app
                                             if (node_id == 'core') {
                                                 var core_info = block.parent(3).sibling('core').key('core_info');
                                                 if (core_info && core_info.id && core_info.id != "")
-                                                    app.api.set_core_name(core_info.id, value);
-                                            } else app.api.set_node_name(node_id, value);
+                                                    app.ws.api.set_core_name(core_info.id, value);
+                                            } else app.ws.api.set_node_name(node_id, value);
                                         } else {
                                             block.parent(3).data({ node_name: node_info.name });
                                         }
@@ -1557,7 +1549,7 @@ app
                                     //if (data.hasOwnProperty('value') && data.value != block.key('value')) {
                                     if (data.hasOwnProperty('value')) {
                                         block.key('value', data.value);
-                                        app.api.update_node_data(app.block.child('main/node').key('id'), metadata.id, data.value,
+                                        app.ws.api.update_node_data(app.ui.block.child('main/node').key('id'), metadata.id, data.value,
                                             data.hasOwnProperty('transitional') && data.transitional === true);
                                     }
                                 })
@@ -1616,20 +1608,20 @@ app
                     #status
                         {
                             block.key('status', status);
-                            block.child('labels/status/text').html('').data(status.code.charAt(0).toUpperCase() + status.code.slice(1) + " " + (status.code == "online" ? "now" : app.util.duration_desc(status.time)));
+                            block.child('labels/status/text').html('').data(status.code.charAt(0).toUpperCase() + status.code.slice(1) + " " + (status.code == "online" ? "now" : util.duration_desc(status.time)));
                             switch (status.code) {
                                 case "online":
-                                    block.child('light/circle').css('background-color', app.block.key('statusGreen'));
+                                    block.child('light/circle').css('background-color', app.ui.block.key('statusGreen'));
                                     break;
                                 case "offline":
-                                    block.child('light/circle').css('background-color', app.block.key('deleteRed'));
+                                    block.child('light/circle').css('background-color', app.ui.block.key('deleteRed'));
                                     break;
                                 case "desync":
-                                    block.child('light/circle').css('background-color', app.block.key('slowYellow'));
+                                    block.child('light/circle').css('background-color', app.ui.block.key('slowYellow'));
                                     break;
                                 case "new":
                                 default:
-                                    block.child('light/circle').css('background-color', app.block.key('stalledGrey'));
+                                    block.child('light/circle').css('background-color', app.ui.block.key('stalledGrey'));
                                     break;
                             }
                         }
@@ -1732,12 +1724,12 @@ app
                                     if (id == 'core') {
                                         var core_info = block.parent(3).sibling('core').key('core_info');
                                         if (core_info && core_info.name && core_info.id) {
-                                            app.api.delete_core(core_info.id, core_info.name);
+                                            app.ws.api.delete_core(core_info.id, core_info.name);
                                         }
                                     } else {
                                         var node_info = block.parent(3).key('node_info');
                                         if (node_info && node_info.name) {
-                                            app.api.delete_node(id, node_info.name);
+                                            app.ws.api.delete_node(id, node_info.name);
                                         }
                                     }
                                 }

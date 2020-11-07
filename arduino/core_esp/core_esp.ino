@@ -16,7 +16,7 @@ boolean ws_client_online = false;
 boolean ws_server_online = false;
 char node_clients[100][25];
 // data
-char wifi_ssid[8] = WIFI_SSID;
+char wifi_ssid[19] = WIFI_SSID;
 char device_code[6] = DEVICE_CODE;
 char device_id[25] = DEVICE_ID;
 char device_user[25] = DEVICE_USER;

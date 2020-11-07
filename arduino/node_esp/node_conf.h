@@ -4,20 +4,20 @@
 #define __N_CONF_H__
 
 // wifi
-#define WIFI_SSID "ssid"
-#define WIFI_PASS "pass"
+#define WIFI_SSID "morty"
+#define WIFI_PASS ""
 
 // device
 #define DEVICE_USER "anuv"
 #define NODE_TYPE "simple-led"
-#define CORE_CODE "0A9Bv"
+#define CORE_CODE "57769"
 #define CORE_PORT 80
 
 // api
 //#define API_URL "nestor.anuv.me"
 //#define API_PORT 3007
-#define API_URL "192.168.86.25"
-#define API_PORT 30007
+#define API_URL "192.168.0.102"
+#define API_PORT 30009
 
 // preferences
 #define LOG_HB false
