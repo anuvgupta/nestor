@@ -32,7 +32,7 @@ var api = {
             if (type_id[0] != '.' && type_id[0] != '_') {
                 m.main.node_drivers[type_id] = {
                     init: require(`../nodes/${type_id}/driver.js`),
-                    data: JSON.parse(fs.readFileSync(`../nodes/${type_id}/data.json`, { encoding: 'utf8', flag: 'r' })),
+                    data: JSON.parse(fs.readFileSync(`nodes/${type_id}/data.json`, { encoding: 'utf8', flag: 'r' })),
                     drivers: {}
                 };
             }
