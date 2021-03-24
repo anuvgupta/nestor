@@ -1,6 +1,6 @@
     *
 
-// nestor node editors blockfile
+// nestor node custom blocks blockfile
 
 // define custom blocks
 !break
@@ -169,6 +169,14 @@
                     });
                     e.stopPropagation();
                 })
+                .on('activate', (e, b, d) => {
+                    if (block.key('enabled')) {
+                        if (d.hasOwnProperty('state')) {
+                            block.key('state', (d.state == 'on'));
+                            block.on('modified');
+                        } else block.child('main/circle').on('click');
+                    }
+                })
             ;
             return block;
         }
@@ -184,6 +192,12 @@
             data('label', (label) => {
                 block.child('label/text').html('').data(label);
                 block.child('label').css('display', 'inline-table');
+            });
+            data('minWidth', (w) => {
+                block.child('label').css('min-width', w);
+            });
+            data('marginRight', (r) => {
+                block.child('label').css('margin-right', r);
             });
         }
 
@@ -208,7 +222,7 @@
                             block.key('recv_semaphore', false);
                         else {
                             var state = switch_block.key('state');
-                            block.on('update', { value: state });
+                            block.on('update', { value: state, boomerang: true });
                         }
                     })
                 )
@@ -270,34 +284,35 @@
                             value: '5'
                         })
                         .on('input', (e, b, d) => {
+                            var cfd = block.key('control_flow_debug');
                             var metadata = block.key('metadata');
                             var val = (b.node().value);
                             if (metadata.type == "int")
                                 val = parseInt(val);
                             if (val === null || isNaN(val)) val = 0;
-                            if (block.key('control_flow_debug'))
-                                console.log('slider modified', val);
+                            if (cfd) console.log('slider modified', val);
                             block.child('display/text').html('').data(`${val}`);
                             var last_input_ts = block.key('last_input_ts');
                             if (last_input_ts == null || last_input_ts == undefined) last_input_ts = 0;
                             var now_ts = Date.now();
-                            if (now_ts - last_input_ts >= app.transitional_update_interval * 1000) {
+                            if (now_ts - last_input_ts >= app.ws.api.transitional_update_interval * 1000) {
                                 block.key('last_input_ts', now_ts);
                                 if (val < metadata.min) val = metadata.min;
                                 if (val > metadata.max) val = metadata.max;
+                                if (cfd) console.log(val, 'transitional');
                                 block.on('update', { value: val, transitional: true });
                             }
                             /*
                             setTimeout(((past_ts, val) => {
                                 return _ => {
                                     var new_last_input_ts = block.key('last_input_ts');
-                                    console.log('past: ', past_ts);
-                                    console.log('new_last_input_ts: ', new_last_input_ts);
+                                    if (cfd) console.log('past: ', past_ts);
+                                    if (cfd) console.log('new_last_input_ts: ', new_last_input_ts);
                                     if (new_last_input_ts == past_ts) {
                                         block.on('update', { value: val, transitional: false });
                                     }
                                 };
-                            })(now_ts, val), (app.transitional_update_interval * 1000) * 10);
+                            })(now_ts, val), (app.ws.api.transitional_update_interval * 1000) * 10);
                             */
                         })
                         .on('mouseup', (e, b, d) => {
@@ -354,6 +369,7 @@
         {
             var block = Block('block');
             return block
+                .key('forward_data', {})
                 .css({
                     width: 'auto',
                     paddingLeft: '15px',
@@ -372,9 +388,67 @@
         {
             data('metadata', metadata => {
                 block.key('metadata', metadata);
-                block.child('text').html('').data(`${metadata.initial}`);
+                block.key('options', {});
+                if (metadata.hasOwnProperty('editor-options') && metadata['editor-options']) {
+                    block.key('options', metadata['editor-options']);
+                    if (metadata['editor-options'].hasOwnProperty('capitalize') && metadata['editor-options'].capitalize)
+                        block.child('text').css('text-transform', 'capitalize');
+                }
+                block.data({
+                    val: `${metadata.initial}`
+                });
             });
             data('val', value => {
+                block.key('value', value);
+                var metadata = block.key('metadata');
+                var forward_data = block.key('forward_data');
+                if (forward_data && Object.keys(forward_data).length > 0) {
+                    for (var f in forward_data) {
+                        block.data({
+                            forward_data: {
+                                id: f,
+                                val: forward_data[f]
+                            }
+                        });
+                    }
+                } else {
+                    block.data({
+                        display: value
+                    });
+                }
+            });
+            data('display', value => {
                 block.child('text').html('').data(`${value}`);
+            });
+            data('forward_data', forward_data => {
+                //console.log(forward_data);
+                var old_forward_data = block.key('forward_data');
+                for (var f in forward_data) {
+                    old_forward_data[forward_data.id] = forward_data.val;
+                }
+                block.key('forward_data', old_forward_data);
+                var node_field_meta = block.key('metadata');
+                var f_data_capture = node_field_meta.hasOwnProperty('editor-options') && node_field_meta['editor-options'].hasOwnProperty('forward-data-capture') && node_field_meta['editor-options']['forward-data-capture'].includes(forward_data.id);
+                var f_data_index = node_field_meta['editor-options']['forward-data-capture'].indexOf(forward_data.id);
+                if (f_data_capture != false && f_data_index > -1) {
+                    if (node_field_meta['editor-options'].hasOwnProperty('forward-data-mapping') && node_field_meta['editor-options']['forward-data-mapping'].length > f_data_index) {
+                        var mappings = node_field_meta['editor-options']['forward-data-mapping'][f_data_index];
+                        for (var m in mappings) {
+                            var mapping = mappings[m];
+                            if (forward_data.val === mapping[0]) {
+                                if (mapping[1] === null) {
+                                    block.data({
+                                        display: `${block.key('value')}`
+                                    });
+                                } else {
+                                    block.data({
+                                        display: `${mapping[1]}`
+                                    });
+                                }
+                                
+                            }
+                        }
+                    }
+                }
             });
         }

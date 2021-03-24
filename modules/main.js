@@ -14,11 +14,7 @@ var err = null;
 
 
 /* MODULE */
-var init = _ => {
-    /*
-        TODO: initialize module variables and anything else needed by the application
-    */
-};
+var init = _ => { };
 var main = _ => {
     m.main.load_node_drivers();
     m.utils.delay(_ => {
@@ -30,9 +26,17 @@ var api = {
     load_node_drivers: _ => {
         fs.readdirSync(path.join(__dirname, "../nodes")).forEach(type_id => {
             if (type_id[0] != '.' && type_id[0] != '_') {
+                var module_driver_def = require(`../nodes/${type_id}/driver.js`);
+                var meta_data = JSON.parse(fs.readFileSync(`nodes/${type_id}/meta.json`, { encoding: 'utf8', flag: 'r' }));
+                if (!meta_data) meta_data = {};
+                meta_data.web = {
+                    client: fs.existsSync(`nodes/${type_id}/client.js`),
+                    views: fs.existsSync(`nodes/${type_id}/views.block`)
+                };
                 m.main.node_drivers[type_id] = {
-                    init: require(`../nodes/${type_id}/driver.js`),
-                    data: JSON.parse(fs.readFileSync(`nodes/${type_id}/data.json`, { encoding: 'utf8', flag: 'r' })),
+                    init: module_driver_def.init ? module_driver_def.init : null,
+                    api: module_driver_def.api ? module_driver_def.api : null,
+                    data: meta_data,
                     drivers: {}
                 };
             }
@@ -89,7 +93,7 @@ var api = {
         return (m.main.node_drivers.hasOwnProperty(type) && m.main.node_drivers[type] ? type : 'node');
     },
     init_node_driver: (node_id, type) => {
-        m.main.node_drivers[type].drivers[node_id] = m.main.node_drivers[type].init();
+        m.main.node_drivers[type].drivers[node_id] = m.main.node_drivers[type].init(m, log);
     },
     init_driver_values: (type) => {
         var node_data = {};
@@ -101,15 +105,19 @@ var api = {
     },
     get_init_driver_vals: (node_type, node_id) => {
         var initial_vals = {};
-        if (m.main.node_drivers[node_type].drivers.hasOwnProperty(node_id)) {
-            for (var d in m.main.node_drivers[node_type].drivers[node_id]) {
-                for (var f in m.main.node_drivers[node_type].data.data) {
-                    if (m.main.node_drivers[node_type].data.data[f].id == d) {
-                        initial_vals[d] = m.main.node_drivers[node_type].data.data[f].initial;
-                        break;
-                    }
-                }
-            }
+        // if (m.main.node_drivers[node_type].drivers.hasOwnProperty(node_id)) {
+        //     for (var d in m.main.node_drivers[node_type].drivers[node_id]) {
+        //         for (var f in m.main.node_drivers[node_type].data.data) {
+        //             if (m.main.node_drivers[node_type].data.data[f].id == d) {
+        //                 initial_vals[d] = m.main.node_drivers[node_type].data.data[f].initial;
+        //                 break;
+        //             }
+        //         }
+        //     }
+        // }
+        for (var v in m.main.node_drivers[node_type].data.data) {
+            var value_profile = m.main.node_drivers[node_type].data.data[v];
+            initial_vals[value_profile.id] = value_profile.initial;
         }
         return initial_vals;
     },
@@ -127,6 +135,13 @@ var api = {
             return true;
         }
         return false;
+    },
+    call_driver_api: (node_type, api_req, api_args, resolve) => {
+        if (m.main.node_drivers.hasOwnProperty(node_type)) {
+            if (m.main.node_drivers[node_type].hasOwnProperty('api') && m.main.node_drivers[node_type].api.hasOwnProperty(api_req)) {
+                m.main.node_drivers[node_type].api[api_req](m, log, api_args, resolve);
+            }
+        }
     }
 };
 

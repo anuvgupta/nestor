@@ -6,7 +6,7 @@
 #include <WebSocketsClient.h>
 #include <Hash.h>
 #include "node_conf.h"
-#include "node.h"
+#include "node_esp.h"
 
 // vars
 WebSocketsClient ws_api_client;
@@ -49,6 +49,7 @@ void setup() {
   ws_node_client.setReconnectInterval(5000);
   ws_node_client.enableHeartbeat(5000, 3000, 2);
   node_driver = new NodeDriver();
+  node_driver->_set_type(NODE_TYPE);
   node_driver->_init(&ws_node_client);
   node_driver->init();
   if (LOG_VERBOSE) SERIAL.printf("[ws_api_client] connecting\n");
@@ -80,6 +81,8 @@ void loop() {
           msgbuff[mb_i] = '\0';
           if (memcmp(msgbuff + mb_i - 5, "reset", 5) == 0) {
             restartESP();
+          } else {
+            node_driver->input(msgbuff);
           }
           mb_i = 0;
         } else if (c != 0 && c > 32 && c < 126) {
@@ -130,6 +133,7 @@ void wsAPIClientEventHandler(WStype_t type, uint8_t * payload, size_t len) {
         payload[dash] = '\0';
         strcpy(core_ip, ((const char * )(payload + 6)));
         strcpy(node_id, ((const char * )(payload + dash + 1)));
+        node_driver->_set_id(node_id);
         if (LOG_VERBOSE) SERIAL.printf("[ws_api_client] core ip received: %s\n", core_ip);
         if (LOG_VERBOSE) SERIAL.printf("[ws_api_client] node id received: %s\n", node_id);
         ws_api_client.disconnect();
@@ -167,15 +171,32 @@ void wsNodeClientEventHandler(WStype_t type, uint8_t * payload, size_t len) {
       if (memcmp(payload, "@hb", 3) == 0) {
         if (LOG_VERBOSE && LOG_HB) SERIAL.printf("[ws_node_client] heartbeat\n");
         ws_node_client.sendTXT("@hb");
-      } else if (memcmp(payload, "@data", 5) == 0) {
-        int dash = findDash(payload, len, 6);
-        payload[dash] = '\0';
+      } else if (memcmp(payload, "@ready", 6) == 0) {
+        if (LOG_VERBOSE) SERIAL.printf("[ws_node_client] ready\n");
+        node_driver->ready();
+      } else if (memcmp(payload, "@data", 5) == 0) { // "@data-color-true-ffffff|ffffff"
+        int dash1 = findDash(payload, len - 6, 6);
+        int dash2 = findDash(payload, len - (dash1 + 1), dash1 + 1);
+        payload[dash1] = '\0';
+        payload[dash2] = '\0';
         char field_id[25];
         char field_val[200];
+        char field_transitional[6];
         strcpy(field_id, ((const char * )(payload + 6)));
-        strcpy(field_val, ((const char * )(payload + dash + 1)));
-        if (LOG_VERBOSE) SERIAL.printf("[ws_node_client] data received: %s %s\n", field_id, field_val);
-        node_driver->data(field_id, field_val);
+        strcpy(field_transitional, ((const char * )(payload + dash1 + 1)));
+        strcpy(field_val, ((const char * )(payload + dash2 + 1)));
+        if (LOG_VERBOSE) SERIAL.printf("[ws_node_client] data received: %s %s %s\n", field_id, field_val, field_transitional);
+        node_driver->data(field_id, field_val, (memcmp(field_transitional, "true", 4) == 0));
+      } else if (memcmp(payload, "@udata", 6) == 0) { // "@udata-pattern-00100ff3de600500,01034fdeac00020,00100ff3de600500"
+        int dash1 = findDash(payload, len - 7, 7);
+        payload[dash1] = '\0';
+        char data_id[25];
+        char data_val[500];
+        strcpy(data_id, ((const char * )(payload + 7)));
+        strcpy(data_val, ((const char * )(payload + dash1 + 1)));
+        //field_transitional
+        if (LOG_VERBOSE) SERIAL.printf("[ws_node_client] user data received: %s %s\n", data_id, data_val);
+        node_driver->user_data(data_id, data_val);
       }
       break;
     case WStype_BIN:

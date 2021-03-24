@@ -1,8 +1,8 @@
-/* nestor node device client driver (node) */
+/* nestor node device driver (node) */
 
 // libraries
 #include <Arduino.h>
-#include "node.h"
+#include "node_esp.h"
 
 // node device type
 #define NODE_TYPE "node"
@@ -15,14 +15,32 @@ void NodeDriver::init()
   SERIAL.println("[driver] initializing");
 }
 
-// driver loop
+// driver network ready
+void NodeDriver::ready()
+{
+  SERIAL.println("[driver] ready");
+}
+
+// driver serial input
+void NodeDriver::input(char *value)
+{
+  SERIAL.printf("[driver] serial input %s\n", value);
+}
+
+// driver main loop
 void NodeDriver::loop()
 {
-  // loop
+  // main loop
 }
 
 // driver data handler
 void NodeDriver::data(char *id, char *value)
 {
-  SERIAL.printf("[driver] message: %s %s\n", id, value);
+  SERIAL.printf("[driver] data update: %s = %s\n", id, value);
+}
+
+// driver user data handler
+void NodeDriver::user_data(char *id, char *value)
+{
+  SERIAL.printf("[driver] user data update: %s = %s\n", id, value);
 }

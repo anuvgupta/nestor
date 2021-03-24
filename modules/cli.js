@@ -19,8 +19,10 @@ var input = readline.createInterface({
 });
 var init = _ => {
     input.on('line', (line) => {
+        var line_text = '';
         line = line.trim();
         if (line != '') {
+            line_text = line;
             line = line.split(' ');
             if (line[0] == "db") {
                 if (line.length > 1 && line[1] == "table") {
@@ -47,6 +49,27 @@ var init = _ => {
                         func.apply(null, args);
                     }
                 }
+            } else if (line[0] == "test") {
+                log('running tests');
+                var user_id = "5f1f9ae70a9a9b9d6e853d9d";
+                var data_key = "key1";
+                var data_action = "list_update";
+                var data_value = {
+                    k3: "652347dkjhfkdfdkjfdjshfkjs"
+                };
+                var data_query = {
+                    k1: "dkjhfkjshfkjs"
+                };
+                var options = { replace: false };
+                m.db.update_user_data(user_id, data_key, data_action, data_value, data_query, options, success => {
+                    console.log(`updated user data: ${success}`);
+                });
+            } else if (line[0] == "code") {
+                if (line.length > 1 && line[1] != "") {
+                    line_text = line_text.substring(4);
+                    var ret = eval(line_text);
+                    if (ret !== undefined) log(ret);
+                }
             } else if (line[0] == "clear") {
                 console.clear();
             } else if (line[0] == "exit" || line[0] == "quit") {
@@ -56,10 +79,7 @@ var init = _ => {
     });
 };
 var api = {
-    /*
-        TODO: create functions that allow other modules to interact with this one when necessary
-        (functions should take simple parameters, execute requested command-line operations/interactions, handle errors, and provide result data)
-    */
+
 };
 
 

@@ -43,9 +43,7 @@ app
         }
     #node_profiles
         {
-            for (var np in node_profiles) {
-                app.ws.api.node_profiles[np] = node_profiles[np];
-            }
+            app.main.update_node_profiles(node_profiles);
         }
     #core_list
         {
@@ -197,6 +195,32 @@ app
         {
             if (node_data && node_data.core_id == block.child('main/core').key('id') && node_data.id == block.child('main/node').key('id')) {
                 block.child('main/node').data({ node_data: node_data });
+            }
+        }
+    #user_data
+        {
+            data_handlers = app.ws.api.user_data_handlers;
+            if (user_data.hasOwnProperty('key') && user_data.hasOwnProperty('value')) {
+
+                if (data_handlers.hasOwnProperty(user_data.key))
+                    data_handlers[user_data.key](user_data.value);
+
+                var node_b = block.child('main/node');
+                var node_info = node_b.key('node_info');
+                if (node_info) {
+                    var node_profile = app.ws.api.node_profiles[node_info.type];
+                    for (var i in node_profile.data) {
+                        if (node_profile.data[i].hasOwnProperty('editor-options') && node_profile.data[i]['editor-options'].hasOwnProperty('user-data-capture') && node_profile.data[i]['editor-options']['user-data-capture'].includes(user_data.key)) {
+                            var field_id = node_profile.data[i].id;
+                            var u_d = {};
+                            u_d[user_data.key] = user_data.value;
+                            node_b.child(`menu/${field_id}`).data({
+                                user_data: u_d
+                            });
+                        }
+                    }
+                }
+
             }
         }
     block login
@@ -359,6 +383,13 @@ app
             borderLeft 1px solid #f2f2f2
             borderRight 1px solid #f2f2f2
             box-sizing border-box
+        @query window height != 0
+            {
+                if (util.mobile()) {
+                    block.css('border-left', 'none');
+                    block.css('border-right', 'none');
+                }
+            }
         div header
             css
                 position absolute
@@ -641,9 +672,10 @@ app
                 }
             :hide
                 {
+                    //alert('Close Menu');
                     block.css('opacity', '0');
                     setTimeout(_ => {
-                        if (data.concurrent) data.concurrent();
+                        if (data && data.concurrent) data.concurrent();
                     }, 1);
                     setTimeout(_ => {
                         block.css('display', 'none');
@@ -740,15 +772,25 @@ app
                         position absolute
                         top 0
                         left 0
-                    div div
+                    button div
                         css
-                            height 40px
-                            width 112px
+                            height 45px
+                            width 125px
                             margin-left 16px
                             background-color rgba(20, 20, 20, 0)
                             border-radius 5px
                             cursor pointer
                             transition background-color 0.2s ease
+                            position relative
+                            z-index 200
+                            border none
+                            outline none
+                        @query window height != 0
+                            {
+                                if (util.mobile()) {
+                                    block.css('width', '138px');
+                                }
+                            }
                         :mouseover
                             css
                                 background-color rgba(20, 20, 20, 0.05)
@@ -761,6 +803,7 @@ app
                                 bb.parent(2).on('hide', { next: _ => {
                                     bb.parent(2).sibling('cores').on('show');
                                 } });
+                                event.stopPropagation();
                             }
                         image img
                             src img/right_b.png
@@ -778,9 +821,14 @@ app
                                 font-size 24px
                                 display block
                                 float left
-                                margin-top 3.5px
+                                margin-top 4.7px
                                 opacity 0.8
                                 cursor pointer
+                            @query window height != 0
+                                {
+                                    if (util.mobile())
+                                        block.css('margin-top', '3.25px');
+                                }
                 block status
                     css
                         width 64px
@@ -1010,7 +1058,7 @@ app
                                         width: '89.5%',
                                         height: '92%',
                                         margin: '0 auto',
-                                        backgroundColor: '#fbfbfb',
+                                        backgroundColor: '#ffffff',
                                         border: '1px solid #f0f0f0',
                                         boxSizing: 'border-box',
                                         borderRadius: '7px',
@@ -1022,13 +1070,13 @@ app
                                     .on('mouseover', (e, b, d) => {
                                         b.css({
                                             boxShadow: 'rgba(50, 50, 50, 0.09) 0px 2.5px 5px',
-                                            backgroundColor: '#fff'
+                                            backgroundColor: '#fbfbfb'
                                         });
                                     })
                                     .on('mouseout', (e, b, d) => {
                                         b.css({
                                             boxShadow: 'rgba(50, 50, 50, 0.04) 0px 2px 4px',
-                                            backgroundColor: '#fbfbfb'
+                                            backgroundColor: '#ffffff'
                                         });
                                     })
                                     .add(Block('div', 'img')
@@ -1152,8 +1200,8 @@ app
                                 block.child('content/title/text').html('').data(title);
                             });
                             data('type', type => {
-                                block.child('content/img').data({ load: 'img/' + app.ws.api.node_profiles[type].meta.img + '.png' });
-                                block.child('content/status/labels/type/text').html('').data(app.ws.api.node_profiles[type].meta.label);
+                                block.child('content/img').data({ load: 'img/' + app.ws.api.node_profiles[type].node.img + '.png' });
+                                block.child('content/status/labels/type/text').html('').data(app.ws.api.node_profiles[type].node.label);
                             });
                             data('status', status => {
                                 block.key('status', status);
@@ -1200,6 +1248,7 @@ app
                     id core
         div node
             {
+                block.key('node_data', null);
                 block.css('transition', `opacity ${app.ui.transition_fade_duration}s`);
             }
             :show
@@ -1216,9 +1265,10 @@ app
                 }
             :hide
                 {
+                    //alert('Close Menu');
                     block.css('opacity', '0');
                     setTimeout(_ => {
-                        if (data.concurrent) data.concurrent();
+                        if (data && data.concurrent) data.concurrent();
                     }, 1);
                     setTimeout(_ => {
                         block.css('display', 'none');
@@ -1244,24 +1294,31 @@ app
                         if (id) app.ws.api.get_core_info(id, false);
                     } else {
                         app.ws.api.get_node_info(id);
-                        app.ws.api.get_node_data(id);
+                        setTimeout(_ => {
+                            app.ws.api.get_node_data(id);
+                        }, 150);
                     }
                 }
             #menu_type
                 {
                     if (app.ws.api.node_profiles.hasOwnProperty(menu_type) && app.ws.api.node_profiles[menu_type]) {
                         var menu_profile = app.ws.api.node_profiles[menu_type];
-                        block.child('menu/status/labels/type/text').html('').data(menu_profile.meta.label);
-                        block.child('menu/status/image/img').data({ src: `img/${menu_profile.meta.img}.png` });
+                        block.child('menu/status/labels/type/text').html('').data(menu_profile.node.label);
+                        block.child('menu/status/image/img').data({ src: `img/${menu_profile.node.img}.png` });
                         var old_children = block.child('menu').children();
                         for (var c in old_children) {
-                            if (c != "status") block.child('menu').remove(c);
+                            if (c != "status" && c != "submenu")
+                                block.child('menu').remove(c);
                         }
                         for (var i in menu_profile.data) {
                             var data_field = menu_profile.data[i];
-                            block.child('menu').add(Block('node-menu-item', data_field.id)
-                                .data({ metadata: data_field })
-                            );
+                            if (data_field.hasOwnProperty('editor') && data_field.editor) {
+                                if (data_field.editor != 'null') {
+                                    block.child('menu').add(Block('node-menu-item', data_field.id)
+                                        .data({ metadata: data_field })
+                                    );
+                                }
+                            }
                             if (data_field.hasOwnProperty('header') && data_field.header) {
                                 block.child('menu').add(Block('node-menu-header', `${data_field.id}-header`)
                                     .data({ val: data_field.header })
@@ -1273,10 +1330,16 @@ app
                     }
                     if (menu_type == "core") {
                         var core_info = app.ui.block.child('main/core').key('core_info');
-                        if (core_info) {
-                            block.child('menu/code').data({ val: core_info.code });
-                        }
+                        if (core_info) app.ui.load_core_menu(block, core_info);
                     }
+                    setTimeout(_ => {
+                        var node_data = block.key('node_data');
+                        if (node_data && node_data != null && node_data.id == block.key('id')) {
+                            block.data({
+                                node_data: node_data
+                            });
+                        }
+                    }, 5);
                     setTimeout(_ => {
                         Block.queries();
                     }, 10);
@@ -1310,13 +1373,63 @@ app
                 }
             #node_data
                 {
-                    for (var d in node_data.data) {
-                        var child_block = block.child(`menu/${d}`);
-                        if (child_block != null) {
-                            child_block.data({
-                                val: node_data.data[d]
-                            });
+                    //block.key('node_data', node_data);
+                    //console.log(node_data);
+                    if (node_data && node_data.data && node_data.id && node_data.core_id) {
+                        var old_data = block.key('node_data');
+                        if (old_data === null) {
+                            block.key('node_data', {});
+                            old_data = block.key('node_data');
                         }
+                        old_data.id = node_data.id;
+                        old_data.core_id = node_data.core_id;
+                        block.key('node_data', old_data);
+                        block.data({
+                            local_update_node_data: node_data.data
+                        });
+                    }
+                    var node_info = block.key('node_info');
+                    if (node_info != null)  {
+                        for (var d in node_data.data) {
+                            var field_meta = app.ws.api.get_node_field_meta(node_info.type, d);
+                            var child_block = block.child(`menu/${d}`);
+                            if (child_block != null) {
+                                child_block.data({
+                                    val: node_data.data[d]
+                                });
+                            }
+                            if (field_meta) {
+                                if (field_meta.hasOwnProperty('forwarding') && field_meta.forwarding != null) {
+                                    for (var f in field_meta.forwarding) {
+                                        // console.log(field_meta.forwarding[f]);
+                                        var forwarding_id = field_meta.forwarding[f];
+                                        var forwarding_block = block.child(`menu/${forwarding_id}`);
+                                        if (forwarding_block != null) {
+                                            forwarding_block.data({
+                                                forward_data: {
+                                                    id: d,
+                                                    val: node_data.data[d]
+                                                }
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            #local_update_node_data
+                {
+                    var data_updates = local_update_node_data;
+                    var node_data = block.key('node_data');
+                    if (data_updates && node_data) {
+                        // console.log(node_data, data_updates);
+                        if (!node_data.hasOwnProperty('data') || !(node_data.data))
+                            node_data.data = {};
+                        for (var d in data_updates) {
+                            node_data.data[d] = data_updates[d];
+                        }
+                        block.key('node_data', node_data);
                     }
                 }
             div bar
@@ -1394,15 +1507,25 @@ app
                         position absolute
                         top 0
                         left 0
-                    div div
+                    button div
                         css
-                            height 40px
-                            width 119px
+                            height 45px
+                            width 132px
                             margin-left 16px
                             background-color rgba(20, 20, 20, 0)
                             border-radius 5px
                             cursor pointer
                             transition background-color 0.2s ease
+                            position relative
+                            z-index 200
+                            border none
+                            outline none
+                        @query window height != 0
+                            {
+                                if (util.mobile()) {
+                                    block.css('width', '143px');
+                                }
+                            }
                         :mouseover
                             css
                                 background-color rgba(20, 20, 20, 0.05)
@@ -1415,6 +1538,14 @@ app
                                 bb.parent(2).on('hide', { next: _ => {
                                     bb.parent(2).sibling('core').on('show');
                                 } });
+                                var submenu = bb.parent(2).child('menu/submenu');
+                                //var menu_ret = submenu.key('menu_return');
+                                //if (menu_ret && menu_ret != 'null')
+                                    submenu.key('menu_return', 'null');
+                                setTimeout(_ => {
+                                    submenu.child('bar/exit').on('click');
+                                }, 100);
+                                event.stopPropagation();
                             }
                         image img
                             src img/right_b.png
@@ -1432,9 +1563,14 @@ app
                                 font-size 24px
                                 display block
                                 float left
-                                margin-top 3.5px
+                                margin-top 4.7px
                                 opacity 0.8
                                 cursor pointer
+                            @query window height != 0
+                                {
+                                    if (util.mobile())
+                                        block.css('margin-top', '3.25px');
+                                }
                 block edit
                     css
                         width 64px
@@ -1531,6 +1667,19 @@ app
                                     block.css('width', new_width);
                                 })
                             )
+                            .on('local-update', (e, b, d) => {
+                                if (d && d.value !== null) {
+                                    var value = d.value;
+                                    var field_id = block.key('id');
+                                    if (field_id) {
+                                        var local_update = {};
+                                        local_update[field_id] = value;
+                                        app.ui.block.child('main/node').data({
+                                            local_update_node_data: local_update
+                                        });
+                                    }
+                                }
+                            })
                         ;
                     }
                 load
@@ -1538,6 +1687,7 @@ app
                         data('metadata', metadata => {
                             block.key('id', metadata.id);
                             block.key('value', metadata.initial);
+                            block.key('value-alt', {});
                             block.key('metadata', metadata);
                             block.child('icon/image').data({ src: `img/${metadata.img}.png` });
                             if (metadata.hasOwnProperty('label') && metadata.label)
@@ -1549,8 +1699,29 @@ app
                                     //if (data.hasOwnProperty('value') && data.value != block.key('value')) {
                                     if (data.hasOwnProperty('value')) {
                                         block.key('value', data.value);
-                                        app.ws.api.update_node_data(app.ui.block.child('main/node').key('id'), metadata.id, data.value,
-                                            data.hasOwnProperty('transitional') && data.transitional === true);
+                                        // console.log('update: ', data.value);
+                                        block.on('local-update', {
+                                            value: data.value
+                                        });
+                                        if (!data.hasOwnProperty('update_node_data') || data.update_node_data == false) {
+                                            app.ws.api.update_node_data(app.ui.block.child('main/node').key('id'), metadata.id, data.value,
+                                                data.hasOwnProperty('transitional') && data.transitional === true,
+                                                data.hasOwnProperty('boomerang') && data.boomerang === true);
+                                        }
+                                    }
+                                })
+                                .on('update-alt', (event, editor_block, data) => {
+                                    if (data.hasOwnProperty('value') && data.hasOwnProperty('id')) {
+                                        var alt_val_keys = block.key('value-alt');
+                                        if (alt_val_keys) {
+                                            alt_val_keys[data.id] = data.value;
+                                            block.key('value-alt', alt_val_keys);
+                                            if (!data.hasOwnProperty('update_node_data') || data.update_node_data == false) {
+                                                app.ws.api.update_node_data(app.ui.block.child('main/node').key('id'), data.id, data.value,
+                                                    data.hasOwnProperty('transitional') && data.transitional === true, 
+                                                    data.hasOwnProperty('boomerang') && data.boomerang === true);
+                                            }
+                                        }
                                     }
                                 })
                             );
@@ -1558,6 +1729,23 @@ app
                         data('val', value => {
                             block.key('value', value);
                             block.child('editor/view').data({ val: value });
+                            // console.log(block.key('id'), value);
+                            block.on('local-update', {
+                                value: value
+                            });
+                        });
+                        data('forward_data', forward_data => {
+                            block.key('forward_data', forward_data);
+                            var node_field_meta = block.key('metadata');
+                            var f_data_capture = node_field_meta.hasOwnProperty('editor-options') && node_field_meta['editor-options'].hasOwnProperty('forward-data-capture') && node_field_meta['editor-options']['forward-data-capture'].includes(forward_data.id);
+                            if (f_data_capture)
+                                block.child('editor/view').data({ forward_data: forward_data });
+                            // console.log(block.mark(), forward_data);
+                        });
+                        data('user_data', user_data => {
+                            block.child('editor/view').data({
+                                user_data: user_data
+                            });
                         });
                     }
             !node-menu-header
@@ -1598,6 +1786,135 @@ app
                     width 100%
                     height 100%
                     position relative
+                    z-index 1
+                    overflow-y auto
+                    overflow-x hidden
+                    padding-bottom 70px
+                div submenu
+                    css
+                        width 100%
+                        height 100%
+                        background-color white
+                        position absolute
+                        top 0
+                        left 0
+                        padding-top 80px
+                        z-index 10
+                        box-sizing border-box
+                        display none
+                        opacity 0
+                        //transition opacity 0.2s ease
+                    :show
+                        {
+                            block.key('parent_scrolltop', block.parent().$().scrollTop())
+                            block.parent().$().scrollTop(0);
+                            block.css('display', 'block');
+                            //setTimeout(_ => {
+                                block.parent().css('overflow-y', 'hidden');
+                                block.css('opacity', '1');
+                            //}, 10);
+                            event.stopPropagation();
+                        }
+                    :hide
+                        {
+                            block.parent().css('overflow-y', 'auto');
+                            var parent_scrolltop = block.key('parent_scrolltop');
+                            if (parent_scrolltop !== null) {
+                                block.parent().$().scrollTop(parent_scrolltop);
+                            }
+                            //setTimeout(_ => {
+                                block.css('opacity', '0');
+                                //setTimeout(_ => {
+                                    block.css('display', 'none');
+                                //}, 200);
+                            //}, 10);
+                            event.stopPropagation();
+                        }
+                    :hide_children
+                        {
+                            var children = block.child('content-wrap/content').children();
+                            for (var c in children) {
+                                children[c].css('display', 'none');
+                            }
+                        }
+                    div bar
+                        css
+                            position absolute
+                            top 80px
+                            left 0
+                            width 100%
+                            height 65px
+                            z-index 12
+                            border-bottom 1px solid #f0f0f0
+                        block exit
+                            css
+                                position absolute
+                                top 0
+                                left 25px
+                                width 50px
+                                cursor pointer
+                                opacity 0.65
+                                padding-top 3px
+                                box-sizing border-box
+                                transition opacity 0.15s ease
+                                z-index 14
+                            :mouseover
+                                css
+                                    opacity 0.8
+                            :mouseout
+                                css
+                                    opacity 0.65
+                            :click
+                                {
+                                    var submenu = app.ui.block.child('main/node/menu/submenu');
+
+                                    app.ui.submenu_pre_exit(event, block, data);
+
+                                    var menu_return = submenu.key('menu_return');
+                                    if (menu_return && menu_return != 'null' && menu_return.from && menu_return.to && submenu.child(`content-wrap/content/${menu_return.from}`).css('display') != 'none') {
+                                        var to_path = `content-wrap/content/${menu_return.to}`;
+                                        submenu.child('bar/title/text').html('').data(`${submenu.child(to_path).key('submenu_title')}`);
+                                        submenu.on('hide_children');
+                                        submenu.child(to_path).css('display', 'block');
+                                        submenu.key('menu_return', 'null');
+                                    } else {
+
+                                        app.ui.submenu_exit(event, block, data);
+
+                                        // hide submenu
+                                        block.parent(1).on('hide');
+                                    }
+                                    event.stopPropagation();
+                                }
+                            image img
+                                height 44px
+                                width 44px
+                                src img/x_b.png
+                        block title
+                            css
+                                position absolute
+                                top 0
+                                left 0
+                                z-index 13
+                            text text
+                                val Submenu Title
+                                css
+                                    font-size 23px
+                    div content-wrap
+                        css
+                            position absolute
+                            top 0
+                            left 0
+                            height 100%
+                            width 100%
+                            z-index 11
+                            box-sizing border-box
+                            padding-top 145px
+                        div content
+                            css
+                                position relative
+                                height 100%
+                                width 100%
                 div status
                     css
                         width 100%
@@ -1693,7 +2010,7 @@ app
                             right 45px
                         block button
                             css
-                                background-color #e4e4e4
+                                background-color #dcdcdc
                                 width 100%
                                 height 44%
                                 color white
@@ -1713,8 +2030,7 @@ app
                                     margin 0 auto
                             :mouseout
                                 css
-                                    //background-color #dedede
-                                    background-color #e4e4e4
+                                    background-color #dcdcdc
                             :mouseover
                                 css
                                     background-color rgba(190, 49, 41, 0.9)

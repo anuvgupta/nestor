@@ -1,18 +1,23 @@
-/* nestor node device server driver (simple-led) */
+/* nestor node server driver (simple-led) */
 
-module.exports = _ => {
-    return {
-        switch1: (node, client, value, transitional, next) => {
-            next();
-        },
-        switch2: (node, client, value, transitional, next) => {
-            next();
-        },
-        brightness1: (node, client, value, transitional, next) => {
-            next();
-        },
-        brightness2: (node, client, value, transitional, next) => {
-            next();
-        }
-    };
+const node_type = "simple-led";
+
+module.exports = {
+    init: (m, log) => {
+        return {
+            switch1: (node, client, value, transitional, next) => {
+                next();
+            },
+            switch2: (node, client, value, transitional, next) => {
+                next();
+            },
+            brightness1: (node, client, value, transitional, next) => {
+                next();
+            },
+            brightness2: (node, client, value, transitional, next) => {
+                next();
+            }
+        };
+    },
+    api: {}
 };

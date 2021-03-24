@@ -28,12 +28,25 @@ var init = _ => {
             });
         }
     });
+    express_api.get("/nodes/:node_type/client.js", (req, res) => {
+        var node_type = req.params.node_type;
+        if (m.main.node_drivers.hasOwnProperty(node_type) && m.main.node_drivers[node_type].data && m.main.node_drivers[node_type].data.hasOwnProperty('web') && m.main.node_drivers[node_type].data.web.hasOwnProperty('client')) {
+            if (m.main.node_drivers[node_type].data.web.client === true) {
+                res.sendFile(`${m.utils.remove_last_dir(__dirname)}/nodes/${node_type}/client.js`);
+            }
+        }
+    });
+    express_api.get("/nodes/:node_type/views.block", (req, res) => {
+        var node_type = req.params.node_type;
+        if (m.main.node_drivers.hasOwnProperty(node_type) && m.main.node_drivers[node_type].data && m.main.node_drivers[node_type].data.hasOwnProperty('web') && m.main.node_drivers[node_type].data.web.hasOwnProperty('views')) {
+            if (m.main.node_drivers[node_type].data.web.views === true) {
+                res.sendFile(`${m.utils.remove_last_dir(__dirname)}/nodes/${node_type}/views.block`);
+            }
+        }
+    });
 };
 var api = {
-    /*
-        TODO: create functions that allow other modules to interact with this one when necessary
-        (functions should take simple parameters, execute the requested web operations/interactions, handle errors, and provide result data)
-    */
+
 };
 
 

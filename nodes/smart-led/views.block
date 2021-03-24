@@ -1,0 +1,2891 @@
+    *
+
+// nestor node web client views (smart-led)
+
+!color-picker-e
+    init
+        {
+            var block = Block('block');
+            var load_color_submenu = (submenu, section) => {
+                // console.log(submenu, section);
+                var presets_b = submenu.child('content-wrap/content/colors/presets');
+                var picker = submenu.child('content-wrap/content/colors/picker/rect').node().jscolor;
+                var section_alt = section == 'left' ? 'right' : 'left';
+                var section_cap = util.capitalize(section);
+                var section_alt_cap = util.capitalize(section_alt);
+                var switch_target = submenu.child(`content-wrap/content/colors/picker/sync/track${section_cap}/switch`);
+                var switch_alt_target = submenu.child(`content-wrap/content/colors/picker/sync/track${section_alt_cap}/switch`);
+                switch_target.on('activate', { state: 'on' });
+                switch_alt_target.on('activate', { state: 'off' });
+                var color_split = (block.key('value')).split(app.ui.color_picker.split_char);
+                // console.log(section == 'left' ? color_split[0] : color_split[1]);
+                picker.fromString(section == 'left' ? color_split[0] : color_split[1]);
+                app.ui.color_picker.submenu_data_editor_block = block;
+                app.ui.color_picker.jscolor_update(picker, false, true);
+                presets_b.on('deselect_all');
+                app.ui.color_picker.load_presets();
+                submenu.on('hide_children');
+                submenu.child('bar/title/text').html('').data(`${block.key('submenu_title')}`);
+                submenu.child('content-wrap/content/colors').css('display', 'block');
+                submenu.on('show');
+            };
+            return block
+                .key('submenu_title', 'Hue Editor')
+                .css({
+                    width: '100%',
+                    paddingLeft: '25px',
+                    boxSizing: 'border-box',
+                    paddingBottom: '2px',
+                    position: 'relative'
+                })
+                .add(Block('block', 'color')
+                    .css({
+                        width: '50%',
+                        maxWidth: '500px',
+                        float: 'left',
+                        marginLeft: '0.5px'
+                    })
+                    .add(Block('div', 'views')
+                        .css({
+                            width: '100%',
+                            height: '50%'
+                        })
+                        .add(Block('div', 'viewL')
+                            .css({
+                                width: '50%',
+                                height: '100%',
+                                borderRadius: '6px 0 0 6px',
+                                border: '1px solid #eee',
+                                marginTop: '2px',
+                                float: 'left',
+                                boxSizing: 'border-box',
+                                backgroundColor: '#ffffff'
+                            })
+                            .add(Block('block', 'edit')
+                                .css({
+                                    cursor: 'pointer'
+                                })
+                                .add(Block('image', 1)
+                                    .data({
+                                        width: '30px',
+                                        height: '30px',
+                                        src: 'img/pencil_b.png'
+                                    })
+                                    .css({
+                                        margin: '0 auto',
+                                        opacity: '0',
+                                        transition: '0.15s ease opacity',
+                                        cursor: 'pointer'
+                                    })
+                                )
+                                .on('mouseover', (e, b, d) => {
+                                    b.child('image').css('opacity', '0.6');
+                                })
+                                .on('mouseout', (e, b, d) => {
+                                    b.child('image').css('opacity', '0');
+                                })
+                                .on('click', (e, b, d) => {
+                                    var submenu = block.parent(1).sibling('submenu');
+                                    if (submenu) load_color_submenu(submenu, 'left');
+                                })
+                            )
+                        )
+                        .add(Block('div', 'viewR')
+                            .css({
+                                width: '50%',
+                                height: '100%',
+                                borderRadius: '0 6px 6px 0',
+                                border: '1px solid #eee',
+                                marginTop: '2px',
+                                float: 'left',
+                                boxSizing: 'border-box',
+                                borderLeft: 'none',
+                                backgroundColor: '#ffffff'
+                            })
+                            .add(Block('block', 'edit')
+                                .css({
+                                    cursor: 'pointer'
+                                })
+                                .add(Block('image', 1)
+                                    .data({
+                                        width: '30px',
+                                        height: '30px',
+                                        src: 'img/pencil_b.png'
+                                    })
+                                    .css({
+                                        margin: '0 auto',
+                                        opacity: '0',
+                                        transition: '0.15s ease opacity',
+                                        cursor: 'pointer'
+                                    })
+                                )
+                                .on('mouseover', (e, b, d) => {
+                                    b.child('image').css('opacity', '0.6');
+                                })
+                                .on('mouseout', (e, b, d) => {
+                                    b.child('image').css('opacity', '0');
+                                })
+                                .on('click', (e, b, d) => {
+                                    var submenu = block.parent(1).sibling('submenu');
+                                    if (submenu) load_color_submenu(submenu, 'right');
+                                })
+                            )
+                        )
+                    )
+                )
+                .add(Block('block', 'play')
+                    .css({
+                        height: '100%',
+                        width: '100px',
+                        position: 'absolute',
+                        top: '0',
+                        right: '2px',
+                        display: 'none'
+                    })
+                    .add(Block('image', 1)
+                        .data({
+                            width: '35px',
+                            height: '35px',
+                            src: 'img/play_b.png'
+                        })
+                        .css({
+                            margin: '0 auto',
+                            opacity: '0.5',
+                            transition: '0.15s ease opacity',
+                            cursor: 'pointer'
+                        })
+                        .on('mouseover', (e, b, d) => {
+                            b.css('opacity', '0.6');
+                        })
+                        .on('mouseout', (e, b, d) => {
+                            b.css('opacity', '0.5');
+                        })
+                        
+                    )
+                    .on('hide', (e, b, d) => {
+                        b.css('display', 'none');
+                        e.stopPropagation();
+                    })
+                    .on('show', (e, b, d) => {
+                        b.css('display', 'table');
+                        e.stopPropagation();
+                    })
+                    .on('click', (e, b, d) => {
+                        block.on('update-alt', {
+                            id: block.key('button-target'),
+                            value: block.key('button-value'),
+                            boomerang: true
+                        });
+                        e.stopPropagation();
+                    })
+                )
+            ;
+        }
+    load
+        {
+            data('metadata', metadata => {
+                block.key('metadata', metadata);
+                block.key('options', {});
+                if (metadata.hasOwnProperty('editor-options') && metadata['editor-options']) {
+                    block.key('options', metadata['editor-options']);
+                    if (metadata['editor-options'].hasOwnProperty('button-display') && metadata['editor-options']['button-display'] === true) {
+                        block.key('button-display', true);
+                        block.key('button-target', metadata['editor-options']['button-target']);
+                        block.key('button-value', metadata['editor-options']['button-value']);
+                    }
+                }
+                block.data({
+                    val: metadata.initial
+                });
+            });
+            data('val', value => {
+                block.key('value', value);
+                var color_split = value.split(app.ui.color_picker.split_char);
+                block.child('color/views/viewL').css('background-color', `#${color_split[0]}`);
+                block.child('color/views/viewR').css('background-color', `#${color_split[1]}`);
+            });
+            data('forward_data', forward_data => {
+                if (block.key('button-display') === true) {
+                    if (forward_data && forward_data.hasOwnProperty('id') && forward_data.hasOwnProperty('val')) {
+                        var node_field_meta = block.key('metadata');
+                        var f_data_capture = node_field_meta.hasOwnProperty('editor-options') && node_field_meta['editor-options'].hasOwnProperty('forward-data-capture') && node_field_meta['editor-options']['forward-data-capture'].includes(block.key('button-target'));
+                        if (forward_data.id == block.key('button-target') && f_data_capture) {
+                            if (forward_data.val === block.key('button-value')) {
+                                block.child('play').on('hide');
+                            } else {
+                                block.child('play').on('show');
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+!pattern-picker-e
+    init
+        {
+            var load_pattern_submenu = (submenu) => {
+                /*
+                var presets_b = submenu.child('content-wrap/content/colors/presets');
+                var picker = submenu.child('content-wrap/content/colors/picker/rect').node().jscolor;
+                var color_split = (block.key('value')).split(app.ui.color_picker.split_char);
+                // console.log(section == 'left' ? color_split[0] : color_split[1]);
+                picker.fromString(section == 'left' ? color_split[0] : color_split[1]);
+                app.ui.color_picker.jscolor_update(picker, false, true);
+                presets_b.on('deselect_all');
+                app.ui.color_picker.load_presets();
+                */
+                app.ui.pattern_picker.submenu_data_editor_block = block;
+                submenu.on('hide_children');
+                submenu.child('bar/title/text').html('').data(`${block.key('submenu_title')}`);
+                submenu.child('content-wrap/content/patterns').on('load_current').css('display', 'block');
+                submenu.on('show');
+            };
+            var block = Block('div');
+            block
+                .key('submenu_title', 'Pattern Editor')
+                .key('load_pattern_submenu_func', load_pattern_submenu)
+                .css({
+                    width: '100%',
+                    height: '100%',
+                    //paddingLeft: '25px',
+                    boxSizing: 'border-box',
+                    //paddingBottom: '2px',
+                    position: 'relative'
+                })
+                .add(Block('block', 'dropdown')
+                    .css({
+                        width: '280px',
+                        paddingLeft: '15px',
+                        boxSizing: 'border-box',
+                        float: 'left'
+                    })
+                    .add(Block('select', 1)
+                        .css({
+                            width: '100%',
+                            height: '40px',
+                            paddingLeft: '8px',
+                            boxSizing: 'border-box',
+                            outline: 'none',
+                            fontSize: '16px',
+                            opacity: '0.75',
+                            cursor: 'pointer'
+                        })
+                        .on('input', (e, b, d) => {
+                            var value = b.$().val();
+                            if (value && value.trim() != '') {
+                                block.key('value', value);
+                                var node_id = app.ui.block.child('main/node').key('id');
+                                if (node_id && node_id.trim() != '')
+                                    app.ui.pattern_picker.update_node_pattern(node_id, value, block);
+                                app.ui.pattern_picker.set_local_current(value);
+                                if (value == 'null') {
+                                    block.child('edit').on('disable');
+                                } else {
+                                    block.child('edit').on('enable');
+                                }
+                            }
+                        })
+                        .add(Block('option', 'none')
+                            .attribute('value', 'null')
+                            .html('None')
+                        )
+                    )
+                )
+                .add(Block('block', 'edit')
+                    .css({
+                        width: '45px',
+                        float: 'left',
+                        marginLeft: '15px'
+                    })
+                    .key('enabled', 'yes')
+                    .on('enable', (e, b, d) => {
+                        if (b.key('enabled') != 'yes') {
+                            b.key('enabled', 'yes');
+                            b.child('content').css('opacity', '0.5');
+                        }
+                        event.stopPropagation();
+                    })
+                    .on('disable', (e, b, d) => {
+                        if (b.key('enabled') != 'no') {
+                            b.key('enabled', 'no');
+                            b.child('content').css('opacity', '0.4');
+                        }
+                        event.stopPropagation();
+                    })
+                    .add(Block('div', 'content')
+                        .css({
+                            margin: '0 auto',
+                            width: '33px',
+                            height: '33px',
+                            cursor: 'pointer',
+                            opacity: '0.5',
+                            transition: 'opacity 0.3s ease'
+                        })
+                        .on('mouseover', (e, b, d) => {
+                            if (b.parent().key('enabled') == 'yes')
+                                b.css('opacity', '0.65');
+                        })
+                        .on('mouseout', (e, b, d) => {
+                            if (b.parent().key('enabled') == 'yes')
+                                b.css('opacity', '0.5');
+                        })
+                        .on('click', (e, b, d) => {
+                            if (b.parent().key('enabled') == 'yes') {
+                                var value = block.key('value');
+                                if (value) {
+                                    app.ui.pattern_picker.set_local_current(`${value}`);
+                                    var submenu = block.parent(1).sibling('submenu');
+                                    if (submenu) load_pattern_submenu(submenu);
+                                }
+                            }
+                        })
+                        .add(Block('image', 1)
+                            .data({
+                                src: 'img/pencil_b.png',
+                                width: '33px',
+                                height: '33px'
+                            })
+                        )
+                    )
+                )
+                .add(Block('block', 'add')
+                    .css({
+                        width: '45px',
+                        float: 'left'
+                    })
+                    .add(Block('div', 'content')
+                        .css({
+                            margin: '0 auto',
+                            width: '30px',
+                            height: '30px',
+                            cursor: 'pointer',
+                            opacity: '0.5',
+                            transition: 'opacity 0.3s ease'
+                        })
+                        .on('mouseover', (e, b, d) => {
+                            b.css('opacity', '0.65');
+                        })
+                        .on('mouseout', (e, b, d) => {
+                            b.css('opacity', '0.5');
+                        })
+                        .on('click', (e, b, d) => {
+                            app.ui.pattern_picker.new_pattern();
+                        })
+                        .add(Block('image', 1)
+                            .data({
+                                src: 'img/plus_circle_b.png',
+                                width: '30px',
+                                height: '30px'
+                            })
+                        )
+                    )
+                )
+                .add(Block('block', 'play')
+                    .css({
+                        height: '100%',
+                        width: '100px',
+                        position: 'absolute',
+                        top: '0',
+                        right: '2px',
+                        display: 'none'
+                    })
+                    .add(Block('image', 1)
+                        .data({
+                            width: '35px',
+                            height: '35px',
+                            src: 'img/play_b.png'
+                        })
+                        .css({
+                            margin: '0 auto',
+                            opacity: '0.5',
+                            transition: '0.15s ease opacity',
+                            cursor: 'pointer'
+                        })
+                        .on('mouseover', (e, b, d) => {
+                            b.css('opacity', '0.6');
+                        })
+                        .on('mouseout', (e, b, d) => {
+                            b.css('opacity', '0.5');
+                        })
+                        
+                    )
+                    .on('hide', (e, b, d) => {
+                        b.css('display', 'none');
+                        e.stopPropagation();
+                    })
+                    .on('show', (e, b, d) => {
+                        b.css('display', 'table');
+                        e.stopPropagation();
+                    })
+                    .on('click', (e, b, d) => {
+                        block.on('update-alt', {
+                            id: block.key('button-target'),
+                            value: block.key('button-value'),
+                            boomerang: true
+                        });
+                        e.stopPropagation();
+                    })
+                )
+            ;
+            return block;
+        }
+    load
+        {
+            data('metadata', metadata => {
+                block.key('metadata', metadata);
+                block.key('options', {});
+                if (metadata.hasOwnProperty('editor-options') && metadata['editor-options']) {
+                    block.key('options', metadata['editor-options']);
+                    if (metadata['editor-options'].hasOwnProperty('button-display') && metadata['editor-options']['button-display'] === true) {
+                        block.key('button-display', true);
+                        block.key('button-target', metadata['editor-options']['button-target']);
+                        block.key('button-value', metadata['editor-options']['button-value']);
+                    }
+                }
+                block.data({
+                    val: metadata.initial
+                });
+                app.ui.pattern_picker.load_patterns();
+            });
+            data('val', value => {
+                // console.log(value);
+                block.key('value', value);
+                if (value == 'null' || value == null || app.ui.pattern_picker.get_pattern(value) == null) {
+                    block.child('dropdown/select').node().value = 'null';
+                    block.child('edit').on('disable');
+                } else {
+                    block.child('dropdown/select').node().value = value;
+                    block.child('edit').on('enable');
+                }
+            });
+            data('forward_data', forward_data => {
+                if (block.key('button-display') === true) {
+                    if (forward_data && forward_data.hasOwnProperty('id') && forward_data.hasOwnProperty('val')) {
+                        var node_field_meta = block.key('metadata');
+                        var f_data_capture = node_field_meta.hasOwnProperty('editor-options') && node_field_meta['editor-options'].hasOwnProperty('forward-data-capture') && node_field_meta['editor-options']['forward-data-capture'].includes(block.key('button-target'));
+                        if (forward_data.id == block.key('button-target') && f_data_capture) {
+                            if (forward_data.val === block.key('button-value')) {
+                                block.child('play').on('hide');
+                            } else {
+                                block.child('play').on('show');
+                            }
+                        }
+                    }
+                }
+            });
+            data('user_data', user_data => {
+                // console.log('user_data', user_data);
+                if (user_data.hasOwnProperty('color_patterns')) {
+
+                    var pattern_switch = app.ui.pattern_picker.switch_to_pattern;
+                    if (pattern_switch && pattern_switch.trim() != '') {
+                        //block.key('value', pattern_switch);
+                        app.ui.pattern_picker.set_local_current(`${pattern_switch}`);
+                        var load_pattern_submenu = block.key('load_pattern_submenu_func');
+                        var submenu = block.parent(1).sibling('submenu');
+                        if (submenu && load_pattern_submenu) load_pattern_submenu(submenu);
+                        app.ui.pattern_picker.switch_to_pattern = null;
+                    }
+
+                    var patterns = user_data.color_patterns;
+                    block.key('color_patterns', patterns);
+                    var select_b = block.child('dropdown/select');
+                    var children = select_b.children();
+                    for (var c in children) {
+                        if (c != 'none') 
+                            select_b.remove(c);
+                    }
+                    var found_id = false;
+                    var current_val = block.key('value');
+                    for (var i in patterns) {
+                        if (current_val && patterns[i].id == current_val)
+                            found_id = true;
+                        select_b.add(Block('option', patterns[i].id)
+                            .attribute('value', patterns[i].id)
+                            .html(patterns[i].name)
+                        , 'none');
+                    }
+                    if (found_id)
+                        select_b.node().value = current_val;
+                }
+            });
+        }
+
+!audio-menu-e
+    init
+        {
+            var load_audio_submenu = (submenu) => {
+                app.ui.pattern_picker.submenu_data_editor_block = block;
+                submenu.on('hide_children');
+                submenu.child('bar/title/text').html('').data(`${block.key('submenu_title')}`);
+                submenu.child('content-wrap/content/audio_react_menu').on('load_current').css('display', 'block');
+                submenu.on('show');
+
+                Block.queries();
+                setTimeout(_ => {
+                    Block.queries();
+                }, 25);
+            };
+            var block = Block('div');
+            return block
+                .key('submenu_title', 'Audio React Settings')
+                .key('load_audio_submenu_func', load_audio_submenu)
+                .key('recv_semaphore', false)
+                .key('control_flow_debug', false)
+                .css({
+                    width: '100%',
+                    height: '100%',
+                    marginLeft: '15px',
+                    marginTop: '1px'
+                })
+                .add(Block('block', 'switch_wrap')
+                    .css({
+                        width: 'auto',
+                        float: 'left'
+                    })
+                    .add(Block('switch', 1)
+                        .data({
+                            label: 'React',
+                            minWidth: '40px'
+                        })
+                        .on('modified', (event, switch_block, data) => {
+                            if (block.key('control_flow_debug'))
+                                console.log('switch modified', switch_block.key('state'));
+                            if (block.key('recv_semaphore') == true)
+                                block.key('recv_semaphore', false);
+                            else {
+                                var state = switch_block.key('state');
+                                block.on('update', { value: state, boomerang: true });
+                            }
+                        })
+                    )
+                )
+                .add(Block('block', 'settings')
+                    .css({
+                        width: '100px',
+                        float: 'left'
+                    })
+                    .add(Block('img', 1)
+                        .data({
+                            src: 'img/gear_b.png',
+                            height: '45px',
+                            width: '45px'
+                        })
+                        .css({
+                            opacity: '0.55',
+                            cursor: 'pointer',
+                            transition: 'opacity 0.12s ease'
+                        })
+                        .on('mouseover', (e, b, d) => {
+                            b.css('opacity', '0.65');
+                        })
+                        .on('mouseout', (e, b, d) => {
+                            b.css('opacity', '0.55');
+                        })
+                        .on('click', (e, b, d) => {
+                            var submenu = app.ui.block.child('main/node/menu/submenu');
+                            load_audio_submenu(submenu);
+                        })
+                    )
+                )
+            ;
+        }
+    load
+        {
+            data('metadata', metadata => {
+                block.key('metadata', metadata);
+                block.child('switch_wrap/switch').data({
+                    val: metadata.initial ? 'on' : 'off'
+                });
+            });
+            data('val', value => {
+                if (value != block.child('switch_wrap/switch').key('state'))
+                    block.key('recv_semaphore', true);
+                if (block.key('control_flow_debug')) {
+                    console.log('switch updated', value);
+                    console.log('switch semaphore', block.key('recv_semaphore'));
+                }
+                block.child('switch_wrap/switch').data({
+                    val: value ? 'on' : 'off'
+                });
+                app.ui.audio_react_menu.music_settings.enabled = value ? true : false;
+            });
+            var ar_menu = app.ui.block.child('main/node/menu/submenu/content-wrap/content/audio_react_menu');
+            data('forward_data', forward_data => {
+                if (forward_data && forward_data.hasOwnProperty('id') && forward_data.hasOwnProperty('val')) {
+                        var node_field_meta = block.key('metadata');
+                        if (node_field_meta.hasOwnProperty('editor-options') && node_field_meta['editor-options'].hasOwnProperty('forward-data-capture') && node_field_meta['editor-options']['forward-data-capture'].includes(forward_data.id)) {
+                            if (forward_data.id.includes('audio_')) {
+                                var block_name = `${forward_data.id.split('audio_').join('')}`;
+                                // console.log(ar_menu, block_name);
+                                var data_updates = {};
+                                data_updates[block_name] = forward_data.val;
+                                ar_menu.on('update_current', {
+                                    updates: data_updates
+                                });
+                            }
+                        }
+                    }
+            });
+        }
+
+views
+    :initialize
+        {
+            if (data) {
+                if (data.submenu) {
+                    data.submenu.child('content-wrap/content')
+                        .add(block.child('colors'))
+                        .add(block.child('patterns'))
+                        .add(block.child('audio_react_menu'))
+                    ;
+                }
+                if (data.resolve) data.resolve();
+            }
+        }
+    div colors
+        $submenu_title Hue Editor
+        css
+            height 100%
+            width 100%
+            top 0
+            right 0
+            position absolute
+            text-align left
+            font-size 0
+            display none
+        div picker
+            #color
+                {
+                    var number = block.child('numbers');
+                    number.child('redinput').$().val(color.r);
+                    number.child('t1R').html(String(parseInt(color.r)));
+                    number.child('greeninput').$().val(color.g);
+                    number.child('t2R').html(String(parseInt(color.g)));
+                    number.child('blueinput').$().val(color.b);
+                    number.child('t3R').html(String(parseInt(color.b)));
+                    number.child('hexinput').$().val(color.hex);
+                }
+            css
+                height 420px
+                border-bottom 1px solid #eee
+            button rect
+                css
+                    height 255px
+                    width 100%
+                    outline none
+                    cursor pointer
+                    border none
+                    border-bottom 1px solid #eee
+                class jscolor {valueElement:null,value:'000000',position:'bottom',width:300,height:226,onFineChange:'app.ui.color_picker.jscolor_update(this)'}
+            div numbers
+                css
+                    padding 20px 8px 0 30px
+                    font-size 17px
+                    width 46%
+                    float left
+                    height 160px
+                    box-sizing border-box
+                div spacer1
+                    css
+                        height 5px
+                text t1
+                    html R
+                input redinput
+                    type range
+                    min 0
+                    max 255
+                    value 0
+                    css
+                        margin 2px 10px 2px 15px
+                        padding 0
+                        outline none
+                        width 205px
+                        cursor pointer
+                        opacity 0.8
+                    :input
+                        {
+                            var val = parseInt(block.$().val().trim());
+                            if (!isNaN(val)) {
+                                if (val < 0) val = 0;
+                                if (val > 255) val = 255;
+                                block.sibling('t1R').html('' + val);
+                                app.ui.color_picker.rgb.r = val;
+                                var picker = block.parent().sibling('rect').node().jscolor;
+                                picker.fromRGB(app.ui.color_picker.rgb.r, app.ui.color_picker.rgb.g, app.ui.color_picker.rgb.b);
+                                app.ui.color_picker.jscolor_update(picker);
+                            }
+                        }
+                    :mouseup
+                        {
+                            block.on('input');
+                            app.ui.color_picker.update_preset(true);
+                            if (app.ui.color_picker.track_live.left || app.ui.color_picker.track_live.right)
+                                app.ui.color_picker.play_preset(true);
+                        }
+                text t1R
+                    html 0
+                div spacer2
+                    css
+                        height 5px
+                text t2
+                    html G
+                input greeninput
+                    type range
+                    min 0
+                    max 255
+                    value 0
+                    css
+                        margin 2px 10px 2px 15px
+                        padding 0
+                        outline none
+                        width 205px
+                        cursor pointer
+                        opacity 0.8
+                    :input
+                        {
+                            var val = parseInt(block.$().val().trim());
+                            if (!isNaN(val)) {
+                                if (val < 0) val = 0;
+                                if (val > 255) val = 255;
+                                block.sibling('t2R').html('' + val);
+                                app.ui.color_picker.rgb.g = val;
+                                var picker = block.parent().sibling('rect').node().jscolor;
+                                picker.fromRGB(app.ui.color_picker.rgb.r, app.ui.color_picker.rgb.g, app.ui.color_picker.rgb.b);
+                                app.ui.color_picker.jscolor_update(picker);
+                            }
+                        }
+                    :mouseup
+                        {
+                            block.on('input');
+                            app.ui.color_picker.update_preset(true);
+                            if (app.ui.color_picker.track_live.left || app.ui.color_picker.track_live.right)
+                                app.ui.color_picker.play_preset(true);
+                        }
+                text t2R
+                    html 0
+                div spacer3
+                    css
+                        height 5px
+                text t3
+                    html B
+                input blueinput
+                    type range
+                    min 0
+                    max 255
+                    value 0
+                    css
+                        margin 2px 10px 2px 15px
+                        padding 0
+                        outline none
+                        width 205px
+                        cursor pointer
+                        opacity 0.8
+                    :input
+                        {
+                            var val = parseInt(block.$().val().trim());
+                            if (!isNaN(val)) {
+                                if (val < 0) val = 0;
+                                if (val > 255) val = 255;
+                                block.sibling('t3R').html('' + val);
+                                app.ui.color_picker.rgb.b = val;
+                                var picker = block.parent().sibling('rect').node().jscolor;
+                                picker.fromRGB(app.ui.color_picker.rgb.r, app.ui.color_picker.rgb.g, app.ui.color_picker.rgb.b);
+                                app.ui.color_picker.jscolor_update(picker);
+                            }
+                        }
+                    :mouseup
+                        {
+                            block.on('input');
+                            app.ui.color_picker.update_preset(true);
+                            if (app.ui.color_picker.track_live.left || app.ui.color_picker.track_live.right)
+                                app.ui.color_picker.play_preset(true);
+                        }
+                text t3R
+                    html 0
+                div spacer4
+                    css
+                        height 10px
+                text t4
+                    html HEX
+                input hexinput
+                    type text
+                    value #000000
+                    css
+                        margin 0 0 0 12px
+                        padding 2px 5px
+                        font-size 15px
+                        outline none
+                        width 175px
+                    :input
+                        {
+                            var val = block.$().val().trim();
+                            if (val.length == 7) {
+                                // console.log(val);
+                                var picker = block.parent().sibling('rect').node().jscolor;
+                                picker.fromString(val);
+                                app.ui.color_picker.jscolor_update(picker);
+                                app.ui.color_picker.update_preset(true);
+                                if (app.ui.color_picker.track_live.left || app.ui.color_picker.track_live.right)
+                                    app.ui.color_picker.play_preset(true);
+                            }
+                        }
+                div spacer5
+                    css
+                        height 5px
+            block sync
+                css
+                    float left
+                    height 155px
+                    width 21%
+                {
+                    block.key('enabled', true);
+                }
+                :enable
+                    {
+                        block.key('enabled', true);
+                        block.child('trackLeft/switch').on('enable');
+                        block.child('trackRight/switch').on('enable');
+                    }
+                :disable
+                    {
+                        block.key('enabled', false);
+                        block.child('trackLeft/switch').on('disable');
+                        block.child('trackRight/switch').on('disable');
+                    }
+                #left
+                    {
+                        block.child('trackLeft/switch').data(left === true || left === 'true' ? 'on' : 'off');
+                    }
+                #right
+                    {
+                        block.child('trackRight/switch').data(right === true || right === 'true' ? 'on' : 'off');
+                    }
+                div trackLeft
+                    css
+                        width 100%
+                        display inline-block
+                        height auto
+                        float left
+                        //margin-left 10px
+                        //margin-top 20px
+                    switch switch
+                        val off
+                        label Left
+                        minWidth 40px
+                        marginRight 0
+                        $first yes
+                        :modified
+                            {
+                                app.ui.color_picker.track_live.left = block.key('state') === true;
+                                //if (block.key('first') == 'yes') block.key('first', 'no');
+                                //else util.cookie('trackLeft', "" + app.ui.color_picker.track_live.left);
+                            }
+                div trackRight
+                    css
+                        width 100%
+                        display inline-block
+                        height auto
+                        float left
+                        //margin-left 10px
+                    switch switch
+                        val off
+                        label Right
+                        minWidth 40px
+                        marginRight 0
+                        $first yes
+                        :modified
+                            {
+                                app.ui.color_picker.track_live.right = block.key('state') === true;
+                                //if (block.key('first') == 'yes') block.key('first', 'no');
+                                //else util.cookie('trackLeft', "" + app.ui.color_picker.track_live.right);
+                            }
+            block buttons
+                css
+                    //margin-top 6px
+                    width 32%
+                    height 155px
+                    float left
+                    //margin-left 17%
+                div button1
+                    css
+                        margin 0 36px 3px auto
+                        padding 8px 0
+                        width 150px
+                        text-align center
+                        border-radius 4px
+                        cursor pointer
+                        color white
+                        transition background-color 0.15s ease, box-shadow 0.15s ease, -moz-box-shadow 0.15s ease, -webkit-box-shadow 0.15s ease
+                        border 1px solid #ffffff
+                        opacity 0.9
+                        background-color #777
+                    :mouseover, mouseout, mousedown, mouseup
+                        {
+                            var event_colors = {
+                                mouseover: '#666',
+                                mouseout: '#777',
+                                mousedown: '#888',
+                                mouseup: '#666'
+                            };
+                            block.css('background-color', event_colors[event.type]);
+                        }
+                    text text
+                        val new
+                        css
+                            font-size 20px
+                            letter-spacing 1.5px
+                            // text-transform uppercase
+                    :click
+                        {
+                            app.ui.color_picker.new_preset();
+                        }
+                div spacer2
+                    css
+                        float left
+                        width 30px
+                        height 30px
+                        display none
+                div button2
+                    {
+                        block.key('enabled', false);
+                    }
+                    css
+                        margin 3px 36px 0 auto
+                        padding 8px 0
+                        width 150px
+                        text-align center
+                        border-radius 4px
+                        cursor default
+                        color white
+                        transition background-color 0.15s ease, opacity 0.1s ease, box-shadow 0.15s ease, -moz-box-shadow 0.15s ease, -webkit-box-shadow 0.15s ease
+                        border 1px solid #ffffff
+                        opacity 0.5
+                        background-color #777
+                    :mouseover, mouseout, mousedown, mouseup
+                        {
+                            var event_colors = {
+                                mouseover: '#666',
+                                mouseout: '#777',
+                                mousedown: '#888',
+                                mouseup: '#666'
+                            };
+                            if (block.key('enabled'))
+                                block.css('background-color', event_colors[event.type]);
+                        }
+                    :click
+                        {
+                            if (block.key('enabled')) {
+                                app.ui.color_picker.delete_preset();
+                            }
+                        }
+                    :enable
+                        {
+                            block.key('enabled', true);
+                            block.css({
+                                'opacity': '0.9',
+                                'cursor': 'pointer'
+                            });
+                        }
+                    :disable
+                        {
+                            block.key('enabled', false);
+                            block.css({
+                                'opacity': '0.5',
+                                'cursor': 'default'
+                            });
+                        }
+                    text text
+                        val delete
+                        css
+                            font-size 20px
+                            letter-spacing 1.5px
+                            // text-transform uppercase
+        !preset
+            init
+                {
+                    return Block('div')
+                        .key('red', 0)
+                        .key('green', 0)
+                        .key('blue', 0)
+                        .key('id', '')
+                        .key('name', '')
+                        .key('foreground', 'white')
+                        .key('selected', false)
+                        .key('lastclicked', 0)
+                        .key('h_mult', 1) // 1.8
+                        .css({
+                            backgroundColor: 'black',
+                            display: 'inline-block',
+                            border: '4px solid black',
+                            cursor: 'pointer'
+                        })
+                        .query('window height != 0', function (event, block, data) {
+                            var width = block.parent().$().width() / block.parent().key('squaresPerRow') - 8;
+                            block.css({
+                                width: width + 'px',
+                                height: (width / block.key('h_mult')) + 'px'
+                            });
+                        })
+                        .add(Block('block', 'content')
+                            .add(Block('text', 1)
+                                .css({
+                                    color: 'white',
+                                    fontSize: '17px'
+                                })
+                                .data('')
+                            )
+                        )
+                        .on('recolor', function (e, b, d) {
+                            var rgb = util.rgbcss(b.key('red'), b.key('green'), b.key('blue'));
+                            b.css('background-color', rgb);
+                            if (!b.key('selected'))
+                                b.css('border', '4px solid ' + rgb)
+                            block.on('recolorcontent');
+                        })
+                        .on('recolorcontent', function (e, b, d) {
+                            if (b.key('red') > app.ui.color_picker.bw_threshold && b.key('green') > app.ui.color_picker.bw_threshold && b.key('blue') > app.ui.color_picker.bw_threshold) {
+                                b.key('foreground', 'black');
+                                b.child('content/text').css('color', 'black');
+                            } else {
+                                b.key('foreground', 'white');
+                                b.child('content/text').css('color', 'white');
+                            }
+                        })
+                        //.on('mouseover', function (e, b, d) {
+                        //    if (!b.key('selected'))
+                        //        b.css('border', '4px solid #fff');
+                        //})
+                        //.on('mouseout', function (e, b, d) {
+                        //    if (!b.key('selected')) {
+                        //        var rgb = util.rgbcss(b.key('red'), b.key('green'), b.key('blue'));
+                        //        b.css('border', '4px solid ' + rgb);
+                        //    }
+                        //})
+                        .on('select', function (e, b, d) {
+                            var siblings = b.parent().children();
+                            for (var s in siblings) {
+                                if (siblings.hasOwnProperty(s)) {
+                                    siblings[s].on('deselect');
+                                }
+                            }
+                            b.key('selected', true);
+                            b.css('border', '4px solid ' + b.key('foreground'));
+                            app.ui.color_picker.rgb.r = b.key('red');
+                            app.ui.color_picker.rgb.g = b.key('green');
+                            app.ui.color_picker.rgb.b = b.key('blue');
+                            app.ui.color_picker.id = b.key('id');
+                            app.ui.color_picker.switch_to_preset = null;
+                            if (app.ui.color_picker.id && app.ui.color_picker.id.trim().length > 1) {
+                                var picker = b.parent().sibling('picker').child('rect').node().jscolor;
+                                picker.fromRGB(app.ui.color_picker.rgb.r, app.ui.color_picker.rgb.g, app.ui.color_picker.rgb.b);
+                                app.ui.color_picker.jscolor_update(picker, true, true);
+                                b.parent().sibling('picker').child('buttons/button2').on('enable');
+                            }
+                        })
+                        .on('deselect', function (e, b, d) {
+                            b.key('selected', false);
+                            var rgb = util.rgbcss(b.key('red'), b.key('green'), b.key('blue'));
+                            b.css('border', '4px solid ' + rgb);
+                            app.ui.color_picker.id = null;
+                            app.ui.color_picker.switch_to_preset = null;
+                            b.parent().sibling('picker').child('buttons/button2').on('disable');
+                        })
+                        .on('click', function (e, b, d) {
+                            var doubleClickTimeout = app.ui.color_picker.double_click_timeout;
+                            var newclicked = Date.now();
+                            var lastclicked = b.key('lastclicked');
+                            b.key('lastclicked', newclicked)
+                            if (newclicked - lastclicked < doubleClickTimeout) {
+                                if (b.key('selected')) {
+                                    b.on('deselect');
+                                    //if (app.music_settings.enabled) {
+                                    //    setTimeout(function () {
+                                    //        app.playMusic();
+                                    //    }, 100);
+                                    //}
+                                } else b.on('select');
+                            } else {
+                                setTimeout(function () {
+                                    if (b.key('lastclicked') == newclicked) {
+                                        // no double click occurred
+                                        if (app.ui.color_picker.id == b.key('id')) {
+                                            var newname = prompt('Rename color "' + b.key('name') + '"?', b.key('name'));
+                                            if (newname != null && newname.length > 0) {
+                                                app.ui.color_picker.name_preset(newname);
+                                            }
+                                        } else {
+                                            app.ui.color_picker.rgb.r = b.key('red');
+                                            app.ui.color_picker.rgb.g = b.key('green');
+                                            app.ui.color_picker.rgb.b = b.key('blue');
+                                            var picker = b.parent().sibling('picker').child('rect').node().jscolor;
+                                            picker.fromRGB(app.ui.color_picker.rgb.r, app.ui.color_picker.rgb.g, app.ui.color_picker.rgb.b);
+                                            app.ui.color_picker.jscolor_update(picker, app.ui.color_picker.id && app.ui.color_picker.id.trim().length > 1 && app.ui.color_picker.id.trim() != b.key('id').trim(), true);
+                                        }
+                                    }
+                                }, doubleClickTimeout + 10);
+                            }
+                        })
+                    ;
+                }
+            load
+                {
+                    data('r', function (v) {
+                        if (v > 255) v = 255;
+                        if (v < 0) v = 0;
+                        block.key('red', v);
+                        block.on('recolor');
+                    });
+                    data('g', function (v) {
+                        if (v > 255) v = 255;
+                        if (v < 0) v = 0;
+                        block.key('green', v);
+                        block.on('recolor');
+                    });
+                    data('b', function (v) {
+                        if (v > 255) v = 255;
+                        if (v < 0) v = 0;
+                        block.key('blue', v);
+                        block.on('recolor');
+                    });
+                    data('id', function (id) {
+                        block.key('id', id);
+                    });
+                    data('name', function (name) {
+                        block.key('name', name);
+                        block.child('content/text').html('').data(name);
+                        block.on('recolorcontent');
+                    });
+                    data('sw', function (sw) {
+                        if (sw) {
+                            block.on('select');
+                        }
+                    });
+                }
+        div presets
+            {
+                block.key('squaresPerRow', 8);
+            }
+            css
+                overflow-y scroll
+                height 425px
+            :clear
+                {
+                    var children = block.children();
+                    for (var c in children) {
+                        if (c != 'spacer')
+                            block.remove(c);
+                    }
+                    if (data.callback) data.callback();
+                }
+            :deselect_all
+                {
+                    var children = block.children();
+                    for (var c in children) {
+                        if (c != 'spacer') {
+                            // console.log(children[c]);
+                            children[c].on('deselect');
+                        }
+                    }
+                }
+            #newpreset
+                {
+                    if (!block.children().hasOwnProperty(newpreset.id)) {
+                        block.add(Block('preset', newpreset.id), 'spacer');
+                        Block.queries();
+                        block.child(newpreset.id).data(newpreset);
+                    }
+                }
+            #updatepreset
+                {
+                    if (block.children().hasOwnProperty(updatepreset.id)) {
+                        block.child(updatepreset.id).data({
+                            r: updatepreset.r,
+                            g: updatepreset.g,
+                            b: updatepreset.b,
+                            name: updatepreset.name
+                        });
+                    }
+                    if (updatepreset.id == app.ui.color_picker.id) {
+                        app.ui.color_picker.rgb.r = updatepreset.r;
+                        app.ui.color_picker.rgb.g = updatepreset.g;
+                        app.ui.color_picker.rgb.b = updatepreset.b;
+                        var picker = block.sibling('picker').child('rect').node().jscolor;
+                        picker.fromRGB(app.ui.color_picker.rgb.r, app.ui.color_picker.rgb.g, app.ui.color_picker.rgb.b);
+                        app.ui.color_picker.jscolor_update(picker, false);
+                    }
+                }
+            #deletepreset
+                {
+                    if (block.children().hasOwnProperty(deletepreset.id)) {
+                        if (deletepreset.id == app.ui.color_picker.id) {
+                            block.child(deletepreset.id).on('deselect');
+                        }
+                        block.remove(deletepreset.id);
+                    }
+                }
+            div spacer
+                css
+                    height 0px
+                // @query window height != 0
+                //     {
+                //         var width = block.parent().$().width() / block.parent().key('squaresPerRow');
+                //         block.css('height', (width) + 'px');
+                //     }
+    div patterns
+        $submenu_title Pattern Editor
+        css
+            height 100%
+            width 100%
+            top 0
+            right 0
+            position absolute
+            text-align left
+            display none
+        :load_current
+            {
+                var current_pattern = app.ui.pattern_picker.current;
+                if (current_pattern) {
+                    block.on('update_current');
+                }
+            }
+        :update_current
+            {
+                var current_pattern = app.ui.pattern_picker.current;
+                if (current_pattern) {
+                    block.child('area/editor').data({
+                        name: current_pattern.name
+                    });
+                    var list_dict = {};
+                    for (var p in current_pattern.list) {
+                        list_dict[p] = current_pattern.list[p];
+                        list_dict[p].id = p;
+                    }
+                    block.child('area/editor/colors').data({
+                        list: list_dict
+                    });
+                    setTimeout(_ => {
+                        Block.queries();
+                    }, 50);
+                }
+            }
+        :click
+            {
+                /*
+                var colors = block.child('area/editor/colors');
+                var children = colors.children();
+                for (var c in children) {
+                    if (children.hasOwnProperty(c) && c != 'addbutton') {
+                        if (children[c].key('editcolor')) {
+                            children[c].child('colorwrap/color').on('click');
+                        }
+                    }
+                }
+                */
+            }
+        div area
+            css
+                width 100%
+                height 100%
+                position absolute
+                top 0
+                left 0
+            block placeholder
+                css
+                    display none
+                :show
+                    {
+                        var siblings = block.parent().children();
+                        for (var s in siblings) {
+                            if (s != block.mark()) siblings[s].css('display', 'none');
+                        }
+                        block.css('display', 'table');
+                    }
+                image icon
+                    src img/icon_g.png
+                    height 270px
+                    width 270px
+                    css
+                        margin 0 auto 50px
+                        opacity 0.85
+                //text icon
+                //    val { ... }
+                //    css
+                //        font-size 160px
+                //        color #888
+                //        letter-spacing 1px
+                //        display block
+                //        margin-bottom 5px
+                //        cursor default
+                text desc
+                    val create or edit pattern
+                    css
+                        font-size 25px
+                        color #666
+                        letter-spacing 1px
+                        display block
+                        margin-bottom 35px
+                        cursor default
+                        display none
+            div editor
+                css
+                    display block
+                    position absolute
+                    top 0
+                    left 0
+                    width 100%
+                    height 100%
+                :show
+                    {
+                        var siblings = block.parent().children();
+                        for (var s in siblings) {
+                            if (s != block.mark()) siblings[s].css('display', 'none');
+                        }
+                        block.css('display', 'block');
+                    }
+                #name
+                    {
+                        if (name.trim() != '') {
+                            block.child('title/text').html('').data(name).sibling('input').$().val(name);
+                            block.child('title/input').css('display', 'none').sibling('text').css('display', 'inline-block');
+                        }
+                    }
+                div title
+                    css
+                        text-align left
+                        margin-top 14px
+                        position relative
+                        height 46px
+                    text text
+                        val pattern title
+                        css
+                            font-size 35px
+                            color #444
+                            position absolute
+                            top 0
+                            left 40px
+                            opacity 0.9
+                    input input
+                        type text
+                        css
+                            font-size 35px
+                            color #444
+                            position absolute
+                            top 0
+                            left 40px
+                            display none
+                            outline none
+                            border none
+                            padding 0
+                            margin 0
+                            opacity 0.9
+                        value pattern title
+                        :keyup
+                            {
+                                if (event.keyCode && event.keyCode == 13) {
+                                    var val = block.$().val().trim();
+                                    if (val != '') app.ui.pattern_picker.name_pattern(val);
+                                }
+                            }
+                    div delete
+                        css
+                            position absolute
+                            right 37px
+                            top 8px
+                            opacity 0.55
+                            cursor pointer
+                            transition opacity 0.2s ease
+                        image icon
+                            src img/trash_b.png
+                            height 35px
+                            width 35px
+                        :mouseover
+                            css
+                                opacity 0.65
+                        :mouseout
+                            css
+                                opacity 0.55
+                        :click
+                            {
+                                var update_node_data = false;
+                                var node_data = app.ui.block.child('main/node').key('node_data');
+                                if (node_data && node_data.data && node_data.data.pattern) {
+                                    if (app.ui.pattern_picker.current && app.ui.pattern_picker.current.id) {
+                                        if (node_data.data.pattern === app.ui.pattern_picker.current.id) {
+                                            update_node_data = true;
+                                        }
+                                    }
+                                }
+                                app.ui.pattern_picker.delete_pattern(update_node_data);
+                            }
+                    div edit
+                        css
+                            position absolute
+                            right 82px
+                            top 8px
+                            opacity 0.55
+                            cursor pointer
+                            transition opacity 0.2s ease
+                        image icon
+                            src img/pencil_b.png
+                            height 35px
+                            width 35px
+                        :mouseover
+                            css
+                                opacity 0.65
+                        :mouseout
+                            css
+                                opacity 0.55
+                        :click
+                            {
+                                block.sibling('text').css('display', 'none')
+                                    .sibling('input').css('display', 'inline-block').$().focus().select();
+                            }
+                hr hr1
+                    css
+                        width 90%
+                        opacity 0.25
+                        margin 3px auto 13px auto
+                !pattern-color
+                    init
+                        {
+                            var block = Block('div');
+                            return block
+                                .css({
+                                    width: '88%',
+                                    marginLeft: 'auto',
+                                    marginRight: 'auto',
+                                    height: '63px',
+                                    marginBottom: '10px',
+                                    borderRadius: '3px',
+                                    backgroundColor: '#fdfdfd',
+                                    boxShadow: '3px 2px 7px rgba(0,0,0,0.12)',
+                                    transition: 'margin-left 0.1s ease, box-shadow 0.1s ease',
+                                    border: '1px solid #f1f1f1'
+                                })
+                                .key('moved_color', 'null')
+                                .key('editcolor', false)
+                                .key('dragging', false)
+                                .add(Block('block', 'handle')
+                                    .css({
+                                        width: '70px',
+                                        float: 'left'
+                                    })
+                                    .add(Block('div', 'imgwrap')
+                                        .css({
+                                            width: '32px',
+                                            height: '32px',
+                                            cursor: 'pointer',
+                                            margin: '2px auto 0',
+                                            opacity: '0.55',
+                                            transition: 'opacity 0.1s ease, background-color 0.1s ease'
+                                        })
+                                        .on('mouseover', function (e, b, d) {
+                                            b.css('opacity', '0.65');
+                                        })
+                                        .on('mouseout', function (e, b, d) {
+                                            b.css('opacity', '0.55');
+                                        })
+                                        .on('mousedown', function (e, b, d) {
+                                            // console.log('dragging ' + block.key('id'));
+                                            block.key('dragging', true);
+                                            block.parent().key('draggingitem', block.key('id'));
+                                            block.css({
+                                                boxShadow: '3px 4px 9px rgba(0,0,0,0.15)',
+                                                marginLeft: '60px',
+                                                backgroundColor: '#eee'
+                                            });
+                                        })
+                                        .on('mouseup', function (e, b, d) {
+                                            e.stopPropagation();
+                                            // console.log('released ' + block.key('id'));
+                                            block.key('dragging', false);
+                                            block.parent().key('draggingitem', -1);
+                                            block.css({
+                                                boxShadow: '3px 2px 7px rgba(0,0,0,0.12)',
+                                                marginLeft: '40px',
+                                                backgroundColor: '#fdfdfd'
+                                            });
+                                            // console.log(block.key('moved_color'));
+                                            setTimeout(function () {
+                                                app.ui.pattern_picker.move_pattern_color(block.key('id'), block.key('ordinalPos'));
+                                            }, 100);
+                                        })
+                                        .add(Block('image', 1)
+                                            .data({
+                                                src: 'img/bars3_b.png',
+                                                width: '32px',
+                                                height: '32px'
+                                            })
+                                        )
+                                    )
+                                )
+                                .add(Block('block', 'fade')
+                                    .css({
+                                        width: '85px',
+                                        height: '100%',
+                                        float: 'left',
+                                        marginRight: '15px'
+                                    })
+                                    .add(Block('div', 'wrapper')
+                                        .css({
+                                            width: '100%',
+                                            height: '31px',
+                                            textAlign: 'center',
+                                            cursor: 'pointer'
+                                        })
+                                        .add(Block('text', 'text')
+                                            .css({
+                                                fontSize: '23px',
+                                                width: 'auto',
+                                                color: '#333'
+                                            })
+                                            .class('select-disabled')
+                                            .data('fade')
+                                        )
+                                        .add(Block('text', 'label')
+                                            .css({
+                                                fontSize: '19px',
+                                                color: '#333'
+                                            })
+                                            .class('select-disabled')
+                                            .data('ms')
+                                        )
+                                        .on('click', function (e, b, d) {
+                                            e.stopPropagation();
+                                            b.css('display', 'none').sibling('input').css('display', 'block').$().focus().select();
+                                        })
+                                    )
+                                    .add(Block('input', 1)
+                                        .data({
+                                            type: 'text',
+                                            placeholder: '10000'
+                                        })
+                                        .css({
+                                            fontSize: '23px',
+                                            width: '90%',
+                                            textAlign: 'center',
+                                            outline: 'none',
+                                            border: 'none',
+                                            backgroundColor: 'rgba(0, 0, 0, 0)',
+                                            display: 'none',
+                                            color: '#333'
+                                        })
+                                        .on('sendVal', function (e, b, d) {
+                                            var val = b.$().val().trim();
+                                            val = parseInt(val);
+                                            if (!isNaN(val) && val >= 0 && val <= 30000) {
+                                                block.key('fade', val);
+                                                block.on('sendUpdate');
+                                            }
+                                        })
+                                        .on('keyup', function (e, b, d) {
+                                            if (e.keyCode == 13) {
+                                                // b.on('sendVal');
+                                                app.ui.pattern_picker.send_open_fades_and_times();
+                                            }
+                                        })
+                                        .on('click', function (e, b, d) {
+                                            e.stopPropagation();
+                                        })
+                                    )
+                                )
+                                .add(Block('div', 'colorwrap')
+                                    .css({
+                                        float: 'left',
+                                        borderLeft: '1px solid #f0f0f0',
+                                        borderRight: '1px solid #f0f0f0',
+                                        boxSizing: 'border-box',
+                                        height: '100%',
+                                        width: '43%'
+                                    })
+                                    .add(Block('block', 'color')
+                                        .css({
+                                            cursor: 'pointer',
+                                            border: '3px solid black',
+                                            boxSizing: 'border-box'
+                                        })
+                                        .add(Block('image', 'edit_img')
+                                            .data({
+                                                src: 'img/pencil_w.png',
+                                                height: '36px',
+                                                width: '36px',
+                                                css: {
+                                                    margin: '0 auto',
+                                                    display: 'none',
+                                                    opacity: '0.9'
+                                                }
+                                            })
+                                        )
+                                        .on('click', function (e, b, d) {
+                                            e.stopPropagation();
+                                            if (block.key('editcolor')) {
+                                                block.key('editcolor', false);
+                                                b.css('border', '3px solid ' + util.rgbcss(block.key('r'), block.key('g'), block.key('b')));
+                                                b.child('edit_img').css('display', 'none');
+                                                app.ui.pattern_picker.pattern_color_block = null;
+                                                app.ui.pattern_picker.pattern_color_edit_id.color = null;
+                                                // app.ui.pattern_picker.pattern_color_edit_id.pattern = null;
+                                                block.on('sendUpdate');
+                                            } else {
+                                                var prevent = false;
+                                                var siblings = block.parent().children();
+                                                for (var s in siblings) {
+                                                    if (siblings.hasOwnProperty(s) && siblings[s].key('editcolor')) {
+                                                        siblings[s].child('colorwrap/color').on('click');
+                                                        prevent = true;
+                                                    }
+                                                }
+                                                if (!prevent) {
+                                                    block.key('editcolor', true);
+                                                    b.css('border', '3px solid #c3c3c3');
+                                                    b.child('edit_img').css('display', 'block');
+                                                    app.ui.pattern_picker.pattern_color_block = block;
+                                                    app.ui.pattern_picker.pattern_color_edit_id.color = block.key('id');
+
+                                                    var submenu = app.ui.block.child('main/node/menu/submenu');
+                                                    var presets_b = submenu.child('content-wrap/content/colors/presets');
+                                                    var picker = submenu.child('content-wrap/content/colors/picker/rect').node().jscolor;
+                                                    var r_val = block.key('r');
+                                                    var g_val = block.key('g');
+                                                    var b_val = block.key('b');
+                                                    if (r_val !== null && g_val !== null && b_val !== null) {
+                                                        var hex_val = util.rgb_hex(r_val, g_val, b_val);
+                                                    }
+                                                    picker.fromString(hex_val);
+                                                    app.ui.color_picker.jscolor_update(picker, false, true);
+                                                    presets_b.on('deselect_all');
+                                                    app.ui.color_picker.load_presets();
+
+                                                    submenu.child('content-wrap/content/colors/picker/sync/trackLeft/switch')
+                                                            .on('activate', { state: 'off' })
+                                                        .parent().sibling('trackRight').child('switch')
+                                                            .on('activate', { state: 'off' })
+                                                    ;
+
+                                                    submenu.key('menu_return', {
+                                                        from: 'colors',
+                                                        to: 'patterns'
+                                                    });
+
+                                                    submenu.child('bar/title/text').html('').data(`${submenu.child('content-wrap/content/colors').key('submenu_title')}`);
+                                                    submenu.on('hide_children')
+                                                        .child('content-wrap/content/patterns').css('display', 'none')
+                                                        .sibling('colors').css('display', 'block');
+                                                }
+                                            }
+                                        })
+                                    )
+                                )
+                                .add(Block('block', 'time')
+                                    .css({
+                                        width: '100px',
+                                        height: '100%',
+                                        float: 'left',
+                                        marginLeft: '10px'
+                                    })
+                                    .add(Block('div', 'wrapper')
+                                        .css({
+                                            width: '100%',
+                                            height: '31px',
+                                            textAlign: 'center',
+                                            cursor: 'pointer'
+                                        })
+                                        .add(Block('text', 'text')
+                                            .css({
+                                                fontSize: '23px',
+                                                width: 'auto',
+                                                color: '#333'
+                                            })
+                                            .class('select-disabled')
+                                            .data('time')
+                                        )
+                                        .add(Block('text', 'label')
+                                            .css({
+                                                fontSize: '19px',
+                                                color: '#333'
+                                            })
+                                            .class('select-disabled')
+                                            .data('ms')
+                                        )
+                                        .on('click', function (e, b, d) {
+                                            e.stopPropagation();
+                                            b.css('display', 'none').sibling('input').css('display', 'block').$().focus().select();
+                                        })
+                                    )
+                                    .add(Block('input', 1)
+                                        .data({
+                                            type: 'text',
+                                            placeholder: '10000'
+                                        })
+                                        .css({
+                                            fontSize: '23px',
+                                            width: '90%',
+                                            textAlign: 'center',
+                                            outline: 'none',
+                                            border: 'none',
+                                            backgroundColor: 'rgba(0, 0, 0, 0)',
+                                            display: 'none',
+                                            color: '#333'
+                                        })
+                                        .on('sendVal', function (e, b, d) {
+                                            var val = b.$().val().trim();
+                                            val = parseInt(val);
+                                            if (!isNaN(val) && val >= 0 && val <= 30000) {
+                                                block.key('time', val);
+                                                block.on('sendUpdate');
+                                            }
+                                        })
+                                        .on('keyup', function (e, b, d) {
+                                            if (e.keyCode == 13) {
+                                                // b.on('sendVal');
+                                                app.ui.pattern_picker.send_open_fades_and_times();
+                                            }
+                                        })
+                                        .on('click', function (e, b, d) {
+                                            e.stopPropagation();
+                                        })
+                                    )
+                                )
+                                .add(Block('block', 'delete')
+                                    .css({
+                                        width: '55px',
+                                        float: 'left',
+                                        marginLeft: '5px'
+                                    })
+                                    .add(Block('div', 'imgwrap')
+                                        .css({
+                                            width: '33px',
+                                            height: '33px',
+                                            cursor: 'pointer',
+                                            margin: '2px auto 0',
+                                            opacity: '0.5',
+                                            transition: 'opacity 0.1s ease'
+                                        })
+                                        .on('mouseover', function (e, b, d) {
+                                            b.css('opacity', '0.6');
+                                        })
+                                        .on('mouseout', function (e, b, d) {
+                                            b.css('opacity', '0.5');
+                                        })
+                                        .add(Block('image', 1)
+                                            .data({
+                                                src: 'img/x_b.png',
+                                                width: '33px',
+                                                height: '33px'
+                                            })
+                                        )
+                                    )
+                                    .on('click', function (e, b, d) {
+                                        app.ui.pattern_picker.delete_pattern_color(block.key('id'));
+                                    })
+                                )
+                                .on('sendUpdate', function (e, b, d) {
+                                    var hex_val = util.rgb_hex(block.key('r'), block.key('g'), block.key('b'));
+                                    app.ui.pattern_picker.update_pattern_color(block.key('id'), {
+                                        fade: block.key('fade'),
+                                        time: block.key('time'),
+                                        hex: hex_val
+                                    });
+                                })
+                                .on('setOrdinalPos', function(e, b, d) {
+                                    // console.log(d.pos);
+                                    d.pos = parseInt(d.pos);
+                                    // console.log('switching ' + block.key('ordinalPos') + ' to ' + d.pos);
+                                    if (block.key('ordinalPos') != d.pos) {
+                                        // console.log('moving ' + d.pos + ' to ' + block.key('ordinalPos'));
+                                        var siblings = block.parent().children();
+                                        for (var s in siblings) {
+                                            if (siblings.hasOwnProperty(s) && siblings[s].key('ordinalPos') == d.pos) {
+                                                var sibling = siblings[s];
+                                                sibling.key('ordinalPos', block.key('ordinalPos'));
+                                                var stringpostemp = String(sibling.key('ordinalPos') + 1);
+                                                sibling.css({
+                                                    '-webkit-box-ordinal-group': stringpostemp,
+                                                    '-moz-box-ordinal-group': stringpostemp,
+                                                    'box-ordinal-group': stringpostemp
+                                                });
+                                                block.key('moved_color', {
+                                                    id: sibling.key('id'),
+                                                    old_pos: parseInt(block.key('ordinalPos')),
+                                                    new_pos: parseInt(d.pos)
+                                                });
+                                            }
+                                        }
+                                    }
+                                    block.key('ordinalPos', d.pos);
+                                    var stringpos = String(d.pos + 1);
+                                    block.css({
+                                        '-webkit-box-ordinal-group': stringpos,
+                                        '-moz-box-ordinal-group': stringpos,
+                                        'box-ordinal-group': stringpos
+                                });
+                            });
+                        }
+                    load
+                        {
+                            data('fade', function (fade) {
+                                block.key('fade', fade);
+                                block.child('fade/input').$().val(String(fade));
+                                block.child('fade/wrapper/text').html('').data(String(fade));
+                            });
+                            var rgbupdate = function () {
+                                var currentrgbcss = util.rgbcss(block.key('r'), block.key('g'), block.key('b'));
+                                block.child('colorwrap/color').css('background-color', currentrgbcss);
+                                if (!block.key('editcolor'))
+                                    block.child('colorwrap/color').css('border', '3px solid ' + currentrgbcss);
+                                if (block.key('r') > app.ui.color_picker.bw_threshold && block.key('g') > app.ui.color_picker.bw_threshold && block.key('b') > app.ui.color_picker.bw_threshold) {
+                                    block.child('colorwrap/color/edit_img').data({
+                                        src: 'img/pencil_b.png'
+                                    });
+                                } else {
+                                    block.child('colorwrap/color/edit_img').data({
+                                        src: 'img/pencil_w.png'
+                                    });
+                                }
+                            }
+                            data('r', function (r) {
+                                block.key('r', r);
+                                rgbupdate();
+                            });
+                            data('g', function (g) {
+                                block.key('g', g);
+                                rgbupdate();
+                            });
+                            data('b', function (b) {
+                                block.key('b', b);
+                                rgbupdate();
+                            });
+                            data('hex', hex => {
+                                var rgb_val = util.hex_rgb(hex);
+                                block.data(rgb_val);
+                            });
+                            data('time', function (time) {
+                                block.key('time', time);
+                                block.child('time/input').$().val(String(time));
+                                block.child('time/wrapper/text').html('').data(String(time));
+                            });
+                            data('id', function (id) {
+                                block.key('id', id);
+                            });
+                            data('pos', pos => {
+                                block.on('setOrdinalPos', { pos: pos });
+                            });
+                        }
+                div colors
+                    class flexcontainer
+                    css
+                        width 100%
+                        height calc(100% - 90px)
+                        margin-bottom 5px
+                        overflow scroll
+                    {
+                        block.key('draggingitem', -1);
+                    }
+                    #list
+                        {
+                            // console.log(list);
+                            var children = block.children();
+                            for (var c in children) {
+                                if (children.hasOwnProperty(c) && c != 'addbutton') {
+                                    block.remove(c);
+                                }
+                            }
+                            var numcolors = 0;
+                            for (var l in list) {
+                                block.add(Block('pattern-color', 'color_' + l), 'addbutton');
+                                // console.log(list[l]);
+                                block.child('color_' + l)
+                                    .data({ 'id': l })
+                                    .data(list[l].hue)
+                                    .data({ 'pos': list[l].pos });
+                                numcolors++;
+                            }
+                            numcolors++;
+                            block.child('addbutton').css({
+                                '-webkit-box-ordinal-group': "" + numcolors,
+                                '-moz-box-ordinal-group': "" + numcolors,
+                                'box-ordinal-group': "" + numcolors
+                            });
+                            Block.queries();
+                        }
+                    block addbutton
+                        css
+                            height 64px
+                            cursor pointer
+                            background-color rgba(76, 76, 76, 0)
+                            transition background-color 0.2s ease
+                            text-align center
+                            opacity 0.8
+                            margin 1px auto 40px auto
+                            border-radius 8px
+                            width 88.3%
+                        :mouseover
+                            css
+                                background-color rgba(76, 76, 76, 0.1)
+                        :mouseout
+                            css
+                                background-color rgba(76, 76, 76, 0)
+                        :mousedown
+                            css
+                                background-color rgba(76, 76, 76, 0.2)
+                        :mouseup
+                            css
+                                background-color rgba(76, 76, 76, 0.1)
+                        :click
+                            {
+                                if (Object.keys(block.siblings()).length - 1 <= app.ui.pattern_picker.pattern_l_limit)
+                                    app.ui.pattern_picker.add_pattern_color();
+                            }
+                        image img
+                            src img/plus_bl.png
+                            height 30px
+                            width 30px
+                            css
+                                margin 0 auto
+    div audio_react_menu
+        $submenu_title Audio React Editor
+        css
+            height 100%
+            width 100%
+            top 0
+            right 0
+            position absolute
+            text-align left
+            display none
+            overflow-y auto
+        :load_current
+            {
+                block.on('update_current');
+            }
+        :update_current
+            {
+                if (data.hasOwnProperty('updates') && data.updates) {
+                    for (var data_id in data.updates) {
+                        var data_value = data.updates[data_id];
+                        app.ui.audio_react_menu.music_settings[data_id] = data_value;
+                        var child_block = block.child(`music/${data_id}`);
+                        child_block.data({
+                            val: data_value
+                        });
+                        // console.log(`received update: ${data_id} = ${data_value}`);
+                    }
+                }
+            }
+        div music
+            css
+                position absolute
+                top 0
+                left 0
+                width 100%
+                height auto
+            :show
+                {
+                    var siblings = block.parent().children();
+                    for (var s in siblings) {
+                        if (s != block.mark()) siblings[s].css('display', 'none');
+                    }
+                    block.css('display', 'block');
+                    Block.queries();
+                }
+            div spacer
+                css
+                    width 100%
+                    height 1px
+                    ///background-color #eee
+                    opacity 0.65
+                    margin-bottom 25px
+            !selector-menu
+                init
+                    {
+                        var block = Block();
+                        block
+                            .key('visible', false)
+                            .css({
+                                "position": "relative",
+                                "width": "105px",
+                                "height": "40px",
+                                "border": "1px solid #e8e8e8",
+                                "padding": "0 40px 0 10px",
+                                "border-radius": "4px",
+                                "cursor": "pointer",
+                                "box-sizing": "border-box"
+                            })
+                            .__child('content')
+                                .__add(Block('div', 'options')
+                                    .css({
+                                        "position": "absolute",
+                                        "width": "101%",
+                                        "min-height": "50px",
+                                        "bottom": "35px",
+                                        "left": "-1px",
+                                        "background-color": "white",
+                                        "border": "1px solid #eee",
+                                        "border-radius": "5px 5px 5px 0",
+                                        "cursor": "default",
+                                        "box-shadow": "rgba(210, 210, 210, 0.3) 0px 2px 4px",
+                                        "z-index": "10",
+                                        "display": "none",
+                                        "opacity": "0",
+                                        "transition": "opacity 0.15s ease"
+                                    })
+                                    .on('show', function (e, b, d) {
+                                        b.css('display', 'block');
+                                        setTimeout(function () {
+                                            b.css('opacity', '1');
+                                        }, 10);
+                                        e.stopPropagation();
+                                    })
+                                    .on('hide', function (e, b, d) {
+                                        b.css('opacity', '0');
+                                        setTimeout(function () {
+                                            b.css('display', 'none');
+                                        }, 160);
+                                        e.stopPropagation();
+                                    })
+                                )
+                                .__add(Block('text', 1)
+                                    .data('...')
+                                    .css({
+                                        "color" : "#333",
+                                        "letter-spacing": "0.4px",
+                                        "font-size": "15px"
+                                    })
+                                )
+                                .__add(Block('image', 'arrow')
+                                    .data({
+                                        src: "img/down_b.png",
+                                        height: "20px",
+                                        width: "20px"
+                                    })
+                                    .css({
+                                        "position": "absolute",
+                                        "right": "4px",
+                                        "top": "10px",
+                                        "bottom": "10px",
+                                        "margin": "auto",
+                                        "opacity": "0.8",
+                                        "transition": "transform 0.1s ease",
+                                        "transform": "rotate(90deg)"
+                                    })
+                                    .on('up', function (e, b, d) {
+                                        b.css('transform', 'rotate(90deg');
+                                        e.stopPropagation();
+                                    })
+                                    .on('down', function (e, b, d) {
+                                        b.css('transform', 'rotate(180deg');
+                                        e.stopPropagation();
+                                    })
+                                )
+                                .__parent()
+                            .on('click', function (e, b, d) {
+                                if (b.key('visible')) {
+                                    b.__child('content/options').on('hide');
+                                    b.__child('content/arrow').on('up');
+                                    b.key('visible', false);
+                                } else {
+                                    b.__child('content/options').on('show');
+                                    b.__child('content/arrow').on('down');
+                                    b.key('visible', true);
+                                }
+                            })
+                            .setAdd(block.__child("content/options"))
+                        ;
+                        return block;
+                    }
+                load
+                    {
+                        data('select', function (option) {
+                            block.__child("content/text").html('').data(option);
+                        });
+                    }
+            !selector-channel
+                init
+                    {
+                        return Block('div')
+                            .css({
+                                width: '100%',
+                                height: '30px',
+                                backgroundColor: 'rgba(255, 255, 255, 0)',
+                                cursor: 'pointer',
+                                borderBottom: '1px solid #f8f8f8'
+                            })
+                            .add(Block('block', 1)
+                                .add(Block('text', 1)
+                                    .data('title')
+                                    .css({
+                                        fontSize: '15px',
+                                        // paddingLeft: '25px',
+                                        color: '#333',
+                                        letterSpacing: '0.4px'
+                                    })
+                                )
+                            )
+                            .on('mouseover', function (e, b) {
+                                b.css('background-color', '#f3f3f3');
+                                e.stopPropagation();
+                            })
+                            .on('mouseout', function (e, b) {
+                                b.css('background-color', 'rgba(255, 255, 255, 0)');
+                                e.stopPropagation();
+                            })
+                            .on('click', function (e, b, d) {
+                                if (b.key('side') == 'left') {
+                                    app.ui.audio_react_menu.music_settings.l_ch = parseInt(b.key('num')) - 1;
+                                    app.ui.audio_react_menu.api.send_left_channel();
+                                } else if (b.key('side') == 'right') {
+                                    app.ui.audio_react_menu.music_settings.r_ch = parseInt(b.key('num')) - 1;
+                                    app.ui.audio_react_menu.api.send_right_channel();
+                                }
+                                if (app.ui.audio_react_menu.music_settings.enabled) {
+                                    setTimeout(function () {
+                                        app.ui.audio_react_menu.api.play_music();
+                                    }, 75);
+                                }
+                                e.stopPropagation();
+                            })
+                        ;
+                    }
+                load
+                    {
+                        data('num', function (num) {
+                            block.key('num', num);
+                            block.child('block/text').html('').data(num);
+                        });
+                        data('side', function (side) {
+                            block.key('side', side);
+                        });
+                    }
+            block enable
+                $templock unlock
+                :on
+                    {
+                        var sw = block.child('switch_wrap/switch');
+                        if (!sw.key('state')) sw.data('on');
+                        event.stopPropagation();
+                    }
+                :off
+                    {
+                        var sw = block.child('switch_wrap/switch');
+                        if (sw.key('state')) sw.data('off');
+                        event.stopPropagation();
+                    }
+                css
+                    height 90px
+                    //margin-top 40px
+                    margin-top 0
+                    margin-bottom 10px
+                    background-color #f8f8f8
+                    border-bottom 1px solid #f9f9f9
+                    display none
+                div switch_wrap
+                    css
+                        height 35px
+                        width 170px
+                        margin 0 auto
+                    switch switch
+                        val off
+                        label React
+                        css
+                            font-size 22px
+                            color #222
+                        :modified
+                            {
+                                if (block.parent()) {
+                                    if (block.parent(1).key('templock') == 'lock') 
+                                        block.parent(1).key('templock', 'unlock');   
+                                    else {
+                                        data.locked = data.hasOwnProperty('locked') && (data.locked ? true : false);
+                                        if (!data.locked) {
+                                            if (block.key('state'))
+                                                app.playMusic();
+                                            else app.playNone();
+                                        }
+                                    }
+                                }
+                            }
+            block smoothing
+                css
+                    height 60px
+                    padding-left 60px
+                    box-sizing border-box
+                    //border-top 1px solid #fafafa
+                    //border-bottom 1px solid #fafafa
+                #val
+                    {
+                        block.child('wrap/input').$().val(val);
+                        block.child('wrap/value/text').html('').data(val);
+                    }
+                div wrap
+                    css
+                        height 30px
+                        width auto
+                    block label
+                        css
+                            width auto
+                            height 30px
+                            float left
+                            margin-right 20px
+                        text text
+                            val Smoothing
+                            css
+                                font-size 18px
+                    input input
+                        type range
+                        min 0
+                        max 99
+                        value 95
+                        css
+                            display block
+                            float left
+                            height 30px
+                            margin 0
+                            cursor pointer
+                            opacity 0.8
+                        @query window width != 0
+                            {
+                                block.css('width', (block.parent().$().width() - 30 - block.sibling('label').$().width() - 70 - 30) + 'px');
+                            }
+                        :input
+                            {
+                                var val = parseInt(block.$().val().trim());
+                                if (!isNaN(val)) {
+                                    if (val < 0) val = 0;
+                                    if (val > 99) val = 99;
+                                    block.sibling('value').child('text').html('' + val);
+                                    if (data && data.latent && data.latent === true) {
+                                        app.ui.audio_react_menu.music_settings.smoothing = val;
+                                        app.ui.audio_react_menu.api.send_smoothing(!(data.latent ? true : false));
+                                    }
+                                }
+                            }
+                        :mouseup
+                            {
+                                block.on('input', { latent: true });
+                                if (app.ui.audio_react_menu.music_settings.enabled) {
+                                    setTimeout(function () {
+                                        app.ui.audio_react_menu.api.play_music();
+                                    }, 75);
+                                }
+                            }
+                    block value
+                        css
+                            width 30px
+                            height 30px
+                            float left
+                            margin-left 20px
+                        text text
+                            val 95
+                            css
+                                font-size 18px
+            block noise_gate
+                css
+                    height 60px
+                    padding-left 60px
+                    box-sizing border-box
+                    //border-bottom 1px solid #fafafa
+                #val
+                    {
+                        block.child('wrap/input').$().val(val);
+                        block.child('wrap/value/text').html('').data(val);
+                    }
+                div wrap
+                    css
+                        height 30px
+                        width auto
+                    block label
+                        css
+                            width auto
+                            height 30px
+                            float left
+                            margin-right 20px
+                        text text
+                            val Noise Gate
+                            css
+                                font-size 18px
+                    input input
+                        type range
+                        min 0
+                        max 50
+                        value 15
+                        css
+                            display block
+                            float left
+                            height 30px
+                            margin 0
+                            cursor pointer
+                            opacity 0.8
+                        @query window width != 0
+                            {
+                                block.css('width', (block.parent().$().width() - 30 - block.sibling('label').$().width() - 70 - 30) + 'px');
+                            }
+                        :input
+                            {
+                                
+                                var val = parseInt(block.$().val().trim());
+                                if (!isNaN(val)) {
+                                    if (val < 0) val = 0;
+                                    if (val > 50) val = 50;
+                                    block.sibling('value').child('text').html('' + val);
+                                    if (data && data.latent && data.latent === true) {
+                                        app.ui.audio_react_menu.music_settings.noise_gate = val;
+                                        app.ui.audio_react_menu.api.send_noise_gate(!(data.latent ? true : false));
+                                    }
+                                }
+                            }
+                        :mouseup
+                            {
+                                block.on('input', { latent: true });
+                                if (app.ui.audio_react_menu.music_settings.enabled) {
+                                    setTimeout(function () {
+                                        app.ui.audio_react_menu.api.play_music();
+                                    }, 75);
+                                }
+                            }
+                    block value
+                        css
+                            width 30px
+                            height 30px
+                            float left
+                            margin-left 20px
+                        text text
+                            val 15
+                            css
+                                font-size 18px
+            block l_bar
+                css
+                    height 60px
+                    margin-top 20px
+                    margin-bottom 17px
+                    background-color #fafafa
+                    box-sizing border-box
+                div wrap
+                    css
+                        height 50px
+                        width auto
+                    block title
+                        css
+                            width auto
+                            margin 0 auto
+                        text text
+                            html left &nbsp;
+                            css
+                                text-transform uppercase
+                                font-size 20px
+                                color #222
+                                letter-spacing 1px
+            block l_ch
+                css
+                    width auto
+                    height 50px
+                    //padding-left 80px
+                    box-sizing border-box
+                    margin 8px auto
+                block ch-lbl
+                    css
+                        width auto
+                        float left
+                        margin-right 20px
+                    text text
+                        val Channel
+                        css
+                            font-size 16px
+                block ch-selector
+                    css
+                        width auto
+                        float left
+                    selector-menu selector
+                        css
+                            background-color white
+                            width 40px
+                            height 35px
+                            padding 0 37px 0 13px
+                        {
+                            block.data({ select: '1' });
+                            for (var i = 1; i < 8; i++) {
+                                var num = "" + i;
+                                if (i == 0) num += " (bass)";
+                                block.add(Block('selector-channel', 'ch-' + i)
+                                    .data({
+                                        num: num,
+                                        side: 'left'
+                                    })
+                                );
+                            }
+                        }
+                    #select
+                        {
+                            block.child('selector').data({ select: select + 1 });
+                        }
+                #val
+                    {
+                        var selector = block.child('ch-selector/selector');
+                        selector.parent().data({
+                            select: val
+                        });
+                        if (selector.key('visible') === true) {
+                            selector.on('click');
+                        }
+                    }
+                div spacer
+                    css
+                        width 30px
+                        height 100%
+                        float left
+                block i-sw
+                    css
+                        width auto
+                        float left
+                    switch switch
+                        label Invert
+                        val on
+                        css
+                            font-size 16px
+                        {
+                            block.child('label').css({
+                                'min-width': '20px',
+                                'margin-right': '15px'
+                            });
+                        }
+                        :modified
+                            {
+                                data.locked = data.hasOwnProperty('locked') && (data.locked ? true : false);
+                                if (!data.locked) {
+                                    app.ui.audio_react_menu.music_settings.l_invert = block.key('state');
+                                    app.ui.audio_react_menu.api.send_left_invert();
+                                    if (app.ui.audio_react_menu.music_settings.enabled) {
+                                        setTimeout(function () {
+                                            app.ui.audio_react_menu.api.play_music();
+                                        }, 75);
+                                    }
+                                }
+                            }
+            block l_invert
+                css
+                    display none
+                #val
+                    {
+                        block.sibling('l_ch').child('i-sw/switch').data(val ? 'on' : 'off');
+                    }
+            block l_preamp
+                css
+                    height 50px
+                    padding-left 80px
+                    padding-right 35px
+                    box-sizing border-box
+                    margin-top 6px
+                    //border-bottom 1px solid #fafafa
+                #val
+                    {
+                        block.child('wrap/input').$().val(val);
+                        block.child('wrap/value/text').html('').data("" + parseInt(val));
+                    }
+                div wrap
+                    css
+                        height 30px
+                        width auto
+                    block label
+                        css
+                            width auto
+                            height 30px
+                            float left
+                            margin-right 20px
+                        text text
+                            val Pre-Amp
+                            css
+                                font-size 16px
+                    input input
+                        type range
+                        min 20
+                        max 200
+                        value 100
+                        css
+                            display block
+                            float left
+                            height 30px
+                            margin 0
+                            cursor pointer
+                            opacity 0.8
+                        @query window width != 0
+                            {
+                                block.css('width', (block.parent().$().width() - 30 - block.sibling('label').$().width() - 70) + 'px');
+                            }
+                        :input
+                            {
+                                var val = parseInt(block.$().val().trim());
+                                if (!isNaN(val)) {
+                                    if (val < 1) val = 1;
+                                    if (val > 200) val = 200;
+                                    block.sibling('value').child('text').html('' + val);
+                                    if (data && data.latent && data.latent === true) {
+                                        app.ui.audio_react_menu.music_settings.l_preamp = val;
+                                        app.ui.audio_react_menu.api.send_left_preamp(!(data.latent ? true : false));
+                                    }
+                                }
+                            }
+                        :mouseup
+                            {
+                                block.on('input', { latent: true });
+                                if (app.ui.audio_react_menu.music_settings.enabled) {
+                                    setTimeout(function () {
+                                        app.ui.audio_react_menu.api.play_music();
+                                    }, 75);
+                                }
+                            }
+                    block value
+                        css
+                            width 30px
+                            height 30px
+                            float left
+                            margin-left 20px
+                        text text
+                            val 1
+                            css
+                                font-size 18px
+            block l_postamp
+                css
+                    height 50px
+                    padding-left 80px
+                    padding-right 35px
+                    box-sizing border-box
+                    margin-top 6px
+                    //border-bottom 1px solid #fafafa
+                #val
+                    {
+                        block.child('wrap/input').$().val(val);
+                        block.child('wrap/value/text').html('').data(val);
+                    }
+                div wrap
+                    css
+                        height 30px
+                        width auto
+                    block label
+                        css
+                            width auto
+                            height 30px
+                            float left
+                            margin-right 20px
+                        text text
+                            val Post-Amp
+                            css
+                                font-size 16px
+                    input input
+                        type range
+                        min 1
+                        max 10
+                        value 1
+                        css
+                            display block
+                            float left
+                            height 30px
+                            margin 0
+                            cursor pointer
+                            opacity 0.8
+                        @query window width != 0
+                            {
+                                block.css('width', (block.parent().$().width() - 30 - block.sibling('label').$().width() - 70) + 'px');
+                            }
+                        :input
+                            {
+                                var val = parseInt(block.$().val().trim());
+                                if (!isNaN(val)) {
+                                    if (val < 1) val = 1;
+                                    if (val > 20) val = 20;
+                                    block.sibling('value').child('text').html('' + val);
+                                    if (data && data.latent && data.latent === true) {
+                                        app.ui.audio_react_menu.music_settings.l_postamp = val;
+                                        app.ui.audio_react_menu.api.send_left_postamp(!(data.latent ? true : false));
+                                    }
+                                }
+                            }
+                        :mouseup
+                            {
+                                block.on('input', { latent: true });
+                                if (app.ui.audio_react_menu.music_settings.enabled) {
+                                    setTimeout(function () {
+                                        app.ui.audio_react_menu.api.play_music();
+                                    }, 75);
+                                }
+                            }
+                    block value
+                        css
+                            width 30px
+                            height 30px
+                            float left
+                            margin-left 20px
+                        text text
+                            val 1
+                            css
+                                font-size 18px
+            block r_bar
+                css
+                    height 60px
+                    margin-top 20px
+                    margin-bottom 17px
+                    background-color #fafafa
+                    box-sizing border-box
+                div wrap
+                    css
+                        height 50px
+                        width auto
+                    block title
+                        css
+                            width auto
+                            margin 0 auto
+                        text text
+                            html right &nbsp;
+                            css
+                                text-transform uppercase
+                                font-size 20px
+                                color #222
+                                letter-spacing 1px
+            block r_ch
+                css
+                    width auto
+                    height 50px
+                    // padding-left 80px
+                    box-sizing border-box
+                    margin 8px auto
+                block ch-lbl
+                    css
+                        width auto
+                        float left
+                        margin-right 20px
+                    text text
+                        val Channel
+                        css
+                            font-size 16px
+                block ch-selector
+                    css
+                        width auto
+                        float left
+                    selector-menu selector
+                        css
+                            background-color white
+                            width 40px
+                            height 35px
+                            padding 0 37px 0 13px
+                        {
+                            block.data({ select: '1' });
+                            for (var i = 1; i < 8; i++) {
+                                var num = "" + i;
+                                if (i == 0) num += " (bass)";
+                                block.add(Block('selector-channel', 'ch-' + i)
+                                    .data({
+                                        num: num,
+                                        side: 'right'
+                                    })
+                                );
+                            }
+                        }
+                    #select
+                        {
+                            block.child('selector').data({ select: select + 1 });
+                        }
+                #val
+                    {
+                        var selector = block.child('ch-selector/selector');
+                        selector.parent().data({
+                            select: val
+                        });
+                        if (selector.key('visible') === true) {
+                            selector.on('click');
+                        }
+                    }
+                div spacer
+                    css
+                        width 30px
+                        height 100%
+                        float left
+                block i-sw
+                    css
+                        width auto
+                        float left
+                    switch switch
+                        label Invert
+                        val on
+                        css
+                            font-size 16px
+                        {
+                            block.child('label').css({
+                                'min-width': '20px',
+                                'margin-right': '15px'
+                            });
+                        }
+                        :modified
+                            {
+                                
+                                data.locked = data.hasOwnProperty('locked') && (data.locked ? true : false);
+                                if (!data.locked) {
+                                    app.ui.audio_react_menu.music_settings.r_invert = block.key('state');
+                                    app.ui.audio_react_menu.api.send_right_invert();
+                                    if (app.ui.audio_react_menu.music_settings.enabled) {
+                                        setTimeout(function () {
+                                            app.ui.audio_react_menu.api.play_music();
+                                        }, 75);
+                                    }
+                                }
+                            }
+            block r_invert
+                css
+                    display none
+                #val
+                    {
+                        block.sibling('r_ch').child('i-sw/switch').data(val ? 'on' : 'off');
+                    }
+            block r_preamp
+                css
+                    height 50px
+                    padding-left 80px
+                    padding-right 35px
+                    box-sizing border-box
+                    margin-top 6px
+                    //border-bottom 1px solid #fafafa
+                #val
+                    {
+                        block.child('wrap/input').$().val(val);
+                        block.child('wrap/value/text').html('').data("" + parseInt(val));
+                    }
+                div wrap
+                    css
+                        height 30px
+                        width auto
+                    block label
+                        css
+                            width auto
+                            height 30px
+                            float left
+                            margin-right 20px
+                        text text
+                            val Pre-Amp
+                            css
+                                font-size 16px
+                    input input
+                        type range
+                        min 20
+                        max 200
+                        value 100
+                        css
+                            display block
+                            float left
+                            height 30px
+                            margin 0
+                            cursor pointer
+                            opacity 0.8
+                        @query window width != 0
+                            {
+                                block.css('width', (block.parent().$().width() - 30 - block.sibling('label').$().width() - 70) + 'px');
+                            }
+                        :input
+                            {
+                                var val = parseInt(block.$().val().trim());
+                                if (!isNaN(val)) {
+                                    if (val < 1) val = 1;
+                                    if (val > 200) val = 200;
+                                    block.sibling('value').child('text').html('' + val);
+                                    if (data && data.latent && data.latent === true) {
+                                        app.ui.audio_react_menu.music_settings.r_preamp = val;
+                                        app.ui.audio_react_menu.api.send_right_preamp(!(data.latent ? true : false));
+                                    }
+                                }
+                            }
+                        :mouseup
+                            {
+                                block.on('input', { latent: true });
+                                if (app.ui.audio_react_menu.music_settings.enabled) {
+                                    setTimeout(function () {
+                                        app.ui.audio_react_menu.api.play_music();
+                                    }, 75);
+                                }
+                            }
+                    block value
+                        css
+                            width 30px
+                            height 30px
+                            float left
+                            margin-left 20px
+                        text text
+                            val 1
+                            css
+                                font-size 18px
+            block r_postamp
+                css
+                    height 50px
+                    padding-left 80px
+                    padding-right 35px
+                    box-sizing border-box
+                    margin-top 6px
+                    //border-bottom 1px solid #fafafa
+                #val
+                    {
+                        block.child('wrap/input').$().val(val);
+                        block.child('wrap/value/text').html('').data(val);
+                    }
+                div wrap
+                    css
+                        height 30px
+                        width auto
+                    block label
+                        css
+                            width auto
+                            height 30px
+                            float left
+                            margin-right 20px
+                        text text
+                            val Post-Amp
+                            css
+                                font-size 16px
+                    input input
+                        type range
+                        min 1
+                        max 10
+                        value 1
+                        css
+                            display block
+                            float left
+                            height 30px
+                            margin 0
+                            cursor pointer
+                            opacity 0.8
+                        @query window width != 0
+                            {
+                                block.css('width', (block.parent().$().width() - 30 - block.sibling('label').$().width() - 70) + 'px');
+                            }
+                        :input
+                            {
+                                var val = parseInt(block.$().val().trim());
+                                if (!isNaN(val)) {
+                                    if (val < 1) val = 1;
+                                    if (val > 20) val = 20;
+                                    block.sibling('value').child('text').html('' + val);
+                                    if (data && data.latent && data.latent === true) {
+                                        app.ui.audio_react_menu.music_settings.r_postamp = val;
+                                        app.ui.audio_react_menu.api.send_right_postamp(!(data.latent ? true : false));
+                                    }
+                                }
+                            }
+                        :mouseup
+                            {
+                                block.on('input', { latent: true });
+                                if (app.ui.audio_react_menu.music_settings.enabled) {
+                                    setTimeout(function () {
+                                        app.ui.audio_react_menu.api.play_music();
+                                    }, 75);
+                                }
+                            }
+                    block value
+                        css
+                            width 30px
+                            height 30px
+                            float left
+                            margin-left 20px
+                        text text
+                            val 1
+                            css
+                                font-size 18px
+            div spacer_post
+                css
+                    width 100%
+                    height 1px
+                    margin-top 24px

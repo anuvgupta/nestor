@@ -1,5 +1,5 @@
 {
-    "meta": {
+    "node": {
         "img": "led_b",
         "label": "Simple LED"
     },

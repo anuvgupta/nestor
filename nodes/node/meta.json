@@ -1,7 +1,7 @@
 {
-    "meta": {
+    "node": {
         "img": "board_b",
-        "label": "Vizio IR"
+        "label": "Nestor Node"
     },
     "data": []
 }

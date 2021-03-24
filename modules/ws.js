@@ -19,7 +19,11 @@ var ws_server = {
     online: false,
     clients: {}, // client sockets
     events: {}, // event handlers
+    api_events: {
+        node_ready: []
+    },
     quiet_events: [],
+    cond_quiet_events: {},
     // encode event+data to JSON
     encode_msg: (e, d) => {
         return JSON.stringify({
@@ -125,6 +129,19 @@ var ws_server = {
             }
         }
     },
+    // fire api events
+    fire_api_events: (event_name, event_args) => {
+        if (ws_server.api_events.hasOwnProperty(event_name) && ws_server.api_events[event_name]) {
+            for (h in ws_server.api_events[event_name]) {
+                var handler = ws_server.api_events[event_name][h];
+                handler.apply(handler, event_args);
+            };
+        }
+    },
+    // bind api events
+    bind_api_events: (event_name, event_handler) => {
+        ws_server.api_events[event_name].push(event_handler);
+    },
     // initialize server
     init: _ => {
         // attach server socket events
@@ -143,8 +160,9 @@ var ws_server = {
                 var d = ws_server.decode_msg(m.data); // parse message
                 if (d != null) {
                     // console.log('    ', d.event, d.data);
-                    if (!ws_server.quiet_events.includes(d.event))
-                        log(`client ${client.id} – message: ${d.event}`, d.data);
+                    if (!ws_server.quiet_events.includes(d.event) &&
+                        !(ws_server.cond_quiet_events.hasOwnProperty(d.event) && ws_server.cond_quiet_events[d.event](d.data))
+                    ) log(`client ${client.id} – message: ${d.event}`, d.data);
                     // handle various events
                     if (ws_server.events.hasOwnProperty(d.event))
                         ws_server.events[d.event](client, d.data);
@@ -367,7 +385,31 @@ var init = _ => {
             log(`get_node_data | client ${client.id} requested node ${node_id} data`);
         });
     });
-
+    ws_server.bind('update_user_data', (client, req) => {
+        var client_user_id = `${client.o_id}`;
+        if (req.hasOwnProperty('key') && req.hasOwnProperty('action') && req.hasOwnProperty('value') && req.hasOwnProperty('query') && req.hasOwnProperty('options')) {
+            m.db.update_user_data(client_user_id, `${req.key}`, `${req.action}`, req.value, req.query, req.options, result1 => {
+                if (result1 === null || result1 === false) return;
+                if (req.options && req.options.hasOwnProperty('boomerang') && req.options.boomerang == true)
+                    ws_server.trigger_for_user("get_user_data", { key: req.key }, client_user_id);
+                else ws_server.trigger_for_user_except("get_user_data", { key: req.key }, client_user_id, client.id);
+                log(`update_user_data | client ${client.id} updated user data ${req.key}`);
+            });
+        }
+    });
+    ws_server.bind('get_user_data', (client, req) => {
+        var client_user_id = `${client.o_id}`;
+        if (req.hasOwnProperty('key')) {
+            m.db.get_user_data(client_user_id, `${req.key}`, result1 => {
+                if (result1 === null || result1 === false) return;
+                ws_server.send_to_client("user_data", {
+                    key: `${req.key}`,
+                    value: result1
+                }, client);
+                log(`get_user_data | client ${client.id} requested user data ${req.key}`);
+            });
+        }
+    });
 
     // client: device
     ws_server.bind('core_sync', (client, req) => {
@@ -445,11 +487,12 @@ var init = _ => {
                     else if (node === null)
                         ws_server.send_to_device("node-hb", `${node_mdb_id}-404`, client);
                     else {
-                        log(`node_hb | client ${client.id} - node ${node_mdb_id} heartbeat`);
+                        // log(`node_hb | client ${client.id} - node ${node_mdb_id} heartbeat`);
                         var now = (new Date()).getTime();
                         m.db.set_node_status(node_mdb_id, "online", now, client.id, result => {
                             if (result === null || result === false) return;
                             if (node.status != "online") {
+                                // node just connected
                                 ws_server.send_to_user("node_status", {
                                     id: node._id.toString(),
                                     core_id: node.core_id,
@@ -461,12 +504,17 @@ var init = _ => {
                                     if (initial_vals.hasOwnProperty(field_i)) {
                                         ws_server.trigger_for_user('update_node_data', {
                                             id: node._id.toString(),
-                                            transitional: true,
+                                            transitional: false,
                                             field_id: field_i,
                                             field_val: node.data[field_i] == undefined ? initial_vals[field_i] : node.data[field_i]
                                         }, node.user_id);
                                     }
                                 }
+                                setTimeout(_ => {
+                                    node.status = "online";
+                                    node.status_time = now;
+                                    ws_server.fire_api_events('node_ready', [node._id.toString(), node]);
+                                }, 100);
                             }
                         });
                     }
@@ -474,7 +522,7 @@ var init = _ => {
             }
         });
     });
-    // ws_server.quiet_events.push('node_hb');
+    ws_server.quiet_events.push('node_hb');
     ws_server.bind('node_sync', (client, req) => {
         m.db.get_core_info(null, null, `${req.core_code}`, client.id, core => {
             if (core === false) return;
@@ -553,6 +601,7 @@ var init = _ => {
             if (node === false || node === null) return;
             var field_type = m.main.get_driver_field_type(node.type, req.field_id);
             var transitional_val = req.hasOwnProperty('transitional') && req.transitional === true;
+            var transitional_text = transitional_val ? 'true' : 'false';
             req.field_val = m.utils.correct_type(req.field_val, field_type);
             var _send = _ => {
                 for (var c_id in ws_server.clients) {
@@ -563,7 +612,7 @@ var init = _ => {
                         ws_server.clients[c_id].type == "core" &&
                         ws_server.clients[c_id].o_id == node.core_id
                     ) {
-                        ws_server.clients[c_id].socket.send(`@node-data-${node._id.toString()}-${req.field_id}-${req.field_val}`);
+                        ws_server.clients[c_id].socket.send(`@node-data-${node._id.toString()}-${req.field_id}-${transitional_text}-${req.field_val}`);
                     }
                 }
             };
@@ -572,7 +621,9 @@ var init = _ => {
                 m.db.set_node_data(node_id, req.field_id, req.field_val, client.id, result => {
                     if (result === false || result === null) return;
                     log(`update_node_data | client ${client.id} updated node ${node_id} data`);
-                    ws_server.trigger_for_user_except("get_node_data", { id: node_id, field: req.field_id }, node.user_id, client.id);
+                    if (req.hasOwnProperty('boomerang') && req.boomerang == true)
+                        ws_server.trigger_for_user("get_node_data", { id: node_id, field: req.field_id }, node.user_id);
+                    else ws_server.trigger_for_user_except("get_node_data", { id: node_id, field: req.field_id }, node.user_id, client.id);
                     m.db.get_core_info(node.core_id, node.user_id, null, client.id, core => {
                         if (core === false || core === null) return;
                         if (core.status == "online") _send();
@@ -593,10 +644,38 @@ var init = _ => {
             ) _next();
         });
     });
+    ws_server.cond_quiet_events['update_node_data'] = (data => (data.hasOwnProperty('transitional') && data.transitional == true));
+    ws_server.bind('trigger_node_api', (client, req) => {
+        var client_user_id = `${client.o_id}`;
+        if (req.hasOwnProperty('node_type') && req.hasOwnProperty('api_req') && req.hasOwnProperty('api_args')) {
+            req.api_args.user_id = client_user_id;
+            req.node_type = req.node_type.split('|').join('-');
+            m.main.call_driver_api(req.node_type, req.api_req, req.api_args, result1 => {
+                if (result1 === null || result1 === false) return;
+                log(`trigger_node_api | client ${client.id} triggered node api ${req.node_type}.${req.api_req}`);
+            });
+        }
+    });
 };
 var api = {
+    trigger_user_data_update: (user_id, data_key) => {
+        ws_server.trigger_for_user('get_user_data', {
+            key: data_key
+        }, user_id);
+    },
     broadcast_core_hb: _ => {
         ws_server.send_to_device_group("hb", "", "core");
+    },
+    send_to_device: (event, data, client, auth_req = true) => {
+        ws_server.send_to_device(event, data, client, auth_req);
+    },
+    get_client_by_o_id: o_id => {
+        for (var c_id in ws_server.clients) {
+            if (ws_server.clients.hasOwnProperty(c_id) && ws_server.clients[c_id].o_id === o_id) {
+                return ws_server.clients[c_id];
+            }
+        }
+        return null;
     },
     update_core_status: (core_id, status, status_time, user_id) => {
         ws_server.send_to_user("core_status", {
@@ -628,6 +707,10 @@ var api = {
                 }
             }
         }
+    },
+    api_bind: (event, handler) => {
+        if (event && handler)
+            ws_server.bind_api_events(event, handler);
     }
 };
 

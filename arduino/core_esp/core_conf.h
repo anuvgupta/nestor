@@ -8,8 +8,8 @@
 #define WIFI_PASS ""
 
 // device
-#define DEVICE_CODE "57769"
-#define DEVICE_ID "5fa60df27e21b81a52a9a49b"
+#define DEVICE_CODE "JXeYY"
+#define DEVICE_ID "602ee6e44201281a9b270cb0"
 #define DEVICE_USER "anuv"
 #define DEVICE_PORT 80
 

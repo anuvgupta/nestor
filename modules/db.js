@@ -16,11 +16,7 @@ var mongo_port = null;
 var mongo_dbname = null;
 var mongo_client = null;
 var mongo_api = null;
-var init = _ => {
-    /*
-        TODO: initialize module variables as well as mongodb database
-    */
-};
+var init = _ => { };
 var api = {
     o_id: mongodb.ObjectId,
     example: (table, resolve) => {
@@ -357,6 +353,86 @@ var api = {
                 if (resolve) resolve(false);
             } else {
                 if (resolve) resolve(true);
+            }
+        });
+    },
+    update_user_data: (user_id, data_key, data_action, data_value, data_query, options, resolve) => {
+        var update_action = {};
+        var update_params = {};
+        if (data_action == 'set') {
+            data_action = '$set';
+            data_key = `data.${data_key}`;
+        } else if (data_action == 'delete') {
+            data_action = '$unset';
+            data_key = `data.${data_key}`;
+            data_value = '';
+        } else if (data_action == 'list_append') {
+            data_action = '$push';
+            data_key = `data.${data_key}`;
+        } else if (data_action == 'list_remove') {
+            data_action = '$pull';
+            data_key = `data.${data_key}`;
+            data_value = data_query;
+            // data_value is a query ie. data_value = { name: 'magenta' };
+        } else if (data_action == 'list_update') {
+            data_action = '$set';
+            data_key = `data.${data_key}.$[elem]`;
+            var query_key = null;
+            var query_val = null;
+            if (data_query.hasOwnProperty('_key') && data_query.hasOwnProperty('_value')) {
+                query_key = data_query._key;
+                query_val = data_query._value;
+                // query format 1
+            } else {
+                query_key = Object.keys(data_query)[0];
+                query_val = data_query[query_key];
+                // query format 2
+            }
+            if (options == null || !(options.hasOwnProperty('replace')) || options.replace != true) {
+                if (data_value.hasOwnProperty('_key') && data_value.hasOwnProperty('_value')) {
+                    data_key += `.${data_value._key}`;
+                    data_value = data_value._value;
+                    // data format 1
+                } else {
+                    var subkey = Object.keys(data_value)[0];
+                    data_key += `.${subkey}`;
+                    data_value = data_value[subkey];
+                    // by default, do not replace object
+                    // data format 2
+                }
+
+            }
+            update_params.arrayFilters = [{}];
+            update_params.arrayFilters[0][`elem.${query_key}`] = query_val;
+        }
+        update_action[data_action] = {};
+        update_action[data_action][data_key] = data_value;
+        // log(update_action, update_params);
+        mongo_api.collection('users').updateOne({ _id: m.db.o_id(user_id) }, update_action, update_params, (error1, result) => {
+            if (error1) {
+                err(`update_user_data | failed to update user data ${data_key} for user ${user_id}`, error1);
+                if (resolve) resolve(false);
+            } else {
+                if (resolve) resolve(true);
+            }
+        });
+    },
+    get_user_data: (user_id, data_key, resolve) => {
+        mongo_api.collection('users').findOne({
+            _id: m.db.o_id(user_id)
+        }, (error1, item1) => {
+            if (error1) {
+                err(`get_user_data | client ${client_id} error - get user data ${data_key}`, error1);
+                resolve(false);
+            } else {
+                if (item1 == null) {
+                    err(`get_user_data | client ${client_id} error - user data ${data_key} (not found)`);
+                    resolve(null);
+                } else {
+                    if (item1.data.hasOwnProperty(data_key)) {
+                        resolve(item1.data[data_key]);
+                    } else resolve(null);
+                }
             }
         });
     }

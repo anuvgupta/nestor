@@ -9,8 +9,8 @@
 
 // device
 #define DEVICE_USER "anuv"
-#define NODE_TYPE "simple-led"
-#define CORE_CODE "57769"
+#define NODE_TYPE "smart-led"
+#define CORE_CODE "JXeYY"
 #define CORE_PORT 80
 
 // api
@@ -21,7 +21,7 @@
 
 // preferences
 #define LOG_HB false
-#define LOG_VERBOSE true
+#define LOG_VERBOSE false
 #define ESP_VERBOSE false
 
 #endif

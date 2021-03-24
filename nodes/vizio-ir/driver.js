@@ -1,5 +1,10 @@
-/* nestor node device server driver (vizio-ir) */
+/* nestor node server driver (vizio-ir) */
 
-module.exports = _ => {
-    return {};
+const node_type = "vizio-ir";
+
+module.exports = {
+    init: (m, log) => {
+        return {};
+    },
+    api: {}
 };

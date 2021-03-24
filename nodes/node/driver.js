@@ -1,5 +1,10 @@
-/* nestor node device server driver (node) */
+/* nestor node server driver (node) */
 
-module.exports = _ => {
-    return {};
+const node_type = "node";
+
+module.exports = {
+    init: (m, log) => {
+        return {};
+    },
+    api: {}
 };
