@@ -42,11 +42,6 @@ char databuff[6]; // 5(int dig max) + 1(\0)
 int bands[7];
 int bands_record_l[7];
 int bands_record_r[7];
-int shuffle_record_l = 0;
-int shuffle_record_r = 0;
-double shuffle_beat_threshold = 500;
-int shuffle_beat_limit = 5;
-int shuffle_beat_limit_counter = 0;
 // rgb data
 double r_l = 0; // hue red (left)
 double g_l = 0; // hue green (left)
@@ -69,6 +64,19 @@ double speedmult = 100; // speed mult
 int fade = 0; // transition (ms)
 #define PRECISION 5 // 5 millisecond precision for fades
 #define RESET_INTERVAL 5 // check ESP8266 every 5 minutes
+// shuffle data
+int shuffle_record_l = 0;
+int shuffle_record_r = 0;
+double shuffle_beat_threshold = 600;
+int shuffle_beat_limit = 1;
+int shuffle_beat_limit_counter = 0;
+#define SHUFFLE_HUE_PRESET_NUM 10
+int shuffle_hue_presets[SHUFFLE_HUE_PRESET_NUM][3] = {
+  {255, 255, 255},
+  {0, 0, 255},   {0, 255, 0},   {255, 0, 0},
+  {255, 255, 0}, {255, 0, 255}, {0, 255, 255},
+  {128, 0, 128}, {255, 69, 0},  {255, 20, 147}
+};
 
 void setup() {
   // init hardware and software serials
@@ -104,7 +112,7 @@ void setup() {
 
   // init esp8266
   if (DEBUG) Serial.println(F("[nano] connecting to ESP8266"));
-  ESP8266.println("reset");
+  ESP8266.println(F("reset"));
   lastTimestamp = millis();
 }
 
@@ -118,9 +126,9 @@ void loop() {
   if (resetRequired()) {
     unsigned long newTimestamp = millis();
     if (lastTimestamp > 0) {
-      if (DEBUG) Serial.println("[nano] resetting ESP8266");
+      if (DEBUG) Serial.println(F("[nano] resetting ESP8266"));
       ready = false;
-      ESP8266.println("reset");
+      ESP8266.println(F("reset"));
     }
     lastTimestamp = newTimestamp;
   }
@@ -239,7 +247,7 @@ void bright(bool v) {
     databuff[j] = msgbuff[i];
   databuff[3] = '\0';
   brightness = atoi(databuff);
-  if (v) { Serial.print("[nano] brightness – "); Serial.println(brightness); }
+  if (v) { Serial.print(F("[nano] brightness – ")); Serial.println(brightness); }
   red_l(r_l); green_l(g_l); blue_l(b_l);
   red_r(r_r); green_r(g_r); blue_r(b_r);
 }
@@ -251,11 +259,12 @@ void speedm(bool v) {
     databuff[j] = msgbuff[i];
   databuff[3] = '\0';
   speedmult = atoi(databuff);
-  if (v) { Serial.print("[nano] speed – "); Serial.println(speedmult); }
+  if (v) { Serial.print(F("[nano] speed – ")); Serial.println(speedmult); }
   red_l(r_l); green_l(g_l); blue_l(b_l);
   red_r(r_r); green_r(g_r); blue_r(b_r);
 }
 
+/*
 // process hue from msgbuff
 void hue(bool v) {
   // parse message data
@@ -296,6 +305,7 @@ void hue(bool v) {
   red_l(r_l); green_l(g_l); blue_l(b_l);
   red_r(r_r); green_r(g_r); blue_r(b_r);
 }
+*/
 
 // process hue from msgbuff
 void hue_hex(bool v) {
@@ -353,9 +363,10 @@ void hue_hex(bool v) {
 // process shuffle from msgbuff
 void hue_shuffle(bool v) {
   shuffle_hues = (memcmp(msgbuff + 4, "true", 4) == 0);
-  if (v) { Serial.print("[nano] shuffle – "); Serial.println(shuffle_hues); }
+  if (v) { Serial.print(F("[nano] shuffle – ")); Serial.println(shuffle_hues); }
 }
 
+/*
 // process pattern from msgbuff
 void pattern(bool v) {
   // match left and right
@@ -398,6 +409,7 @@ void pattern(bool v) {
   }
   if (v) Serial.println("[nano] repeat");
 }
+*/
 
 // process hex pattern from msgbuff
 void pattern_hex(bool v) {
@@ -406,6 +418,7 @@ void pattern_hex(bool v) {
   red_l(r_l); green_l(g_l); blue_l(b_l);
   red_r(r_r); green_r(g_r); blue_r(b_r);
   // loop through tokens
+  double time_cnt = 0;
   for (int z = 1; uninterrupted() && tokenize(tokenbuff, msgbuff + 1, ',', z); z++) {
     fade = 0; // reset fade to default (none)
     // parse message data
@@ -438,11 +451,16 @@ void pattern_hex(bool v) {
     // fade into color
     fadeColor();
     // hold color for time
+//    for (j = t / PRECISION / (speedmult / 100.0); uninterrupted() && j > 0; j--) {
+//      delay(PRECISION);
+//    }
+    time_cnt = 0;
     for (j = t / PRECISION / (speedmult / 100.0); uninterrupted() && j > 0; j--) {
-      delay(PRECISION);
+      time_cnt += PRECISION;
     }
+    delay(time_cnt);
   }
-  if (v) Serial.println("[nano] repeat");
+  if (v) Serial.println(F("[nano] repeat"));
 }
 
 // fade into current color
@@ -470,18 +488,39 @@ void fadeColor() {
   red_r(r_r); green_r(g_r); blue_r(b_r);
 }
 
+/*
 // random color
 void random_hue(bool output) {
-  r_l = random(0, 255);
-  g_l = random(0, 255);
-  b_l = random(0, 255);
-  r_r = random(0, 255);
-  g_r = random(0, 255);
-  b_r = random(0, 255);
+  r_l = random(0, 256);
+  g_l = random(0, 256);
+  b_l = random(0, 256);
+  r_r = random(0, 256);
+  g_r = random(0, 256);
+  b_r = random(0, 256);
   if (output) {
     red_l(r_l); green_l(g_l); blue_l(b_l);
     red_r(r_r); green_r(g_r); blue_r(b_r);
   }
+}
+*/
+
+// random color
+int hue_i_prev = -1;
+void random_hue_preset(bool output) {
+  int hue_i = hue_i_prev;
+  while (hue_i == hue_i_prev)
+    hue_i = random(0, SHUFFLE_HUE_PRESET_NUM);
+  r_l = shuffle_hue_presets[hue_i][0];
+  g_l = shuffle_hue_presets[hue_i][1];
+  b_l = shuffle_hue_presets[hue_i][2];
+  r_r = shuffle_hue_presets[hue_i][0];
+  g_r = shuffle_hue_presets[hue_i][1];
+  b_r = shuffle_hue_presets[hue_i][2];
+  if (output) {
+    red_l(r_l); green_l(g_l); blue_l(b_l);
+    red_r(r_r); green_r(g_r); blue_r(b_r);
+  }
+  hue_i_prev = hue_i;
 }
 
 // music reactive mode
@@ -530,9 +569,10 @@ void music(bool v) {
               shuffle_beat_limit_counter = shuffle_beat_limit;
               // detect limited beat
               // Serial.println("[nano] beat");
-              random_hue(false);
+              // random_hue(false);
+              random_hue_preset(false);
             } else shuffle_beat_limit_counter--;
-          }
+          } //else shuffle_beat_limit_counter = 0;  // else shuffle_beat_limit_counter = 1;
         }
         // save
         bands_record_l[i] = level;
@@ -565,9 +605,10 @@ void music(bool v) {
           if (diff > shuffle_beat_threshold) {
             if (shuffle_beat_limit_counter <= 0) {
               shuffle_beat_limit_counter = shuffle_beat_limit;
-              random_hue(false);
+              // random_hue(false);
+              random_hue_preset(false);
             } else shuffle_beat_limit_counter--;
-          }
+          } //else shuffle_beat_limit_counter = 0;
         }
         bands_record_r[i] = level;
         shuffle_record_r = bands[i];
@@ -592,7 +633,7 @@ void smooth(int v) {
     databuff[j] = msgbuff[i];
   databuff[3] = '\0';
   smoothing = atoi(databuff);
-  if (v) { Serial.print("[nano] smoothing – "); Serial.println(smoothing); }
+  if (v) { Serial.print(F("[nano] smoothing – ")); Serial.println(smoothing); }
 }
 
 // set noise gate
@@ -602,7 +643,7 @@ void noise_gate(int v) {
     databuff[j] = msgbuff[i];
   databuff[3] = '\0';
   noise = atoi(databuff);
-  if (v) { Serial.print("[nano] noise gate – "); Serial.println(noise); }
+  if (v) { Serial.print(F("[nano] noise gate – ")); Serial.println(noise); }
 }
 
 // set left channel
@@ -612,7 +653,7 @@ void left_channel(int v) {
     databuff[j] = msgbuff[i];
   databuff[1] = '\0';
   l_channel = atoi(databuff);
-  if (v) { Serial.print("[nano] left channel – "); Serial.println(l_channel); }
+  if (v) { Serial.print(F("[nano] left channel – ")); Serial.println(l_channel); }
 }
 // set right channel
 void right_channel(int v) {
@@ -621,7 +662,7 @@ void right_channel(int v) {
     databuff[j] = msgbuff[i];
   databuff[1] = '\0';
   r_channel = atoi(databuff);
-  if (v) { Serial.print("[nano] right channel – "); Serial.println(r_channel); }
+  if (v) { Serial.print(F("[nano] right channel – ")); Serial.println(r_channel); }
 }
 
 // set left invert
@@ -631,7 +672,7 @@ void left_invert(int v) {
     databuff[j] = msgbuff[i];
   databuff[1] = '\0';
   l_invert = atoi(databuff);
-  if (v) { Serial.print("[nano] left invert – "); Serial.println(l_invert); }
+  if (v) { Serial.print(F("[nano] left invert – ")); Serial.println(l_invert); }
 }
 // set right invert
 void right_invert(int v) {
@@ -640,7 +681,7 @@ void right_invert(int v) {
     databuff[j] = msgbuff[i];
   databuff[1] = '\0';
   r_invert = atoi(databuff);
-  if (v) { Serial.print("[nano] right invert – "); Serial.println(r_invert); }
+  if (v) { Serial.print(F("[nano] right invert – ")); Serial.println(r_invert); }
 }
 
 // set left preamp
@@ -651,7 +692,7 @@ void left_preamp(int v) {
   databuff[3] = '\0';
   l_preamp = atoi(databuff);
   l_preamp /= 100.0;
-  if (v) { Serial.print("[nano] left preamp – "); Serial.println(l_preamp); }
+  if (v) { Serial.print(F("[nano] left preamp – ")); Serial.println(l_preamp); }
 }
 // set right preamp
 void right_preamp(int v) {
@@ -661,7 +702,7 @@ void right_preamp(int v) {
   databuff[3] = '\0';
   r_preamp = atoi(databuff);
   r_preamp /= 100;
-  if (v) { Serial.print("[nano] right preamp – "); Serial.println(r_preamp); }
+  if (v) { Serial.print(F("[nano] right preamp – ")); Serial.println(r_preamp); }
 }
 
 // set left postamp
@@ -671,7 +712,7 @@ void left_postamp(int v) {
     databuff[j] = msgbuff[i];
   databuff[3] = '\0';
   l_postamp = atoi(databuff);
-  if (v) { Serial.print("[nano] left postamp – "); Serial.println(l_postamp); }
+  if (v) { Serial.print(F("[nano] left postamp – ")); Serial.println(l_postamp); }
 }
 // set right postamp
 void right_postamp(int v) {
@@ -680,7 +721,7 @@ void right_postamp(int v) {
     databuff[j] = msgbuff[i];
   databuff[3] = '\0';
   r_postamp = atoi(databuff);
-  if (v) { Serial.print("[nano] right postamp – "); Serial.println(r_postamp); }
+  if (v) { Serial.print(F("[nano] right postamp – ")); Serial.println(r_postamp); }
 }
 
 // LED PWM functions
