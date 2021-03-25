@@ -563,8 +563,9 @@
                 )
                 .add(Block('block', 'settings')
                     .css({
-                        width: '100px',
-                        float: 'left'
+                        width: '85px',
+                        float: 'left',
+                        marginLeft: '5px'
                     })
                     .add(Block('img', 1)
                         .data({
@@ -586,6 +587,41 @@
                         .on('click', (e, b, d) => {
                             var submenu = app.ui.block.child('main/node/menu/submenu');
                             load_audio_submenu(submenu);
+                        })
+                    )
+                )
+                .add(Block('block', 'shuffle')
+                    .css({
+                        width: '80px',
+                        float: 'left'
+                    })
+                    .key('f_val', false)
+                    .add(Block('image', 'img')
+                        .data({
+                            src: 'img/shuffle_b.png',
+                            height: '42px',
+                            width: '42px'
+                        })
+                        .css({
+                            opacity: '0.55',
+                            cursor: 'pointer',
+                            transition: 'opacity 0.12s ease, background-image 0.19s ease-in-out'
+                        })
+                        .on('mouseover', (e, b, d) => {
+                            b.css('opacity', '0.65');
+                        })
+                        .on('mouseout', (e, b, d) => {
+                            b.css('opacity', '0.55');
+                        })
+                        .on('click', (e, b, d) => {
+                            block.on('update-alt', {
+                                id: 'audio_shuffle',
+                                value: !(b.parent().key('f_val')),
+                                boomerang: true
+                            });
+                            setTimeout(_ => {
+                                app.ui.audio_react_menu.api.play_music();
+                            }, 200);
                         })
                     )
                 )
@@ -619,11 +655,29 @@
                             if (forward_data.id.includes('audio_')) {
                                 var block_name = `${forward_data.id.split('audio_').join('')}`;
                                 // console.log(ar_menu, block_name);
-                                var data_updates = {};
-                                data_updates[block_name] = forward_data.val;
-                                ar_menu.on('update_current', {
-                                    updates: data_updates
-                                });
+                                if (block_name == "shuffle") {
+                                    if (forward_data.val === true) {
+                                        block.child('shuffle')
+                                            .key('f_val', true)
+                                            .child('img').data({
+                                                src: 'img/shuffle_i_b.png'
+                                            })
+                                        ;
+                                    } else {
+                                        block.child('shuffle')
+                                            .key('f_val', false)
+                                            .child('img').data({
+                                                src: 'img/shuffle_b.png'
+                                            })
+                                        ;
+                                    }
+                                } else {
+                                    var data_updates = {};
+                                    data_updates[block_name] = forward_data.val;
+                                    ar_menu.on('update_current', {
+                                        updates: data_updates
+                                    });
+                                }
                             }
                         }
                     }

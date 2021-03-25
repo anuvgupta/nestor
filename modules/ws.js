@@ -410,6 +410,34 @@ var init = _ => {
             });
         }
     });
+    ws_server.bind('reset_node', (client, req) => {
+        var node_id = `${req.node_id}`;
+        m.db.get_node_info(node_id, client.o_id, client.id, node => {
+            if (node === false || node === null) return;
+            var node_id_rep = node._id.toString();
+            log(`reset_node | client ${client.id} requested node ${node_id_rep} reset`);
+            if (node.status == 'online') {
+                var core_client = m.ws.get_client_by_o_id(node.core_id);
+                if (core_client) {
+                    ws_server.send_to_device('node-reset', `${node_id_rep}`, core_client);
+                }
+            }
+        });
+    });
+    ws_server.bind('reset_core', (client, req) => {
+        var core_id = `${req.core_id}`;
+        m.db.get_core_info(core_id, client.o_id, null, client.id, core => {
+            if (core === false || core === null) return;
+            var core_id_rep = core._id.toString();
+            log(`reset_core | client ${client.id} requested core ${core_id_rep} reset`);
+            if (core.status == 'online') {
+                var core_client = m.ws.get_client_by_o_id(core_id_rep);
+                if (core_client) {
+                    ws_server.send_to_device('core-reset', 'true', core_client);
+                }
+            }
+        });
+    });
 
     // client: device
     ws_server.bind('core_sync', (client, req) => {

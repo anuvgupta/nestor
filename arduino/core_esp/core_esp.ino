@@ -190,6 +190,15 @@ void wsClientEventHandler(WStype_t type, uint8_t * payload, size_t len) {
         if (LOG_VERBOSE) SERIAL.printf("[ws_client] resetting device %s\n", target_node_id);
         ws_server.disconnect(c_id);
       }
+    } else if (memcmp(payload, "@node-reset", 11) == 0) {
+      char target_node_id[25];
+      strcpy(target_node_id, ((const char * )(payload + 12)));
+      int c_id = findClient(target_node_id);
+      if (LOG_VERBOSE) SERIAL.printf("[ws_client] resetting device %s\n", target_node_id);
+      ws_server.disconnect(c_id);
+    } else if (memcmp(payload, "@core-reset", 11) == 0) {
+      if (LOG_VERBOSE) SERIAL.printf("[ws_client] resetting device self\n");
+      restartESP();
     }
     break;
   case WStype_BIN:

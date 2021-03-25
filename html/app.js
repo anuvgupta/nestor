@@ -222,6 +222,16 @@ var app; app = {
                     api_req: api_req,
                     api_args: api_args
                 });
+            },
+            reset_node: (id) => {
+                app.ws.send('reset_node', {
+                    node_id: id
+                });
+            },
+            reset_core: (id) => {
+                app.ws.send('reset_core', {
+                    core_id: id
+                });
             }
         }
     },

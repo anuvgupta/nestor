@@ -10,7 +10,7 @@ module.exports = {
             m.ws.api_bind('node_ready', (node_id, node_object) => {
                 // log(`node ${node_id} ready`);
                 m.main.call_driver_api(node_type, 'play_initial', [node_id, node_object], (result) => {
-                    console.log(result);
+                    // console.log(result);
                 });
             });
         }
@@ -210,14 +210,21 @@ module.exports = {
             var node_ws_client = m.ws.get_client_by_o_id(node_object.core_id);
             // log(node_ws_client);
             if (node_id && node_object && node_ws_client) {
-                if (node_object.data.hasOwnProperty('audio') && node_object.data.audio === true) {
+                var audio_flag = (node_object.data.hasOwnProperty('audio') && node_object.data.audio === true);
+                setTimeout(_ => {
+                    m.ws.send_to_device('node-data', `${node_id}-audio-false-${(audio_flag ? 'true' : 'false')}`, node_ws_client, true);
                     setTimeout(_ => {
-                        log(`driver[${node_type}.play_initial] sending audio react mode update to node ${node_id}`);
-                        m.ws.send_to_device('node-data', `${node_id}-audio-false-true`, node_ws_client, true);
                         m.ws.send_to_device('node-data', `${node_id}-audio_allow-false-true`, node_ws_client, true);
+                        if (!audio_flag) {
+                            setTimeout(_ => {
+                                m.ws.send_to_device('node-data', `${node_id}-brightness-false-${node_object.data.brightness}`, node_ws_client, true);
+                                log(`driver[${node_type}.play_initial] sending currently playing data to node ${node_id}`);
+                            }, 200);
+                        }
                         resolve(true);
-                    }, 200);
-                }
+                    }, 50);
+                    log(`driver[${node_type}.play_initial] sending audio react mode update to node ${node_id}`);
+                }, 200);
             }
         }
     }

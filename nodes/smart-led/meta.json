@@ -80,6 +80,29 @@
             "label": "Speed"
         },
         {
+            "id": "audio",
+            "img": "speaker_b",
+            "type": "bool",
+            "initial": false,
+            "editor": "audio-menu",
+            "label": "Audio",
+            "editor-options": {
+                "forward-data-capture": [
+                    "audio_smoothing",
+                    "audio_noise_gate",
+                    "audio_l_ch",
+                    "audio_l_invert",
+                    "audio_l_preamp",
+                    "audio_l_postamp",
+                    "audio_r_ch",
+                    "audio_r_invert",
+                    "audio_r_preamp",
+                    "audio_r_postamp",
+                    "audio_shuffle"
+                ]
+            }
+        },
+        {
             "id": "audio_smoothing",
             "type": "int",
             "bounds": [0, 99],
@@ -158,26 +181,11 @@
             "forwarding": ["audio"]
         },
         {
-            "id": "audio",
-            "img": "speaker_b",
+            "id": "audio_shuffle",
             "type": "bool",
             "initial": false,
-            "editor": "audio-menu",
-            "label": "Audio",
-            "editor-options": {
-                "forward-data-capture": [
-                    "audio_smoothing",
-                    "audio_noise_gate",
-                    "audio_l_ch",
-                    "audio_l_invert",
-                    "audio_l_preamp",
-                    "audio_l_postamp",
-                    "audio_r_ch",
-                    "audio_r_invert",
-                    "audio_r_preamp",
-                    "audio_r_postamp"
-                ]
-            }
+            "editor": "null",
+            "forwarding": ["audio"]
         }
     ]
 }

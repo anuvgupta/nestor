@@ -32,6 +32,7 @@ int audio_r_ch;
 bool audio_r_invert;
 int audio_r_preamp;
 int audio_r_postamp;
+bool audio_shuffle;
 
 
 // write to led
@@ -52,11 +53,15 @@ void play_current() {
       else SERIAL.printf("b%d\n", 0);
     } else {
       if (first_play) first_play = 0;
-      if (!audio_enable || !audio_allow)
-        SERIAL.printf("hh%s\n", hue);
-      SERIAL.printf("b%d\n", brightness);
-      if (audio_enable && audio_allow)
+      if (audio_enable && audio_allow) {
+        //SERIAL.printf("b%d\n", 0);
+        //SERIAL.printf("hm%s\n", hue);
+        SERIAL.printf("b%d\n", brightness);
         SERIAL.printf("hm%s\n", hue);
+      } else {
+        SERIAL.printf("hh%s\n", hue);
+        SERIAL.printf("b%d\n", brightness);
+      }
     }
   } else if (memcmp(play_mode, "pattern", 7) == 0) {
     if (strlen(pattern_id) < 1 || memcmp(pattern_id, "null", 4) == 0 || strlen(pattern) < 1 || memcmp(pattern, "null", 4) == 0) {
@@ -110,6 +115,7 @@ void NodeDriver::init() {
   audio_r_invert = false;
   audio_r_preamp = 100;
   audio_r_postamp = 1;
+  audio_shuffle = false;
   
   // first play flag
   first_play = 1;
@@ -195,8 +201,13 @@ void NodeDriver::data(char* id, char* value, bool transitional) {
       } else if (memcmp(sub_id, "r_postamp", 9) == 0) {
         audio_r_postamp = bound_int(atoi(value), 1, 10);
         SERIAL.printf("rpo%d\n", audio_r_postamp);
+      } else if (memcmp(sub_id, "shuffle", 7) == 0) {
+        audio_shuffle = bound_bool(value);
+        SERIAL.printf("ashf%s\n", (audio_shuffle ? "true" : "false"));
       } else if (memcmp(sub_id, "allow", 5) == 0) {
-        audio_allow = bound_bool(value);
+        bool new_audio_allow = bound_bool(value);
+        //if (new_audio_allow) play_current();
+        audio_allow = new_audio_allow;
         play = audio_allow;
       }
     }

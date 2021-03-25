@@ -1703,7 +1703,7 @@ app
                                         block.on('local-update', {
                                             value: data.value
                                         });
-                                        if (!data.hasOwnProperty('update_node_data') || data.update_node_data == false) {
+                                        if (!data.hasOwnProperty('update_node_data') || data.update_node_data == true) {
                                             app.ws.api.update_node_data(app.ui.block.child('main/node').key('id'), metadata.id, data.value,
                                                 data.hasOwnProperty('transitional') && data.transitional === true,
                                                 data.hasOwnProperty('boomerang') && data.boomerang === true);
@@ -1716,7 +1716,7 @@ app
                                         if (alt_val_keys) {
                                             alt_val_keys[data.id] = data.value;
                                             block.key('value-alt', alt_val_keys);
-                                            if (!data.hasOwnProperty('update_node_data') || data.update_node_data == false) {
+                                            if (!data.hasOwnProperty('update_node_data') || data.update_node_data == true) {
                                                 app.ws.api.update_node_data(app.ui.block.child('main/node').key('id'), data.id, data.value,
                                                     data.hasOwnProperty('transitional') && data.transitional === true, 
                                                     data.hasOwnProperty('boomerang') && data.boomerang === true);
@@ -2010,7 +2010,8 @@ app
                             right 45px
                         block button
                             css
-                                background-color #dcdcdc
+                                // background-color #dcdcdc
+                                background-color #d4d4d4
                                 width 100%
                                 height 44%
                                 color white
@@ -2047,6 +2048,45 @@ app
                                         if (node_info && node_info.name) {
                                             app.ws.api.delete_node(id, node_info.name);
                                         }
+                                    }
+                                }
+                    block reset
+                        css
+                            width 55px
+                            position absolute
+                            top 0
+                            right 135px
+                        image img
+                            src img/restart_i_b.png
+                            width 37px
+                            height 37px
+                            css
+                                opacity 0.25
+                                cursor pointer
+                                transition opacity 0.15s ease
+                            :mouseover
+                                css
+                                    opacity 0.4
+                            :mouseout
+                                css
+                                    opacity 0.25
+                            :click
+                                {
+                                    var node_info = app.ui.block.child('main/node').key('node_info');
+                                    if (node_info && node_info.type) {
+                                        if (node_info.type == 'core') {
+                                            var core_info = app.ui.block.child('main/core').key('core_info');
+                                            if (core_info && core_info.id) {
+                                                app.ws.api.reset_core(core_info.id);
+                                            }
+                                        } else if (node_info.id) {
+                                            app.ws.api.reset_node(node_info.id);
+                                        }
+                                        var $b = block.$();
+                                        $b.addClass('rotate');
+                                        setTimeout(_ => {
+                                            $b.removeClass('rotate');
+                                        }, 500);
                                     }
                                 }
                 node-menu-item temp-item

@@ -28,6 +28,7 @@ int noise = 20; // int 0 - 50
 int smoothing = 95; // int 0 - 99
 int l_channel = 0; // int 0 - 7
 int r_channel = 1; // int 0 - 7
+bool shuffle_hues = false;
 // esp8266 data
 bool ready = false;
 SoftwareSerial ESP8266(7, 8); // ARD 7 => ESP TX, ARD 8 => ESP RX
@@ -41,6 +42,11 @@ char databuff[6]; // 5(int dig max) + 1(\0)
 int bands[7];
 int bands_record_l[7];
 int bands_record_r[7];
+int shuffle_record_l = 0;
+int shuffle_record_r = 0;
+double shuffle_beat_threshold = 500;
+int shuffle_beat_limit = 5;
+int shuffle_beat_limit_counter = 0;
 // rgb data
 double r_l = 0; // hue red (left)
 double g_l = 0; // hue green (left)
@@ -193,6 +199,12 @@ void loop() {
                 right_channel(DEBUG);
               else if (msgbuff[1] == 'i')
                 right_invert(DEBUG);
+            } else if (msgbuff[0] == 'a') {
+              if (msgbuff[1] == 's') {
+                if (msgbuff[2] == 'h' && msgbuff[3] == 'f') {
+                  hue_shuffle(DEBUG);
+                }
+              }
             }
           }
           mb_i = 0;
@@ -338,6 +350,12 @@ void hue_hex(bool v) {
   // labels:  0123456789ABCDE
 }
 
+// process shuffle from msgbuff
+void hue_shuffle(bool v) {
+  shuffle_hues = (memcmp(msgbuff + 4, "true", 4) == 0);
+  if (v) { Serial.print("[nano] shuffle – "); Serial.println(shuffle_hues); }
+}
+
 // process pattern from msgbuff
 void pattern(bool v) {
   // match left and right
@@ -452,6 +470,20 @@ void fadeColor() {
   red_r(r_r); green_r(g_r); blue_r(b_r);
 }
 
+// random color
+void random_hue(bool output) {
+  r_l = random(0, 255);
+  g_l = random(0, 255);
+  b_l = random(0, 255);
+  r_r = random(0, 255);
+  g_r = random(0, 255);
+  b_r = random(0, 255);
+  if (output) {
+    red_l(r_l); green_l(g_l); blue_l(b_l);
+    red_r(r_r); green_r(g_r); blue_r(b_r);
+  }
+}
+
 // music reactive mode
 void music(bool v) {
   while (uninterrupted()) {
@@ -486,8 +518,25 @@ void music(bool v) {
           double weight = (smoothing / 100.0);
           level = (level * (1.0 - weight)) + (bands_record_l[i] * weight);
         }
+        // shuffle
+        if (shuffle_hues) {
+          double diff = bands[i] - shuffle_record_l;
+          if (diff < 0) diff *= -1;
+          //Serial.print("[nano] diff: ");
+          //Serial.println(diff);
+          if (diff > shuffle_beat_threshold) {
+            // detect raw beat
+            if (shuffle_beat_limit_counter <= 0) {
+              shuffle_beat_limit_counter = shuffle_beat_limit;
+              // detect limited beat
+              // Serial.println("[nano] beat");
+              random_hue(false);
+            } else shuffle_beat_limit_counter--;
+          }
+        }
         // save
         bands_record_l[i] = level;
+        shuffle_record_l = bands[i];
         // invert
         if (l_invert) level = 255 - level;
         level /=  255.0;
@@ -510,7 +559,18 @@ void music(bool v) {
           double weight = (smoothing / 100.0);
           level = (level * (1.0 - weight)) + (bands_record_r[i] * weight);
         }
+        if (shuffle_hues) {
+          double diff = bands[i] - shuffle_record_r;
+          if (diff < 0) diff *= -1;
+          if (diff > shuffle_beat_threshold) {
+            if (shuffle_beat_limit_counter <= 0) {
+              shuffle_beat_limit_counter = shuffle_beat_limit;
+              random_hue(false);
+            } else shuffle_beat_limit_counter--;
+          }
+        }
         bands_record_r[i] = level;
+        shuffle_record_r = bands[i];
         if (r_invert) level = 255 - level;
         level /=  255.0;
         red_r(((double) r_r) * level);

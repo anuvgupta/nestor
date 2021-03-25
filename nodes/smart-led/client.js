@@ -489,10 +489,12 @@ nestor.module({
                 },
                 api: {
                     play_music: _ => {
-                        console.log('playing music');
-                        var node_id = app.ui.block.child('main/node').key('id');
-                        if (node_id != null && node_id && node_id.trim().length > 0) {
-                            app.ws.api.update_node_data(`${node_id}`, 'audio', true, false, true);
+                        if (app.ui.audio_react_menu.music_settings.enabled) {
+                            console.log('playing music');
+                            var node_id = app.ui.block.child('main/node').key('id');
+                            if (node_id != null && node_id && node_id.trim().length > 0) {
+                                app.ws.api.update_node_data(`${node_id}`, 'audio', true, false, true);
+                            }
                         }
                     },
                     send_smoothing: (transitional) => {
