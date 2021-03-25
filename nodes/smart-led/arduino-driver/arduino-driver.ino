@@ -67,15 +67,15 @@ int fade = 0; // transition (ms)
 // shuffle data
 int shuffle_record_l = 0;
 int shuffle_record_r = 0;
-double shuffle_beat_threshold = 600;
+double shuffle_beat_threshold = 640;
 int shuffle_beat_limit = 1;
 int shuffle_beat_limit_counter = 0;
-#define SHUFFLE_HUE_PRESET_NUM 10
+#define SHUFFLE_HUE_PRESET_NUM 6
 int shuffle_hue_presets[SHUFFLE_HUE_PRESET_NUM][3] = {
   {255, 255, 255},
   {0, 0, 255},   {0, 255, 0},   {255, 0, 0},
-  {255, 255, 0}, {255, 0, 255}, {0, 255, 255},
-  {128, 0, 128}, {255, 69, 0},  {255, 20, 147}
+  // {255, 255, 0}, {255, 0, 255}, {0, 255, 255},
+  {255, 69, 0},  {255, 20, 147}, // {128, 0, 128}
 };
 
 void setup() {

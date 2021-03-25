@@ -385,9 +385,26 @@ app
             box-sizing border-box
         @query window height != 0
             {
-                if (util.mobile()) {
-                    block.css('border-left', 'none');
-                    block.css('border-right', 'none');
+                var width_lim = -1;
+                try {
+                    width_lim = parseInt(app.ui.block.css('max-width').split('px')[0]);
+                } catch (exc) { return; }
+                if (window.innerWidth < width_lim || util.mobile()) {
+                    if (block.css('border-left') != 'none') {
+                        block.key('borderLeftSave', block.css('border-left'));
+                        block.css('border-left', 'none');
+                    }
+                    if (block.css('border-right') != 'none') {
+                        block.key('borderRightSave', block.css('border-right'));
+                        block.css('border-right', 'none');
+                    }
+                } else {
+                    var borderLeftSave = block.key('borderLeftSave');
+                    if (borderLeftSave != null)
+                        block.css('border-left', borderLeftSave);
+                    var borderRightSave = block.key('borderRightSave');
+                    if (borderRightSave != null)
+                        block.css('border-right', borderRightSave);
                 }
             }
         div header

@@ -398,30 +398,34 @@ nestor.module({
                 capture_app_mousemove: (event, block, data) => {
                     // pattern drag event
                     var colors = app.ui.block.child(app.ui.pattern_picker.color_editor_target_block);
-                    var hlim = colors.$().height();
-                    if (colors.key('$hr') == null) colors.key('$hr', colors.sibling('hr1').$());
-                    if (colors.key('draggingitem') != -1) {
-                        var pattern_color = colors.child('color_' + colors.key('draggingitem'));
-                        var $hr = colors.key('$hr');
-                        var pos = event.clientY - ($hr.offset().top + $hr.outerHeight(true));
-                        if (pos < 0) pos = -1000; if (pos > hlim) pos = hlim;
-                        pos /= pattern_color.$().outerHeight(true);
-                        pos = parseInt(pos);
-                        var numpatterncolors = Object.keys(colors.children()).length - 1;
-                        if (pos >= numpatterncolors) pos = numpatterncolors - 1;
-                        if (pos < 0) pos = -1;
-                        // console.log(pos);
-                        pattern_color.on('setOrdinalPos', {
-                            pos: pos
-                        });
+                    if (colors) {
+                        var hlim = colors.$().height();
+                        if (colors.key('$hr') == null) colors.key('$hr', colors.sibling('hr1').$());
+                        if (colors.key('draggingitem') != -1) {
+                            var pattern_color = colors.child('color_' + colors.key('draggingitem'));
+                            var $hr = colors.key('$hr');
+                            var pos = event.clientY - ($hr.offset().top + $hr.outerHeight(true));
+                            if (pos < 0) pos = -1000; if (pos > hlim) pos = hlim;
+                            pos /= pattern_color.$().outerHeight(true);
+                            pos = parseInt(pos);
+                            var numpatterncolors = Object.keys(colors.children()).length - 1;
+                            if (pos >= numpatterncolors) pos = numpatterncolors - 1;
+                            if (pos < 0) pos = -1;
+                            // console.log(pos);
+                            pattern_color.on('setOrdinalPos', {
+                                pos: pos
+                            });
+                        }
                     }
                 },
                 capture_app_mouseup: (event, block, data) => {
                     var colors = app.ui.block.child(app.ui.pattern_picker.color_editor_target_block);
-                    var children = colors.children();
-                    for (var c in children) {
-                        if (children.hasOwnProperty(c) && c != 'addbutton' && children[c].key('dragging'))
-                            children[c].child('handle/imgwrap').on('mouseup');
+                    if (colors) {
+                        var children = colors.children();
+                        for (var c in children) {
+                            if (children.hasOwnProperty(c) && c != 'addbutton' && children[c].key('dragging'))
+                                children[c].child('handle/imgwrap').on('mouseup');
+                        }
                     }
                 },
                 capture_app_click: (event, block, data) => {
