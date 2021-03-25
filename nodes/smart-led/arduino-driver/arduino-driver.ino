@@ -156,7 +156,7 @@ void loop() {
               if (DEBUG) Serial.print(F("[update] new hue: "));
               if (DEBUG) Serial.println(msgbuff);
               double bright_prev = brightness;
-              if (msgbuff[1] == 'm') brightness = 0;
+              //if (msgbuff[1] == 'm') brightness = 0;
               hue_hex(DEBUG);
               if (msgbuff[1] == 'm') {
                 brightness = bright_prev;
