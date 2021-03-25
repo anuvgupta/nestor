@@ -200,7 +200,7 @@ module.exports = {
                         } else resolve(false);
                     });
                 } else resolve(null);
-            }
+            } else resolve(null);
         },
         play_initial: (m, log, api_args, resolve) => {
             log('play_initial');

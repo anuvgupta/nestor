@@ -268,7 +268,7 @@
                             boxSizing: 'border-box',
                             outline: 'none',
                             fontSize: '16px',
-                            opacity: '0.75',
+                            opacity: '0.7',
                             cursor: 'pointer'
                         })
                         .on('input', (e, b, d) => {
@@ -319,16 +319,16 @@
                             width: '33px',
                             height: '33px',
                             cursor: 'pointer',
-                            opacity: '0.5',
+                            opacity: '0.45',
                             transition: 'opacity 0.3s ease'
                         })
                         .on('mouseover', (e, b, d) => {
                             if (b.parent().key('enabled') == 'yes')
-                                b.css('opacity', '0.65');
+                                b.css('opacity', '0.6');
                         })
                         .on('mouseout', (e, b, d) => {
                             if (b.parent().key('enabled') == 'yes')
-                                b.css('opacity', '0.5');
+                                b.css('opacity', '0.45');
                         })
                         .on('click', (e, b, d) => {
                             if (b.parent().key('enabled') == 'yes') {
@@ -360,14 +360,14 @@
                             width: '30px',
                             height: '30px',
                             cursor: 'pointer',
-                            opacity: '0.5',
+                            opacity: '0.45',
                             transition: 'opacity 0.3s ease'
                         })
                         .on('mouseover', (e, b, d) => {
-                            b.css('opacity', '0.65');
+                            b.css('opacity', '0.6');
                         })
                         .on('mouseout', (e, b, d) => {
-                            b.css('opacity', '0.5');
+                            b.css('opacity', '0.45');
                         })
                         .on('click', (e, b, d) => {
                             app.ui.pattern_picker.new_pattern();
@@ -398,7 +398,7 @@
                         })
                         .css({
                             margin: '0 auto',
-                            opacity: '0.5',
+                            opacity: '0.45',
                             transition: '0.15s ease opacity',
                             cursor: 'pointer'
                         })
@@ -406,7 +406,7 @@
                             b.css('opacity', '0.6');
                         })
                         .on('mouseout', (e, b, d) => {
-                            b.css('opacity', '0.5');
+                            b.css('opacity', '0.45');
                         })
                         
                     )
@@ -574,15 +574,15 @@
                             width: '45px'
                         })
                         .css({
-                            opacity: '0.55',
+                            opacity: '0.5',
                             cursor: 'pointer',
                             transition: 'opacity 0.12s ease'
                         })
                         .on('mouseover', (e, b, d) => {
-                            b.css('opacity', '0.65');
+                            b.css('opacity', '0.6');
                         })
                         .on('mouseout', (e, b, d) => {
-                            b.css('opacity', '0.55');
+                            b.css('opacity', '0.5');
                         })
                         .on('click', (e, b, d) => {
                             var submenu = app.ui.block.child('main/node/menu/submenu');
@@ -603,15 +603,15 @@
                             width: '42px'
                         })
                         .css({
-                            opacity: '0.55',
+                            opacity: '0.5',
                             cursor: 'pointer',
                             transition: 'opacity 0.12s ease, background-image 0.19s ease-in-out'
                         })
                         .on('mouseover', (e, b, d) => {
-                            b.css('opacity', '0.65');
+                            b.css('opacity', '0.6');
                         })
                         .on('mouseout', (e, b, d) => {
-                            b.css('opacity', '0.55');
+                            b.css('opacity', '0.5');
                         })
                         .on('click', (e, b, d) => {
                             block.on('update-alt', {

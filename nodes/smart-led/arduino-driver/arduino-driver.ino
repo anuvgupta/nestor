@@ -35,8 +35,8 @@ SoftwareSerial ESP8266(7, 8); // ARD 7 => ESP TX, ARD 8 => ESP RX
 unsigned long lastTimestamp = 0;
 // parsing data
 int mb_i = 0;
-char msgbuff[225]; // sufficient capacity (10 color limit for patterns)
-char tokenbuff[20]; // 5(f) + 3(r) + 3(g) + 3(b) + 5(t) + 1(\0)
+char msgbuff[322]; // sufficient capacity (20 color limit for patterns)
+char tokenbuff[20]; // 5(f) + 3(r) + 3(g) + 3(b) + 5(t) + 1(\0) (back-compat)
 char databuff[6]; // 5(int dig max) + 1(\0)
 // msgeq7 data
 int bands[7];
@@ -769,3 +769,9 @@ void writeBuffer() {
     Serial.println(msgbuff);
   }
 }
+
+/** pattern capacity calculation
+  single pattern: 5(f) + 2(r) + 2(g) + 2(b) + 5(t) = 16
+  pattern message capacity: 1('p') + 16 * MAX_PATTERNS + 1('\0') = 2 + 16 * MAX_PATTERNS
+  if MAX_PATTERNS = 20, capacity = 2 + 16 * 20 = 2 + 320 = 322
+*/
