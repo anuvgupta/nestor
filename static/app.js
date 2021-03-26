@@ -48,13 +48,7 @@ var app; app = {
     ws: {
         id: 0,
         socket: null,
-        url:
-            (location.protocol === 'https:'
-                ? 'wss://'
-                : 'ws://') +
-            document.domain +
-            ((document.domain == 'localhost' || document.domain.includes('192.168.0.')) ? ':30009' : (location.protocol === 'https:' ? ':443' : ':80')) +
-            '/socket',
+        url: null,
         encode_msg: (e, d) => {
             return JSON.stringify({
                 event: e,
@@ -71,10 +65,14 @@ var app; app = {
             return m;
         },
         connect: callback => {
+            if (app.ws.url === null || app.ws.url.trim() === '') {
+                if (callback) callback();
+                return;
+            }
             var socket = new WebSocket(app.ws.url);
             socket.addEventListener('open', e => {
                 console.log('[ws] socket connected');
-                callback();
+                if (callback) callback();
             });
             socket.addEventListener('error', e => {
                 console.log('[ws] socket error ', e.data);
@@ -336,6 +334,12 @@ var app; app = {
                     app.ui.block.load(_ => {
                         console.log('[main] blocks loaded');
                         console.log('[main] socket connecting');
+                        app.ws.url = (location.protocol === 'https:'
+                            ? 'wss://'
+                            : 'ws://') +
+                            document.domain +
+                            ((document.domain == 'localhost' || document.domain.includes('192.168.0.')) ? ':30009' : (location.protocol === 'https:' ? ':443' : ':80')) +
+                            '/socket';
                         app.ws.connect(_ => {
                             app.ui.init(_ => {
                                 console.log('[main] ready');

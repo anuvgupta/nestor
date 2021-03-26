@@ -50,7 +50,7 @@ void NodeDriver::loop() {
 
 // driver data handler
 void NodeDriver::data(char *id, char *value, bool transitional) {
-	SERIAL.printf("[driver] message: %s %s\n", id, value);
+	SERIAL.printf("[driver] data update: %s = %s\n", id, value);
 	// if (memcmp(id, "switch", 6) == 0)
 	// {
 	//   power = bound_bool(value);
@@ -63,5 +63,5 @@ void NodeDriver::data(char *id, char *value, bool transitional) {
 
 // driver user data handler
 void NodeDriver::user_data(char *id, char *value) {
-	SERIAL.printf("[driver] message: %s %s\n", id, value);
+	SERIAL.printf("[driver] user data update: %s = %s\n", id, value);
 }

@@ -39,6 +39,11 @@ void NodeDriver::ready() {
 	SERIAL.println("[driver] ready");
 }
 
+// driver serial input
+void NodeDriver::input(char *value) {
+	SERIAL.printf("[driver] serial input %s\n", value);
+}
+
 // driver main loop
 void NodeDriver::loop() {
 	if (power1)
