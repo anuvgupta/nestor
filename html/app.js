@@ -243,28 +243,53 @@ var app; app = {
                 else app.main.client_modules[node_type] = module;
             },
         },
-        update_node_profiles: (node_profiles, load_client_driver = true) => {
+        update_node_profiles: (node_profiles, load_client_drivers = true) => {
             for (var np in node_profiles) {
                 node_profiles[np].id = np;
                 app.ws.api.node_profiles[np] = node_profiles[np];
             }
-            if (load_client_driver) {
-                app.main.load_client_driver();
+            if (load_client_drivers) {
+                app.main.load_client_drivers();
                 setTimeout(_ => {
                     Block.queries();
                 }, 20);
             }
         },
-        load_client_driver: _ => {
+        load_client_drivers: (i = null, arr = null, debug = false) => {
+            // debug = true;
+            if (debug) console.log(`load_client_drivers: called (i=${i})`);
             var node_profiles = app.ws.api.node_profiles;
-            for (var np in node_profiles) {
-                if (node_profiles[np] && node_profiles[np].hasOwnProperty('web')) {
-                    if (node_profiles[np].web.hasOwnProperty('views') && node_profiles[np].web.views === true) {
-                        app.main.load_client_view(`${np}`);
-                    }
-                    if (node_profiles[np].web.hasOwnProperty('client') && node_profiles[np].web.client === true) {
-                        app.main.load_client_module(`${np}`);
-                    }
+            if (i === null || arr === null) {
+                if (debug) console.log('load_client_drivers: start');
+                if (node_profiles) {
+                    arr = Object.keys(node_profiles);
+                    app.main.load_client_drivers(0, arr);
+                }
+            } else {
+                if (i < arr.length) {
+                    var np = arr[i];
+                    // if (debug) console.log(i, arr, arr[i]);
+                    var _load_next = _ => {
+                        app.main.load_client_drivers(++i, arr);
+                    };
+                    var _load_current_module = _ => {
+                        var _next = _load_next;
+                        if (node_profiles[np].web.hasOwnProperty('client') && node_profiles[np].web.client === true) {
+                            app.main.load_client_module(`${np}`, _next);
+                        } else _next();
+                    };
+                    var _load_current_view = _ => {
+                        var _next = _load_current_module;
+                        if (node_profiles[np].web.hasOwnProperty('views') && node_profiles[np].web.views === true) {
+                            app.main.load_client_view(`${np}`, _next);
+                        } else _next();
+                    };
+                    if (node_profiles[np] && node_profiles[np].hasOwnProperty('web')) {
+                        if (debug) console.log(`load_client_drivers: np=${np}`);
+                        _load_current_view();
+                    } else _load_next();
+                } else {
+                    if (debug) console.log('load_client_drivers: done');
                 }
             }
         },
