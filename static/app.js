@@ -49,6 +49,7 @@ var app; app = {
         id: 0,
         socket: null,
         url: null,
+        online: false,
         encode_msg: (e, d) => {
             return JSON.stringify({
                 event: e,
@@ -72,6 +73,7 @@ var app; app = {
             var socket = new WebSocket(app.ws.url);
             socket.addEventListener('open', e => {
                 console.log('[ws] socket connected');
+                app.ws.online = true;
                 if (callback) callback();
             });
             socket.addEventListener('error', e => {
@@ -90,7 +92,9 @@ var app; app = {
             });
             socket.addEventListener('close', e => {
                 console.log('[ws] socket disconnected');
+                app.ws.online = false;
                 // alert('disconnected from server');
+                app.main.quit();
             });
             window.addEventListener('beforeunload', e => {
                 // socket.close(1001);
@@ -98,7 +102,7 @@ var app; app = {
             app.ws.socket = socket;
         },
         send: (event, data) => {
-            console.log('[ws] sending:', event, data);
+            console.log('[ws] socket sending:', event, data);
             app.ws.socket.send(app.ws.encode_msg(event, data));
         },
         api: {
@@ -113,13 +117,13 @@ var app; app = {
                 util.delete_cookie('password');
                 window.location.href = String(window.location.href);
             },
-            update_node_status_interval: 5,
+            update_node_status_interval: 2,
             user_data_handlers: {},
             node_profiles: {
                 core: {
                     node: {
                         img: 'memory_b',
-                        label: 'Nestor Core'
+                        label: 'Smart Core'
                     },
                     data: [
                         {
@@ -324,6 +328,18 @@ var app; app = {
                 app.ws.api._temp_prelogin = true;
                 app.ws.api.login(util.cookie('username'), util.cookie('password'));
             }
+        },
+        quit: _ => {
+            if (app.ws.online) app.ws.socket.close(1001);
+            var main_children = app.ui.block.child('main').children();
+            for (var m_c in main_children) {
+                if (m_c != 'header' && m_c != 'reload')
+                    main_children[m_c].css('display', 'none');
+            }
+            app.ui.block.child('main/reload').on('show');
+        },
+        reload: _ => {
+            window.location.reload();
         },
         init: _ => {
             console.clear();
