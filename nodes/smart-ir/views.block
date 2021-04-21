@@ -1,0 +1,822 @@
+    *
+
+// nestor node web client views (smart-ir)
+
+!ir-remote-menu-e
+    init
+        {
+            var block = Block('div');
+            block.key('topbar_theme', 'dark');
+            var load_remote_submenu = (submenu) => {
+                submenu.on('hide_children');
+                var submenu_title = block.key('submenu_title');
+                if (block.key('title_replace') && block.key('title_replace') != 'null') {
+                    submenu_title = block.key('title_replace');
+                    // block.key('title_replace', 'null')
+                } else submenu_title = app.ui.block.child('main/node').key('node_info').name;
+                submenu.child('bar/title/text').html('').data(`${submenu_title}`);
+                submenu.child('content-wrap/content/ir_remote_menu').on('load_current', {
+                    env: block.key('env')
+                }).css('display', 'block');
+                var show_data = {
+                    node_type: block.key('node_type'),
+                    field_id: block.key('metadata') ? block.key('metadata').id : null
+                };
+                if (block.key('size_override') && block.key('size_override') != 'null') {
+                    show_data.size_override = block.key('size_override');
+                    block.key('size_override', 'null');
+                } else if (block.key('size_override_backup') != 'null') {
+                    show_data.size_override = block.key('size_override_backup');
+                }
+                if (block.key('topbar_theme') && block.key('topbar_theme') != 'null') {
+                    show_data.topbar_theme = block.key('topbar_theme');
+                    // block.key('topbar_theme', 'null');
+                }
+                submenu.on('show', show_data);
+                Block.queries();
+                setTimeout(_ => {
+                    Block.queries();
+                }, 25);
+            };
+            return block
+                .key('submenu_title', 'Remote Control')
+                .key('load_remote_submenu_func', load_remote_submenu)
+                .key('env', false)
+                .key('size_override_backup', 'null')
+                .key('enabled', 'true')
+                .css({
+                    width: '100%',
+                    height: '100%',
+                    marginLeft: '15px',
+                    marginTop: '1px'
+                })
+                .on('disable', (e, b, d) => {
+                    block.css('opacity', '0.6');
+                    block.child('open_menu/img').css('cursor', 'default');
+                    block.key('enabled', 'false');
+                    e.stopPropagation();
+                })
+                .on('enable', (e, b, d) => {
+                    block.css('opacity', '1');
+                    block.child('open_menu/img').css('cursor', 'pointer');
+                    block.key('enabled', 'true');
+                    e.stopPropagation();
+                })
+                .on('show_menu', (e, b, d) => {
+                    if (d.hasOwnProperty('size_override'))
+                        block.key('size_override', d.size_override);
+                    if (d.hasOwnProperty('topbar_theme'))
+                        block.key('topbar_theme', d.topbar_theme);
+                    if (d.hasOwnProperty('title_replace'))
+                        block.key('title_replace', d.title_replace);
+                    b.child('open_menu/img').on('click');
+                })
+                .add(Block('block', 'menu_label')
+                    .css({
+                        width: 'auto',
+                        float: 'left',
+                        marginLeft: '6px'
+                    })
+                    .add(Block('text', true)
+                        .data('Panel')
+                        .css({
+                            fontSize: '24px',
+                            cursor:'default'
+                        })
+                    )
+                )
+                .add(Block('block', 'open_menu')
+                    .css({
+                        width: '75px',
+                        float: 'left',
+                        //marginLeft: '5px'
+                    })
+                    .add(Block('img', 1)
+                        .data({
+                            src: '/img/launch_b.png',
+                            height: '42px',
+                            width: '42px'
+                        })
+                        .css({
+                            opacity: '0.5',
+                            cursor: 'pointer',
+                            transition: 'opacity 0.12s ease'
+                        })
+                        .on('mouseover', (e, b, d) => {
+                            if (block.key('enabled') === 'true')
+                                b.css('opacity', '0.6');
+                        })
+                        .on('mouseout', (e, b, d) => {
+                            if (block.key('enabled') === 'true')
+                                b.css('opacity', '0.5');
+                        })
+                        .on('click', (e, b, d) => {
+                            var submenu = app.ui.block.child('main/node/menu/submenu');
+                            if (block.key('enabled') === 'true')
+                                load_remote_submenu(submenu);
+                        })
+                    )
+                )
+                .add(Block('block', 'size_switch')
+                    .css({
+                        width: 'auto',
+                        marginLeft: '10px',
+                        marginRight: 'auto',
+                        float: 'left'
+                    })
+                    .add(Block('switch', 1)
+                        .data({
+                            label: 'Fullscreen'
+                        })
+                        .on('modified', (e, b, d) => {
+                            var size = b.key('state') ? 'full' : 'large';
+                            block.key('size_override_backup', size);
+                            e.stopPropagation();
+                        })
+                    )
+                )
+            ;
+        }
+    load
+        {
+            data('metadata', metadata => {
+                block.key('metadata', metadata);
+            });
+            data('val', value => {
+                block.key('value', value);
+            });
+            var ir_menu = app.ui.block.child('main/node/menu/submenu/content-wrap/content/ir_remote_menu');
+            data('forward_data', forward_data => {
+                if (forward_data && forward_data.hasOwnProperty('id') && forward_data.hasOwnProperty('val')) {
+                        var node_field_meta = block.key('metadata');
+                        if (node_field_meta.hasOwnProperty('editor-options') && node_field_meta['editor-options'].hasOwnProperty('forward-data-capture') && node_field_meta['editor-options']['forward-data-capture'].includes(forward_data.id)) {
+                            console.log('forward_data target: ', forward_data);
+                            if (forward_data.id == "target") {
+                                var menu_type = forward_data.val;
+                                app.ui.ir_remote_menu.menu_type = menu_type;
+                                var env = null;
+                                if (block.key('env')) env = block.key('env');
+                                ir_menu.on('update_current', {
+                                    updates: { "target": menu_type },
+                                    env: env
+                                });
+                                if (menu_type === 'null')
+                                    block.on('disable');
+                                else block.on('enable');
+                            }
+                        }
+                    }
+            });
+            data('env', env => {
+                if (env) {
+                    block.key('env', env);
+                    if (env.menu_profiles) {
+                        app.ui.ir_remote_menu.menu_profiles = env.menu_profiles;
+                    }
+                }
+            });
+            data('node_type', node_type => {
+                if (node_type) {
+                    block.key('node_type', node_type);
+                }
+            });
+            block.child('size_switch/switch').on('activate', {
+                state: 'on'
+            });
+        }
+
+!rokutv-button
+    init
+        {
+            return Block('div')
+                .css({
+                    height: '65px',
+                    width: '130px',
+                    backgroundColor: '#1f1f1f',
+                    borderRadius: '3px',
+                    cursor: 'pointer',
+                    display: 'inline-block',
+                    marginBottom: '10px',
+                    transition: 'background-color 0.15s ease'
+                })
+                .on('mouseover', (e, b, d) => {
+                    b.css('background-color', '#2f2f2f');
+                })
+                .on('mouseout', (e, b, d) => {
+                    b.css('background-color', '#1f1f1f');
+                })
+                .add(Block('block', 1)
+                    .add(Block('img', 1))
+                    .add(Block('text', 1)
+                        .css({
+                            display: 'none',
+                            textTransform: 'uppercase',
+                            color: 'white',
+                            fontSize: '17px'
+                        })
+                    )
+                )
+                .on('click', (e, b, d) => {
+                    var name = b.mark();
+                    console.log('[smart-ir] sending button ', name);
+                    var rokutv_menu = app.ui.block.child('main/node/menu/submenu/content-wrap/content/ir_remote_menu/remote/menu_views/rokutv');
+                    if (rokutv_menu) {
+                        rokutv_menu.on('send_button', {
+                            button: `${name}`
+                        });
+                    }
+                })
+            ;
+        }
+    load
+        {
+            data('src', src => {
+                block.child('block/img').data({
+                    src: '/img/' + src,
+                    height: '25px',
+                    width: '25px',
+                    css: {
+                        marginTop: '3px'
+                    }
+                });
+            });
+            data('val', val => {
+                block.child('block/img').css({
+                    display: 'none'
+                }).sibling('text').css({
+                    display: 'inline'
+                }).html('').data(val);
+            });
+            if (data('src') == null && data('val') == null) {
+                block.child('block/img').data({
+                    src: '/img/' + block.mark() + '_w.png',
+                    height: '30px',
+                    width: '30px',
+                    css: {
+                        marginTop: '3px'
+                    }
+                });
+            }
+        }
+
+!lgtv-button
+    init
+        {
+            return Block('div')
+                .css({
+                    height: '65px',
+                    width: '130px',
+                    backgroundColor: '#1f1f1f',
+                    borderRadius: '3px',
+                    cursor: 'pointer',
+                    display: 'inline-block',
+                    marginBottom: '10px',
+                    transition: 'background-color 0.15s ease'
+                })
+                .on('mouseover', (e, b, d) => {
+                    b.css('background-color', '#2f2f2f');
+                })
+                .on('mouseout', (e, b, d) => {
+                    b.css('background-color', '#1f1f1f');
+                })
+                .add(Block('block', 1)
+                    .add(Block('img', 1))
+                    .add(Block('text', 1)
+                        .css({
+                            display: 'none',
+                            textTransform: 'uppercase',
+                            color: 'white',
+                            fontSize: '17px'
+                        })
+                    )
+                )
+                .on('click', (e, b, d) => {
+                    var name = b.mark();
+                    console.log('[smart-ir] sending button ', name);
+                    var lgtv_menu = app.ui.block.child('main/node/menu/submenu/content-wrap/content/ir_remote_menu/remote/menu_views/lgtv');
+                    if (lgtv_menu) {
+                        lgtv_menu.on('send_button', {
+                            button: `${name}`
+                        });
+                    }
+                })
+            ;
+        }
+    load
+        {
+            data('src', src => {
+                block.child('block/img').data({
+                    src: '/img/' + src,
+                    height: '25px',
+                    width: '25px',
+                    css: {
+                        marginTop: '3px'
+                    }
+                });
+            });
+            data('val', val => {
+                block.child('block/img').css({
+                    display: 'none'
+                }).sibling('text').css({
+                    display: 'inline'
+                }).html('').data(val);
+            });
+            if (data('src') == null && data('val') == null) {
+                block.child('block/img').data({
+                    src: '/img/' + block.mark() + '_w.png',
+                    height: '30px',
+                    width: '30px',
+                    css: {
+                        marginTop: '3px'
+                    }
+                });
+            }
+        }
+
+views
+    :initialize
+        {
+            if (data) {
+                if (data.submenu) {
+                    data.submenu.child('content-wrap/content')
+                        .add(block.child('ir_remote_menu'))
+                    ;
+                }
+                if (data.resolve) data.resolve();
+            }
+        }
+    div ir_remote_menu
+        $submenu_title Remote Control
+        css
+            height 100%
+            width 100%
+            top 0
+            right 0
+            position absolute
+            text-align left
+            display none
+            overflow-y auto
+            overflow-x hidden
+            background-color #111
+        $ir_codes null
+        :load_current
+            {
+                var env = null;
+                var menu_type = app.ui.ir_remote_menu.menu_type;
+                console.log('[smart-ir] loading remote type ' + `${menu_type}`);
+                if (data && data.env) env = data.env;
+                block.on('update_current', {
+                    updates: { tv: `${menu_type}` },
+                    env: env
+                });
+            }
+        :update_current
+            {
+                var env = null;
+                if (data && data.hasOwnProperty('env') && data.env) {
+                    env = data.env;
+                }
+                if (data && data.hasOwnProperty('updates') && data.updates) {
+                    for (var data_id in data.updates) {
+                        var data_value = data.updates[data_id];
+                        if (data_id == "target") {
+                            console.log('[smart-ir] updating to remote type ' + data_value);
+                            if (env && env.hasOwnProperty('menu_profiles') && env.menu_profiles) {
+                                // console.log('env.menu_profiles', env.menu_profiles);
+                                if (env.menu_profiles.hasOwnProperty(`${data_value}`)) {
+                                    var menu_profile = env.menu_profiles[data_value];
+                                    if (menu_profile && menu_profile != null) {
+                                        if (menu_profile.hasOwnProperty('ir_codes') && menu_profile.ir_codes) {
+                                            block.key('ir_codes', menu_profile.ir_codes);
+                                            var menu_views = block.child('remote/menu_views').children();
+                                            var menu_view = block.child('remote/menu_views').child(`${data_value}`);
+                                            if (menu_view && menu_view != null) {
+                                                menu_view.data({ ir_codes: menu_profile.ir_codes });
+                                                // console.log('before reload');
+                                                menu_view.on('reload', { resolve: _ => {
+                                                    // console.log('after reload');
+                                                    for (var m_v in menu_views) {
+                                                        if (m_v != data_value) {
+                                                            menu_views[m_v].on('hide');
+                                                        }
+                                                    }
+                                                    menu_view.on('show');
+                                                    Block.queries();
+                                                    setTimeout(_ => {
+                                                        Block.queries();
+                                                    }, 100);
+                                                } });
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        // console.log(`received update: ${data_id} = ${data_value}`);
+                    }
+                }
+            }
+        :send_button
+            {
+                if (data) {
+                    if (data.hasOwnProperty('button') && data.button && data.button.trim().length > 0) {
+                        if (data.hasOwnProperty('ir_codes') && data.ir_codes) {
+                            // console.log(data.button, data.ir_codes);
+                            if (data.ir_codes.hasOwnProperty(data.button)) {
+                                var button_ir_code = data.ir_codes[data.button];
+                                app.ui.ir_remote_menu.send_button(button_ir_code);
+                            }
+                        }
+                    }
+                }
+                event.stopPropagation();
+            }
+        div remote
+            css
+                position absolute
+                top 0
+                left 0
+                width 100%
+                height 100%
+            :show
+                {
+                    var siblings = block.parent().children();
+                    for (var s in siblings) {
+                        if (s != block.mark()) siblings[s].css('display', 'none');
+                    }
+                    block.css('display', 'block');
+                    Block.queries();
+                }
+            div menu_views
+                css
+                    width 100%
+                    height 100%
+                // Vizio TV IR menu
+                div viziotv
+                    css
+                        display none
+                        font-size 20px
+                        text-align center
+                    #ir_codes
+                        {
+                            block.key('ir_codes', ir_codes);
+                        }
+                    :hide
+                        css
+                            display none
+                        {
+                            event.stopPropagation();
+                        }
+                    :show
+                        css
+                            display block
+                        {
+                            event.stopPropagation();
+                        }
+                    :reload
+                        {
+                            if (data && data.resolve)
+                                data.resolve();
+                        }
+                    div spacer
+                        css
+                            width 100%
+                            height 1px
+                            ///background-color #eee
+                            opacity 0.65
+                            margin-bottom 25px
+                    text text
+                        val Vizio TV
+                // RokuTV IR menu
+                div rokutv
+                    css
+                        display none
+                        font-size 20px
+                        text-align center
+                        width 100%
+                        height 100%
+                    #ir_codes
+                        {
+                            block.key('ir_codes', ir_codes);
+                        }
+                    :hide
+                        css
+                            display none
+                        {
+                            event.stopPropagation();
+                        }
+                    :show
+                        css
+                            display block
+                        {
+                            event.stopPropagation();
+                        }
+                    :reload
+                        {
+                            if (data && data.resolve)
+                                data.resolve();
+                        }
+                    :send_button
+                        {
+                            if (data) {
+                                if (data.hasOwnProperty('button') && data.button && data.button.trim().length > 0) {
+                                    var ir_codes = block.key('ir_codes');
+                                    if (ir_codes && ir_codes != null && ir_codes != 'null') {
+                                        block.parent(2).on('send_button', {
+                                            button: data.button,
+                                            ir_codes: ir_codes
+                                        });
+                                    }
+                                }
+                            }
+                            event.stopPropagation();
+                        }
+                    block main
+                        @query window height != 0
+                            {
+                                if (app.ui.ir_remote_menu) {
+                                    var outer_height = block.$().height();
+                                    var inner_height = block.child('buttons').$().height();
+                                    if (outer_height > 0 && inner_height > 0) {
+                                        // console.log(`oh ${outer_height} vs ih ${inner_height}`);
+                                        var scale_ratio = (outer_height - app.ui.ir_remote_menu.menu_padding) / (inner_height);
+                                        block.child('buttons').css('transform', `scale(${scale_ratio}, ${scale_ratio})`);
+                                    }
+                                }
+                            }
+                        div buttons
+                            img logo
+                                src /img/logos/roku-logo.png
+                                height 72px
+                                width 237px
+                                css
+                                    margin-top 20px
+                                    margin-bottom 20px
+                                    //display none
+                            css
+                                width 100%
+                                max-width 700px
+                                margin 0 auto
+                            div spacer1
+                                css
+                                    height 10px
+                            rokutv-button power
+                                src power_r.png
+                                css
+                                    margin 0 auto 6px
+                                    margin-bottom -3px
+                            div row1
+                                css
+                                    margin 10px auto 5px
+                                rokutv-button back
+                                    css
+                                        margin-right 5px
+                                div subspacer
+                                    css
+                                        width 140px
+                                        display inline-block
+                                rokutv-button home
+                                    css
+                                        margin-left 5px
+                            div row2
+                                css
+                                    margin 0 auto
+                                    margin-top -7px
+                                    margin-bottom -8px
+                                rokutv-button up
+                                    css
+                                        margin 0 auto
+                                div subrow
+                                    css
+                                        margin 5px auto -5px
+                                    rokutv-button left
+                                        css
+                                            margin-right 10px
+                                    rokutv-button ok
+                                        val ok
+                                    rokutv-button right
+                                        css
+                                            margin-left 10px
+                                rokutv-button down
+                                    css
+                                        margin 0 auto
+                            div row3
+                                css
+                                    margin 20px auto 10px
+                                rokutv-button return
+                                    css
+                                        margin-right 10px
+                                rokutv-button sleep
+                                    // sleep
+                                    css
+                                        opacity 0
+                                        pointer-events none
+                                rokutv-button options
+                                    src gear_w.png
+                                    css
+                                        margin-left 10px
+                            div row4
+                                css
+                                    margin -10px auto 0
+                                rokutv-button rewind
+                                    css
+                                        margin-right 10px
+                                rokutv-button play
+                                    src play_pause_w.png
+                                rokutv-button forward
+                                    css
+                                        margin-left 10px
+                            div row5
+                                css
+                                    margin 0 auto
+                                rokutv-button vol_down
+                                    css
+                                        margin-right 10px
+                                rokutv-button vol_mute
+                                    // vol_mute
+                                rokutv-button vol_up
+                                    css
+                                        margin-left 10px
+                    div spacer_post
+                        css
+                            width 100%
+                            height 1px
+                            margin-top 24px
+                            display none
+                // LGTV IR menu
+                div lgtv
+                    css
+                        display none
+                        font-size 20px
+                        text-align center
+                        width 100%
+                        height 100%
+                    #ir_codes
+                        {
+                            block.key('ir_codes', ir_codes);
+                        }
+                    :hide
+                        css
+                            display none
+                        {
+                            event.stopPropagation();
+                        }
+                    :show
+                        css
+                            display block
+                        {
+                            event.stopPropagation();
+                        }
+                    :reload
+                        {
+                            if (data && data.resolve)
+                                data.resolve();
+                        }
+                    :send_button
+                        {
+                            if (data) {
+                                if (data.hasOwnProperty('button') && data.button && data.button.trim().length > 0) {
+                                    var ir_codes = block.key('ir_codes');
+                                    if (ir_codes && ir_codes != null && ir_codes != 'null') {
+                                        block.parent(2).on('send_button', {
+                                            button: data.button,
+                                            ir_codes: ir_codes
+                                        });
+                                    }
+                                }
+                            }
+                            event.stopPropagation();
+                        }
+                    block main
+                        @query window height != 0
+                            {
+                                if (app.ui.ir_remote_menu) {
+                                    var outer_height = block.$().height();
+                                    var inner_height = block.child('buttons').$().height();
+                                    if (outer_height > 0 && inner_height > 0) {
+                                        // console.log(`oh ${outer_height} vs ih ${inner_height}`);
+                                        var scale_ratio = (outer_height - app.ui.ir_remote_menu.menu_padding) / (inner_height);
+                                        block.child('buttons').css('transform', `scale(${scale_ratio}, ${scale_ratio})`);
+                                    }
+                                }
+                            }
+                        div buttons
+                            css
+                                width 100%
+                                max-width 700px
+                                margin 0 auto
+                            div spacer1
+                                css
+                                    height 10px
+                            //lgtv-button power
+                            //    src power_r.png
+                            //    css
+                            //        margin 0 auto 6px
+                            //        margin-bottom -3px
+                            div row0
+                                css
+                                    margin 15px auto 0
+                                lgtv-button power
+                                    src power_r.png
+                                    css
+                                        margin-right 5px
+                                div subspacer
+                                    css
+                                        width 140px
+                                        display inline-block
+                                        height 65px
+                                        position relative
+                                    div logo_wrap
+                                        css
+                                            position absolute
+                                            top 21px
+                                            left 0
+                                            width 100%
+                                        image logo
+                                            src /img/logos/lgtv-logo-b.png
+                                            height 77px
+                                            width 78px
+                                            css
+                                                margin 0 auto
+                                lgtv-button input
+                                    css
+                                        margin-left 5px
+                            div row1
+                                css
+                                    margin 0 auto 5px
+                                lgtv-button back
+                                    css
+                                        margin-right 5px
+                                div subspacer
+                                    css
+                                        width 140px
+                                        display inline-block
+                                lgtv-button home
+                                    css
+                                        margin-left 5px
+                            div row2
+                                css
+                                    margin 0 auto
+                                    margin-top -7px
+                                    margin-bottom -8px
+                                lgtv-button up
+                                    css
+                                        margin 0 auto
+                                div subrow
+                                    css
+                                        margin 5px auto -5px
+                                    lgtv-button left
+                                        css
+                                            margin-right 10px
+                                    lgtv-button ok
+                                        val ok
+                                    lgtv-button right
+                                        css
+                                            margin-left 10px
+                                lgtv-button down
+                                    css
+                                        margin 0 auto
+                            div row3
+                                css
+                                    margin 20px auto 10px
+                                lgtv-button exit
+                                    src return_w.png
+                                    css
+                                        margin-right 10px
+                                lgtv-button sleep
+                                    // sleep
+                                    css
+                                        opacity 0
+                                        pointer-events none
+                                lgtv-button options
+                                    src gear_w.png
+                                    css
+                                        margin-left 10px
+                            div row4
+                                css
+                                    margin -10px auto 0
+                                lgtv-button rewind
+                                    css
+                                        margin-right 10px
+                                lgtv-button play
+                                    src play_pause_w.png
+                                lgtv-button forward
+                                    css
+                                        margin-left 10px
+                            div row5
+                                css
+                                    margin 0 auto
+                                lgtv-button vol_down
+                                    css
+                                        margin-right 10px
+                                lgtv-button vol_mute
+                                    // vol_mute
+                                lgtv-button vol_up
+                                    css
+                                        margin-left 10px
+                    div spacer_post
+                        css
+                            width 100%
+                            height 1px
+                            margin-top 24px
+                            display none

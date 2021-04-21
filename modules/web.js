@@ -44,6 +44,19 @@ var init = _ => {
             }
         }
     });
+    express_api.get("/n/:node_shortcut", (req, res) => {
+        var node_shortcut_id = req.params.node_shortcut;
+        var shortcut_data = m.main.get_node_shortcut(node_shortcut_id);
+        if (shortcut_data == null)
+            res.status(404).send('Not found.');
+        else {
+            res.sendFile(__dirname.split('/').slice(0, -1).join('/') + "/static/index.html");
+        }
+    });
+    // catch-all route
+    express_api.get("/*", (req, res) => {
+        res.sendFile(__dirname.split('/').slice(0, -1).join('/') + "/static/index.html");
+    });
 };
 var api = {
 

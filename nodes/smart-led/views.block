@@ -69,7 +69,7 @@
                                     .data({
                                         width: '30px',
                                         height: '30px',
-                                        src: 'img/pencil_b.png'
+                                        src: '/img/pencil_b.png'
                                     })
                                     .css({
                                         margin: '0 auto',
@@ -110,7 +110,7 @@
                                     .data({
                                         width: '30px',
                                         height: '30px',
-                                        src: 'img/pencil_b.png'
+                                        src: '/img/pencil_b.png'
                                     })
                                     .css({
                                         margin: '0 auto',
@@ -146,7 +146,7 @@
                         .data({
                             width: '35px',
                             height: '35px',
-                            src: 'img/play_b.png'
+                            src: '/img/play_b.png'
                         })
                         .css({
                             margin: '0 auto',
@@ -342,7 +342,7 @@
                         })
                         .add(Block('image', 1)
                             .data({
-                                src: 'img/pencil_b.png',
+                                src: '/img/pencil_b.png',
                                 width: '33px',
                                 height: '33px'
                             })
@@ -374,7 +374,7 @@
                         })
                         .add(Block('image', 1)
                             .data({
-                                src: 'img/plus_circle_b.png',
+                                src: '/img/plus_circle_b.png',
                                 width: '30px',
                                 height: '30px'
                             })
@@ -394,7 +394,7 @@
                         .data({
                             width: '35px',
                             height: '35px',
-                            src: 'img/play_b.png'
+                            src: '/img/play_b.png'
                         })
                         .css({
                             margin: '0 auto',
@@ -569,7 +569,7 @@
                     })
                     .add(Block('img', 1)
                         .data({
-                            src: 'img/gear_b.png',
+                            src: '/img/gear_b.png',
                             height: '45px',
                             width: '45px'
                         })
@@ -598,7 +598,7 @@
                     .key('f_val', false)
                     .add(Block('image', 'img')
                         .data({
-                            src: 'img/shuffle_b.png',
+                            src: '/img/shuffle_b.png',
                             height: '42px',
                             width: '42px'
                         })
@@ -660,14 +660,14 @@
                                         block.child('shuffle')
                                             .key('f_val', true)
                                             .child('img').data({
-                                                src: 'img/shuffle_i_b.png'
+                                                src: '/img/shuffle_i_b.png'
                                             })
                                         ;
                                     } else {
                                         block.child('shuffle')
                                             .key('f_val', false)
                                             .child('img').data({
-                                                src: 'img/shuffle_b.png'
+                                                src: '/img/shuffle_b.png'
                                             })
                                         ;
                                     }
@@ -1357,7 +1357,7 @@ views
                         block.css('display', 'table');
                     }
                 image icon
-                    src img/icon_g.png
+                    src /img/icon_g.png
                     height 270px
                     width 270px
                     css
@@ -1451,7 +1451,7 @@ views
                             cursor pointer
                             transition opacity 0.2s ease
                         image icon
-                            src img/trash_b.png
+                            src /img/trash_b.png
                             height 35px
                             width 35px
                         :mouseover
@@ -1482,7 +1482,7 @@ views
                             cursor pointer
                             transition opacity 0.2s ease
                         image icon
-                            src img/pencil_b.png
+                            src /img/pencil_b.png
                             height 35px
                             width 35px
                         :mouseover
@@ -1568,7 +1568,7 @@ views
                                         })
                                         .add(Block('image', 1)
                                             .data({
-                                                src: 'img/bars3_b.png',
+                                                src: '/img/bars3_b.png',
                                                 width: '32px',
                                                 height: '32px'
                                             })
@@ -1662,7 +1662,7 @@ views
                                         })
                                         .add(Block('image', 'edit_img')
                                             .data({
-                                                src: 'img/pencil_w.png',
+                                                src: '/img/pencil_w.png',
                                                 height: '36px',
                                                 width: '36px',
                                                 css: {
@@ -1825,7 +1825,7 @@ views
                                         })
                                         .add(Block('image', 1)
                                             .data({
-                                                src: 'img/x_b.png',
+                                                src: '/img/x_b.png',
                                                 width: '33px',
                                                 height: '33px'
                                             })
@@ -1891,11 +1891,11 @@ views
                                     block.child('colorwrap/color').css('border', '3px solid ' + currentrgbcss);
                                 if (block.key('r') > app.ui.color_picker.bw_threshold && block.key('g') > app.ui.color_picker.bw_threshold && block.key('b') > app.ui.color_picker.bw_threshold) {
                                     block.child('colorwrap/color/edit_img').data({
-                                        src: 'img/pencil_b.png'
+                                        src: '/img/pencil_b.png'
                                     });
                                 } else {
                                     block.child('colorwrap/color/edit_img').data({
-                                        src: 'img/pencil_w.png'
+                                        src: '/img/pencil_w.png'
                                     });
                                 }
                             }
@@ -1993,7 +1993,7 @@ views
                                     app.ui.pattern_picker.add_pattern_color();
                             }
                         image img
-                            src img/plus_bl.png
+                            src /img/plus_bl.png
                             height 30px
                             width 30px
                             css
@@ -2109,7 +2109,7 @@ views
                                 )
                                 .__add(Block('image', 'arrow')
                                     .data({
-                                        src: "img/down_b.png",
+                                        src: "/img/down_b.png",
                                         height: "20px",
                                         width: "20px"
                                     })

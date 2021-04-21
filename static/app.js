@@ -5,9 +5,20 @@ var app; app = {
     ui: {
         block: Block('div', 'app'),
         transition_fade_duration: 0.145, // 0.155
+        login_mobile_scale: 0.37,
         init: (callback) => {
+            $(window).on("orientationchange", (event) => {
+                Block.queries();
+                setTimeout(_ => {
+                    Block.queries();
+                }, 100);
+            });
             app.ui.block.fill(document.body);
             Block.queries();
+            if (app.main.shortcut_exists()) {
+                app.ui.block.child('loading').on('show');
+                app.ui.block.css('transition', 'none');
+            }
             setTimeout(_ => {
                 app.ui.block.css('opacity', '1');
             }, 100);
@@ -23,7 +34,18 @@ var app; app = {
             node_block.child('menu/code').data({ val: core_info.code });
             node_block.child('menu/id').data({ val: core_info.id });
         },
-        load_view: (blockfile_path, resolve = null, path_extension = true) => {
+        load_main_views: resolve => {
+            console.log('[ui] blocks loading');
+            app.ui.block.load(_ => {
+                app.ui.block.load(_ => {
+                    app.ui.block.load(_ => {
+                        console.log('[ui] blocks loaded');
+                        if (resolve) resolve();
+                    }, '/views/app', 'jQuery');
+                }, '/views/views', 'jQuery');
+            }, '/views/blocks', 'jQuery');
+        },
+        load_client_view: (blockfile_path, resolve = null, path_extension = true) => {
             var views_block = Block('div', 'views');
             views_block.load(_ => {
                 views_block.on('initialize', {
@@ -115,15 +137,22 @@ var app; app = {
             logout: _ => {
                 util.delete_cookie('username');
                 util.delete_cookie('password');
-                window.location.href = String(window.location.href);
+                if (window.location.href.slice(0, -1) == window.location.origin) {
+                    app.main.reload();
+                } else if (window.location.search.includes('logout=true')) {
+                    window.location = String(window.location.origin);
+                } else {
+                    window.location = String(window.location.origin) + "/?logout=true";
+                }
             },
             update_node_status_interval: 2,
             user_data_handlers: {},
             node_profiles: {
                 core: {
+                    id: "core",
                     node: {
-                        img: 'memory_b',
-                        label: 'Smart Core'
+                        img: "memory_b",
+                        label: "Smart Core"
                     },
                     data: [
                         {
@@ -144,6 +173,15 @@ var app; app = {
                         }
                     ]
                 }
+            },
+            get_node_profile_env: (node_type) => {
+                if (node_type != null && node_type && app.ws.api.node_profiles.hasOwnProperty(`${node_type}`)) {
+                    var node_profile = app.ws.api.node_profiles[node_type];
+                    if (node_profile != null && node_profile && node_profile.hasOwnProperty('env') && node_profile.env) {
+                        return node_profile.env;
+                    }
+                }
+                return null;
             },
             get_node_field_meta: (node_type, field_id) => {
                 if (app.ws.api.node_profiles.hasOwnProperty(node_type)) {
@@ -234,6 +272,11 @@ var app; app = {
                 app.ws.send('reset_core', {
                     core_id: id
                 });
+            },
+            get_shortcut: (url) => {
+                app.ws.send('get_shortcut', {
+                    url: url
+                });
             }
         }
     },
@@ -245,19 +288,77 @@ var app; app = {
                 else app.main.client_modules[node_type] = module;
             },
         },
+        shortcut_exists: _ => {
+            var path = window.location.pathname;
+            if (path == "" || path == "/") return false;
+            path_arr = path.split("/");
+            if (path_arr.length >= 1 && path_arr[0] == "") {
+                if (path_arr.length >= 2 && path_arr[1] == "n") {
+                    return true;
+                }
+            }
+            return false;
+        },
+        process_shortcuts: _ => {
+            var path = window.location.pathname;
+            if (path == "" || path == "/") return;
+            path_arr = path.split("/");
+            if (path_arr.length >= 1 && path_arr[0] == "") {
+                if (path_arr.length >= 2 && path_arr[1] == "n") {
+                    if (path_arr.length >= 3 && path_arr[2] != "") {
+                        app.main.get_shortcut(path_arr[2]);
+                    }
+                }
+            }
+        },
+        get_shortcut: (shortcut) => {
+            app.ws.api.get_shortcut(shortcut);
+        },
+        process_shortcut: (shortcut, data) => {
+            console.log(`[main] processing shortcut "${shortcut}"`);
+            var _process = _ => {
+                if (data.action == 'exec') {
+                    var code = `( (block) => { ${data.data} } )(app.ui.block.child('main/node/menu/${data.field_id}'));`;
+                    if (code) eval(code);
+                }
+            };
+            setTimeout(_ => {
+                app.ui.block.child('main/core').data({ id: data.core_id });
+                setTimeout(_ => {
+                    app.ui.block.child('main/node').data({ id: data.id });
+                    setTimeout(_ => {
+                        app.ui.block.child('main/cores').on('hide');
+                        app.ui.block.child('main/node').on('show');
+                        _process();
+                        app.ui.block.child('loading').css('transition', 'opacity 0.3s ease');
+                        setTimeout(_ => {
+                            app.ui.block.child('loading').css('opacity', '0');
+                            setTimeout(_ => {
+                                app.ui.block.child('loading').on('hide');
+                            }, 330);
+                        }, 50);
+                    }, 400);
+                }, 400);
+            }, 10);
+        },
         update_node_profiles: (node_profiles, load_client_drivers = true) => {
             for (var np in node_profiles) {
                 node_profiles[np].id = np;
                 app.ws.api.node_profiles[np] = node_profiles[np];
             }
             if (load_client_drivers) {
-                app.main.load_client_drivers();
+                console.log('[main] loading client drivers');
+                app.main.load_client_drivers(null, null, _ => {
+                    console.log('[main] loaded client drivers');
+                    console.log('[main] processing shortcuts');
+                    app.main.process_shortcuts();
+                });
                 setTimeout(_ => {
                     Block.queries();
                 }, 20);
             }
         },
-        load_client_drivers: (i = null, arr = null, debug = false) => {
+        load_client_drivers: (i = null, arr = null, resolve = null, debug = false) => {
             // debug = true;
             if (debug) console.log(`load_client_drivers: called (i=${i})`);
             var node_profiles = app.ws.api.node_profiles;
@@ -265,14 +366,14 @@ var app; app = {
                 if (debug) console.log('load_client_drivers: start');
                 if (node_profiles) {
                     arr = Object.keys(node_profiles);
-                    app.main.load_client_drivers(0, arr);
+                    app.main.load_client_drivers(0, arr, resolve, debug);
                 }
             } else {
                 if (i < arr.length) {
                     var np = arr[i];
                     // if (debug) console.log(i, arr, arr[i]);
                     var _load_next = _ => {
-                        app.main.load_client_drivers(++i, arr);
+                        app.main.load_client_drivers(++i, arr, resolve, debug);
                     };
                     var _load_current_module = _ => {
                         var _next = _load_next;
@@ -292,6 +393,7 @@ var app; app = {
                     } else _load_next();
                 } else {
                     if (debug) console.log('load_client_drivers: done');
+                    if (resolve) resolve();
                 }
             }
         },
@@ -309,7 +411,7 @@ var app; app = {
             }
         },
         load_client_module: (node_type, resolve = null) => {
-            util.load_script(`nodes/${node_type}/client.js`, _ => {
+            util.load_script(`/nodes/${node_type}/client.js`, _ => {
                 app.main.api.module(app.main.last_loaded_client_module, node_type);
                 app.main.init_client_module(node_type, _ => {
                     console.log(`[main] client module "${node_type}" script initialized`);
@@ -318,7 +420,7 @@ var app; app = {
             });
         },
         load_client_view: (node_type, resolve = null) => {
-            app.ui.load_view(`nodes/${node_type}/views.block`, _ => {
+            app.ui.load_client_view(`/nodes/${node_type}/views.block`, _ => {
                 console.log(`[main] client module "${node_type}" views initialized`);
                 if (resolve) resolve();
             });
@@ -327,6 +429,10 @@ var app; app = {
             if (util.cookie('username') != null && util.cookie('password') != null) {
                 app.ws.api._temp_prelogin = true;
                 app.ws.api.login(util.cookie('username'), util.cookie('password'));
+            } else {
+                if (app.main.shortcut_exists()) {
+                    window.location = String(window.location.origin);
+                }
             }
         },
         quit: _ => {
@@ -343,28 +449,30 @@ var app; app = {
         },
         init: _ => {
             console.clear();
-            console.log('[main] loading...');
+            console.log('[main] loading');
+            if (window.location.search.includes('logout=true')) {
+                app.ws.api.logout();
+                return;
+            }
             window.nestor = app.main.api;
             setTimeout(_ => {
-                app.ui.block.load(_ => {
-                    app.ui.block.load(_ => {
-                        console.log('[main] blocks loaded');
-                        console.log('[main] socket connecting');
-                        app.ws.url = (location.protocol === 'https:'
-                            ? 'wss://'
-                            : 'ws://') +
-                            document.domain +
-                            ((document.domain == 'localhost' || document.domain.includes('192.168.0.')) ? ':30009' : (location.protocol === 'https:' ? ':443' : ':80')) +
-                            '/socket';
-                        app.ws.connect(_ => {
-                            app.ui.init(_ => {
-                                console.log('[main] ready');
-                                app.main.login();
-                                // if (util.mobile()) alert('mobile');
-                            });
+                console.log('[main] ui loading');
+                app.ui.load_main_views(_ => {
+                    console.log('[main] socket connecting');
+                    app.ws.url = (window.location.protocol === 'https:'
+                        ? 'wss://'
+                        : 'ws://') +
+                        document.domain +
+                        ((document.domain == 'localhost' || document.domain.includes('192.168.0.')) ? ':30009' : (window.location.protocol === 'https:' ? ':443' : ':80')) +
+                        '/socket';
+                    app.ws.connect(_ => {
+                        app.ui.init(_ => {
+                            console.log('[main] ready');
+                            app.main.login();
+                            // if (util.mobile()) alert('mobile');
                         });
-                    }, 'app', 'jQuery');
-                }, 'blocks', 'jQuery');
+                    });
+                });
             }, 300);
         }
     }

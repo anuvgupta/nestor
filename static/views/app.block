@@ -2,7 +2,9 @@
 
 // nestor main blockfile
 
+
 // app UI content layer
+
 app
     id app
     css
@@ -36,9 +38,13 @@ app
                     app.ui.block.child('main').on('show');
                 } });
             } else {
+                console.log('login failed');
+                //if () {
+
+                //}
                 if (app.ws.api.hasOwnProperty('_temp_prelogin') && app.ws.api._temp_prelogin) {
                     app.ws.api._temp_prelogin = false;
-                } else block.child('login/content/error/text').css('display', 'inline-block');
+                } else block.child('login/wrap/content/error/text').css('display', 'inline-block');
             }
         }
     #node_profiles
@@ -223,6 +229,13 @@ app
 
             }
         }
+    #get_shortcut
+        {
+            var shortcut = get_shortcut;
+            if (shortcut) {
+                app.main.process_shortcut(shortcut.url, shortcut);
+            }
+        }
     block login
         {
             block.css('transition', `opacity ${app.ui.transition_fade_duration}s`);
@@ -254,97 +267,115 @@ app
         css
             margin 0
             opacity 1
-        div logo
+        div wrap
             css
-                margin 0 auto -15px auto
-                width 150px
-                opacity 0.9
-            image logo
-                src img/nestor_b.png
-                width 150px
-                height 150px
-        h1 h1
-            html nestor
-            css
-                opacity 0.9
-                font-size xx-large
-        div content
-            css
-                margin-bottom 70px
-            input username
-                type text
-                placeholder username
-                css
-                    width 120px
-                    margin-bottom 5px
-                    text-align center
-                    border 1px solid rgba(20, 20, 20, 0.15)
-                    border-radius 1.5px
-                    outline none
-                :keyup
-                    {
-                        if (event.keyCode == 13) {
-                            block.sibling('submit').$().click();
+                width auto
+                height auto
+                transform scale(1.1, 1.1)
+            @query window height != 0
+                {
+                    if (util.mobile()) {
+                        var outer_width = window.innerWidth;
+                        var inner_width = block.child('logo').$().width();
+                        if (outer_width > 0 && inner_width > 0) {
+                            var scale_ratio = (outer_width * app.ui.login_mobile_scale) / (inner_width);
+                            block.css('transform', `scale(${scale_ratio}, ${scale_ratio})`);
                         }
+                    } else {
+                        block.css('transform', 'scale(1.1, 1.1)');
                     }
-            break br1
-                // break
-            input password
-                type password
-                placeholder password
+                }
+            div logo
                 css
-                    width 120px
-                    margin-bottom 5px
-                    text-align center
-                    border 1px solid rgba(20, 20, 20, 0.15)
-                    border-radius 1.5px
-                    outline none
-                :keyup
-                    {
-                        if (event.keyCode == 13) {
-                            block.sibling('submit').$().click();
-                        }
-                    }
-            div error
+                    margin 0 auto -15px auto
+                    width 150px
+                    opacity 0.9
+                image logo
+                    src /img/nestor_b.png
+                    width 150px
+                    height 150px
+            h1 h1
+                html nestor
                 css
-                    margin-bottom 4px
-                text text
-                    val invalid credentials
+                    opacity 0.9
+                    font-size xx-large
+            div content
+                css
+                    margin-bottom 70px
+                input username
+                    type text
+                    placeholder username
                     css
-                        color rgba(150, 30, 30, 0.8)
-                        font-size 12px
-                        display none
-            button submit
-                html enter
-                css
-                    width 128px
-                    cursor pointer
-                    border 1px solid rgba(20, 20, 20, 0.15)
-                    border-radius 1.5px
-                    transition background-color 0.2s ease
-                    background-color #f6f6f6
-                    outline none
-                    height 24px
-                :click
-                    {
-                        var username = block.sibling('username').node().value;
-                        var password = block.sibling('password').node().value;
-                        if (username && password) {
-                            username = username.trim();
-                            password = password.trim();
-                            if (username != "" && password != "") {
-                                util.sha256(password, hashed_password => {
-                                    app.ws.api.login(username, hashed_password);
-                                });
+                        width 120px
+                        margin-bottom 5px
+                        text-align center
+                        border 1px solid rgba(20, 20, 20, 0.15)
+                        border-radius 1.5px
+                        outline none
+                    :keyup
+                        {
+                            if (event.keyCode == 13) {
+                                block.sibling('submit').$().click();
                             }
                         }
-                    }
-                :mouseover
+                break br1
+                    // break
+                input password
+                    type password
+                    placeholder password
                     css
-                        background-color #f1f1f1
-                :mouseout
+                        width 120px
+                        margin-bottom 5px
+                        text-align center
+                        border 1px solid rgba(20, 20, 20, 0.15)
+                        border-radius 1.5px
+                        outline none
+                    :keyup
+                        {
+                            if (event.keyCode == 13) {
+                                block.sibling('submit').$().click();
+                            }
+                        }
+                div error
                     css
+                        margin-bottom 4px
+                    text text
+                        val invalid credentials
+                        css
+                            color rgba(150, 30, 30, 0.8)
+                            font-size 12px
+                            display none
+                button submit
+                    html enter
+                    css
+                        width 128px
+                        cursor pointer
+                        border 1px solid rgba(20, 20, 20, 0.15)
+                        border-radius 1.5px
+                        transition background-color 0.2s ease
                         background-color #f6f6f6
+                        outline none
+                        height 24px
+                    :click
+                        {
+                            var username = block.sibling('username').node().value;
+                            var password = block.sibling('password').node().value;
+                            if (username && password) {
+                                username = username.trim();
+                                password = password.trim();
+                                if (username != "" && password != "") {
+                                    util.sha256(password, hashed_password => {
+                                        app.ws.api.login(username, hashed_password);
+                                    });
+                                }
+                            }
+                        }
+                    :mouseover
+                        css
+                            background-color #f1f1f1
+                    :mouseout
+                        css
+                            background-color #f6f6f6
     div main
         {
             block.css('transition', `opacity ${app.ui.transition_fade_duration}s`);
@@ -423,7 +454,7 @@ app
                     margin-top -3px
                     float left
                 image img
-                    src img/nestor_w.png
+                    src /img/nestor_w.png
                     height 60px
                     width 60px
             block title
@@ -464,7 +495,7 @@ app
                             app.ws.api.logout();
                         }
                     image img
-                        src img/power_w.png
+                        src /img/power_w.png
                         width 42px
                         height 42px
         div cores
@@ -512,124 +543,6 @@ app
             div list
                 css
                     display none
-                !core-item
-                    init
-                        {
-                            var block = Block('div');
-                            return block
-                                .css({
-                                    width: '100%',
-                                    height: '110px',
-                                    backgroundColor: 'white',
-                                    borderBottom: '1px solid #ededed',
-                                    cursor: 'pointer',
-                                    transition: 'background-color 0.15s ease',
-                                    position: 'relative'
-                                })
-                                .on('mouseover', _ => {
-                                    block.css('background-color', '#f9f9f9');
-                                })
-                                .on('mouseout', _ => {
-                                    block.css('background-color', 'white');
-                                })
-                                .add(Block('block', 'img')
-                                    .css({
-                                        opacity: '0.7',
-                                        width: '90px',
-                                        height: '110px',
-                                        float: 'left',
-                                        boxSizing: 'border-box',
-                                        paddingTop: '3.5px'
-                                    })
-                                    .add(Block('image', 1)
-                                        .data({
-                                            src: 'img/memory_b.png',
-                                            //src: 'img/gear_b.png',
-                                            css: { margin: '0 auto' },
-                                            width: '40px',
-                                            height: '40px'
-                                            //width: '35px',
-                                            //height: '35px'
-                                        })
-                                    )
-                                )
-                                .add(Block('block', 'name')
-                                    .css({
-                                        height: '110px',
-                                        float: 'left',
-                                        width: 'auto'
-                                    })
-                                    .add(Block('text', 1)
-                                        .data('Name')
-                                        .css({
-                                            fontSize: '25px',
-                                            letterSpacing: '1px'
-                                        })
-                                    )
-                                )
-                                .add(Block('block', 'next')
-                                    .css({
-                                        width: '50px',
-                                        height: '110px',
-                                        opacity: '0.65',
-                                        position: 'absolute',
-                                        right: '15px',
-                                    })
-                                    .add(Block('image', 1)
-                                        .data({
-                                            src: 'img/right_b.png',
-                                            css: { margin: '0 auto' },
-                                            width: '50px',
-                                            height: '50px'
-                                        })
-                                    )
-                                )
-                                .on('click' , _ => {
-                                    var id = block.key('id');
-                                    if (id) {
-                                        block.parent(1)
-                                            .sibling('core').data({
-                                                    id: id
-                                                })
-                                            .sibling('cores')
-                                                .on('hide', { concurrent: _ => {
-                                                    block.parent(1)
-                                                        .sibling('core').on('show');
-                                                } });
-                                    }
-                                })
-                            ;
-                        }
-                    load
-                        {
-                            data('name', name => {
-                                block.key('name', name);
-                                block.child('name/text').html('').data(name);
-                            });
-                            data('id', id => {
-                                block.key('id', id);
-                            });
-                            data('status', status => {
-                                switch (status.status) {
-                                    case "online":
-                                        block.child('status/circle').css('background-color', app.ui.block.key('statusGreen'));
-                                        break;
-                                    case "offline":
-                                        block.child('status/circle').css('background-color', app.ui.block.key('deleteRed'));
-                                        break;
-                                    case "desync":
-                                        block.child('status/circle').css('background-color', app.ui.block.key('slowYellow'));
-                                        break;
-                                    case "intermediate":
-                                        block.child('status/circle').css('background-color', app.ui.block.key('buttonBlue'));
-                                        break;
-                                    case "new":
-                                    default:
-                                        block.child('status/circle').css('background-color', app.ui.block.key('stalledGrey'));
-                                        break;
-                                }
-                            });
-                        }
                 #core_list
                     {
                         block.html('');
@@ -668,7 +581,7 @@ app
                         width 60px
                         transition opacity 0.1s ease
                     image image
-                        src img/plus_w.png
+                        src /img/plus_w.png
                         width 60px
                         height 60px
         div core
@@ -823,7 +736,7 @@ app
                                 event.stopPropagation();
                             }
                         image img
-                            src img/right_b.png
+                            src /img/right_b.png
                             css
                                 transform rotate(180deg)
                                 display block
@@ -925,7 +838,7 @@ app
                         height 230px
                         margin 0 auto
                     image img
-                        src img/memory_b.png
+                        src /img/memory_b.png
                         css
                             opacity 0.7
                             margin 0 auto
@@ -984,7 +897,7 @@ app
                                     background-color rgba(180, 49, 41, 0.87)
                                     color white
                             image img
-                                src img/trash_w.png
+                                src /img/trash_w.png
                                 height 45px
                                 width 45px
                                 css
@@ -1059,193 +972,6 @@ app
                             });
                         }
                     }
-                !node-item
-                    init
-                        {
-                            var block = Block('block')
-                                .css({
-                                    width: '50%',
-                                    height: '50%',
-                                    minHeight: '345px',
-                                    maxHeight: '355px',
-                                    float: 'left'
-                                })
-                                .add(Block('div', 'content')
-                                    .css({
-                                        width: '89.5%',
-                                        height: '92%',
-                                        margin: '0 auto',
-                                        backgroundColor: '#ffffff',
-                                        border: '1px solid #f0f0f0',
-                                        boxSizing: 'border-box',
-                                        borderRadius: '7px',
-                                        boxShadow: 'rgba(50, 50, 50, 0.04) 0px 2px 4px',
-                                        transition: 'box-shadow 0.2s ease, background-color 0.2s ease',
-                                        cursor: 'pointer',
-                                        position: 'relative'
-                                    })
-                                    .on('mouseover', (e, b, d) => {
-                                        b.css({
-                                            boxShadow: 'rgba(50, 50, 50, 0.09) 0px 2.5px 5px',
-                                            backgroundColor: '#fbfbfb'
-                                        });
-                                    })
-                                    .on('mouseout', (e, b, d) => {
-                                        b.css({
-                                            boxShadow: 'rgba(50, 50, 50, 0.04) 0px 2px 4px',
-                                            backgroundColor: '#ffffff'
-                                        });
-                                    })
-                                    .add(Block('div', 'img')
-                                        .css({
-                                            margin: '20px auto 0',
-                                            height: '160px',
-                                            width: '160px',
-                                            opacity: '0.7'
-                                        })
-                                        .bind('load', load => {
-                                            block.child('content/img/image').data({
-                                                src: load,
-                                                height: '160px',
-                                                width: '160px'
-                                            });
-                                        })
-                                        .add(Block('image', 1))
-                                    )
-                                    .add(Block('div', 'title')
-                                        .add(Block('text', 1)
-                                            .data('Title')
-                                            .css({
-                                                fontSize: '35px',
-                                                color: '#222'
-                                            })
-                                        )
-                                    )
-                                    .add(Block('div', 'status')
-                                        .css({
-                                            width: '100%',
-                                            height: '80px',
-                                            marginTop: '8px',
-                                            position: 'absolute',
-                                            bottom: '13.2px'
-                                        })
-                                        .add(Block('block', 'light')
-                                            .css({
-                                                width: '27%',
-                                                height: '100%',
-                                                float: 'left'
-                                            })
-                                            .query('window width >= 665', function (event, block, data) {
-                                                block.css('width', '27%');
-                                            })
-                                            .query('window width < 665', function (event, block, data) {
-                                                block.css('width', '23%');
-                                            })
-                                            .add(Block('div', 'circle')
-                                                .css({
-                                                    borderRadius: '100%',
-                                                    height: '20px',
-                                                    width: '20px',
-                                                    backgroundColor: '#ddd',
-                                                    border: '1px solid #eee',
-                                                    margin: '0 0 0 auto'
-                                                })
-                                            )
-                                        )
-                                        .add(Block('div', 'labels')
-                                            .css({
-                                                width: '73%',
-                                                height: '100%',
-                                                float: 'left',
-                                                paddingLeft: '25px',
-                                                boxSizing: 'border-box'
-                                            })
-                                            .add(Block('div', 'type')
-                                                .css({
-                                                    height: '50%',
-                                                    width: '100%'
-                                                })
-                                                .add(Block('text', 1)
-                                                    .data('Type')
-                                                    .css({
-                                                        display: 'block',
-                                                        textAlign: 'left',
-                                                        paddingTop: '13px',
-                                                        fontSize: '23px',
-                                                        color: '#222'
-                                                    })
-                                                )
-                                            )
-                                            .add(Block('div', 'status')
-                                                .css({
-                                                    height: '50%',
-                                                    width: '100%'
-                                                })
-                                                .add(Block('text', 1)
-                                                    .data('Status 5 min ago')
-                                                    .css({
-                                                        display: 'block',
-                                                        textAlign: 'left',
-                                                        fontSize: '15px',
-                                                        color: '#888',
-                                                        fontStyle: 'italic',
-                                                        paddingTop: '3px'
-                                                    })
-                                                )
-                                            )
-                                        )
-                                    )
-                                )
-                                .on('click', _ => {
-                                    var id = block.key('id');
-                                    if (id) {
-                                        block.parent(1)
-                                            .sibling('node').data({
-                                                id: id
-                                            });
-                                        block.parent(1).on('hide', { concurrent: _ => {
-                                            block.parent(1).sibling('node').on('show');
-                                        }});
-                                    }
-                                })
-                            ;
-                            return block;
-                        }
-                    load
-                        {
-                            data('title', title => {
-                                block.child('content/title/text').html('').data(title);
-                            });
-                            data('type', type => {
-                                var img_src = app.ws.api.node_profiles[type].node.img;
-                                if (app.ws.api.node_profiles[type].node.hasOwnProperty('img-alt'))
-                                    img_src = app.ws.api.node_profiles[type].node['img-alt'];
-                                block.child('content/img').data({ load: 'img/' + img_src + '.png' });
-                                block.child('content/status/labels/type/text').html('').data(app.ws.api.node_profiles[type].node.label);
-                            });
-                            data('status', status => {
-                                block.key('status', status);
-                                block.child('content/status/labels/status/text').html('').data(status.code.charAt(0).toUpperCase() + status.code.slice(1) + " " + (status.code == "online" ? "now" : util.duration_desc(status.time)));
-                                switch (status.code) {
-                                    case "online":
-                                        block.child('content/status/light/circle').css('background-color', app.ui.block.key('statusGreen'));
-                                        break;
-                                    case "offline":
-                                        block.child('content/status/light/circle').css('background-color', app.ui.block.key('deleteRed'));
-                                        break;
-                                    case "desync":
-                                        block.child('content/status/light/circle').css('background-color', app.ui.block.key('slowYellow'));
-                                        break;
-                                    case "new":
-                                    default:
-                                        block.child('content/status/light/circle').css('background-color', app.ui.block.key('stalledGrey'));
-                                        break;
-                                }
-                            });
-                            data('id', id => {
-                                block.key('id', id);
-                            });
-                        }
                 {
                     var updateNodeStatus = _ => {
                         // console.log('update node status');
@@ -1325,7 +1051,7 @@ app
                     if (app.ws.api.node_profiles.hasOwnProperty(menu_type) && app.ws.api.node_profiles[menu_type]) {
                         var menu_profile = app.ws.api.node_profiles[menu_type];
                         block.child('menu/status/labels/type/text').html('').data(menu_profile.node.label);
-                        block.child('menu/status/image/img').data({ src: `img/${menu_profile.node.img}.png` });
+                        block.child('menu/status/image/img').data({ src: `/img/${menu_profile.node.img}.png` });
                         var old_children = block.child('menu').children();
                         for (var c in old_children) {
                             if (c != "status" && c != "submenu")
@@ -1335,9 +1061,15 @@ app
                             var data_field = menu_profile.data[i];
                             if (data_field.hasOwnProperty('editor') && data_field.editor) {
                                 if (data_field.editor != 'null') {
-                                    block.child('menu').add(Block('node-menu-item', data_field.id)
+                                    var new_node_menu_item_b = Block('node-menu-item', data_field.id)
                                         .data({ metadata: data_field })
-                                    );
+                                        .data({ node_type: menu_type });
+                                    block.child('menu').add(new_node_menu_item_b);
+                                    if (menu_profile.hasOwnProperty('env') && menu_profile.env) {
+                                        new_node_menu_item_b.data({
+                                            env: menu_profile.env
+                                        });
+                                    }
                                 }
                             }
                             if (data_field.hasOwnProperty('header') && data_field.header) {
@@ -1569,7 +1301,7 @@ app
                                 event.stopPropagation();
                             }
                         image img
-                            src img/right_b.png
+                            src /img/right_b.png
                             css
                                 transform rotate(180deg)
                                 display block
@@ -1601,7 +1333,7 @@ app
                     image img
                         height 40px
                         width 40px
-                        src img/pencil_b.png
+                        src /img/pencil_b.png
                         css
                             margin 0 auto
                             opacity 0.61
@@ -1630,175 +1362,6 @@ app
                         opacity 0.54
                     height 80px
                     width 80px
-            !node-menu-item
-                init
-                    {
-                        var block = Block('block');
-                        return block
-                            .css({
-                                width: '100%',
-                                //height: '135px',
-                                height: '110px',
-                                backgroundColor: 'white',
-                                borderBottom: '1px solid #eee',
-                                position: 'relative'
-                            })
-                            .add(Block('block', 'icon')
-                                .css({
-                                    width: '135px',
-                                    float: 'left'
-                                })               
-                                .add(Block('image', 1)
-                                    .data({
-                                        src: 'img/gear_b.png',
-                                        width: '37px',
-                                        height: '37px',
-                                    })
-                                    .css({
-                                        opacity: '0.65',
-                                        margin: '0 auto'
-                                    })
-                                )
-                            )
-                            .add(Block('block', 'label')
-                                .css({
-                                    width: 'auto',
-                                    float: 'left',
-                                    marginLeft: '-3px',
-                                    display: 'none'
-                                })
-                                .add(Block('text', 1)
-                                    .data('Label: ')
-                                    .css({
-                                        fontSize: '20px'
-                                    })
-                                )
-                            )
-                            .add(Block('div', 'editor')
-                                .css({
-                                    height: '100%',
-                                    width: 'calc(100% - 135px)',
-                                    minWidth: '50px',
-                                    boxSizing: 'border-box',
-                                    float: 'left'
-                                })
-                                .query('window width != 0', function (event, block, data) {
-                                    var lbl = block.sibling('label');
-                                    var new_width = `calc(100% - 135px - (${lbl.$().width()}px))`;
-                                    block.css('width', new_width);
-                                })
-                            )
-                            .on('local-update', (e, b, d) => {
-                                if (d && d.value !== null) {
-                                    var value = d.value;
-                                    var field_id = block.key('id');
-                                    if (field_id) {
-                                        var local_update = {};
-                                        local_update[field_id] = value;
-                                        app.ui.block.child('main/node').data({
-                                            local_update_node_data: local_update
-                                        });
-                                    }
-                                }
-                            })
-                        ;
-                    }
-                load
-                    {
-                        data('metadata', metadata => {
-                            block.key('id', metadata.id);
-                            block.key('value', metadata.initial);
-                            block.key('value-alt', {});
-                            block.key('metadata', metadata);
-                            block.child('icon/image').data({ src: `img/${metadata.img}.png` });
-                            if (metadata.hasOwnProperty('label') && metadata.label)
-                                block.child('label/text').html('').data(`${metadata.label}: `)
-                                    .parent().css('display', 'table');
-                            block.child('editor').add(Block(`${metadata.editor}-e`, 'view')
-                                .data({ metadata: metadata })
-                                .on('update', (event, editor_block, data) => {
-                                    //if (data.hasOwnProperty('value') && data.value != block.key('value')) {
-                                    if (data.hasOwnProperty('value')) {
-                                        block.key('value', data.value);
-                                        // console.log('update: ', data.value);
-                                        block.on('local-update', {
-                                            value: data.value
-                                        });
-                                        if (!data.hasOwnProperty('update_node_data') || data.update_node_data == true) {
-                                            app.ws.api.update_node_data(app.ui.block.child('main/node').key('id'), metadata.id, data.value,
-                                                data.hasOwnProperty('transitional') && data.transitional === true,
-                                                data.hasOwnProperty('boomerang') && data.boomerang === true);
-                                        }
-                                    }
-                                })
-                                .on('update-alt', (event, editor_block, data) => {
-                                    if (data.hasOwnProperty('value') && data.hasOwnProperty('id')) {
-                                        var alt_val_keys = block.key('value-alt');
-                                        if (alt_val_keys) {
-                                            alt_val_keys[data.id] = data.value;
-                                            block.key('value-alt', alt_val_keys);
-                                            if (!data.hasOwnProperty('update_node_data') || data.update_node_data == true) {
-                                                app.ws.api.update_node_data(app.ui.block.child('main/node').key('id'), data.id, data.value,
-                                                    data.hasOwnProperty('transitional') && data.transitional === true, 
-                                                    data.hasOwnProperty('boomerang') && data.boomerang === true);
-                                            }
-                                        }
-                                    }
-                                })
-                            );
-                        });
-                        data('val', value => {
-                            block.key('value', value);
-                            block.child('editor/view').data({ val: value });
-                            // console.log(block.key('id'), value);
-                            block.on('local-update', {
-                                value: value
-                            });
-                        });
-                        data('forward_data', forward_data => {
-                            block.key('forward_data', forward_data);
-                            var node_field_meta = block.key('metadata');
-                            var f_data_capture = node_field_meta.hasOwnProperty('editor-options') && node_field_meta['editor-options'].hasOwnProperty('forward-data-capture') && node_field_meta['editor-options']['forward-data-capture'].includes(forward_data.id);
-                            if (f_data_capture)
-                                block.child('editor/view').data({ forward_data: forward_data });
-                            // console.log(block.mark(), forward_data);
-                        });
-                        data('user_data', user_data => {
-                            block.child('editor/view').data({
-                                user_data: user_data
-                            });
-                        });
-                    }
-            !node-menu-header
-                init
-                    {
-                        var block = Block('block');
-                        return block
-                            .css({
-                                height: '45px',
-                                backgroundColor: '#f8f8f8',
-                                borderBottom: '1px solid #efefef',
-                                boxSizing: 'border-box',
-                                paddingLeft: '47px'
-                            })
-                            .__child('content')
-                                .css('text-align', 'left')
-                                .__parent()
-                            .add(Block('text', 1)
-                                .data('text')
-                                .css({
-                                    fontSize: '21px',
-                                    color: '#333'
-                                })
-                            )
-                        ;
-                    }
-                load
-                    {
-                        data('val', val => {
-                            block.child('text').html('').data(val);
-                        });
-                    }
             div menu
                 css
                     box-sizing border-box
@@ -1827,6 +1390,74 @@ app
                         //transition opacity 0.2s ease
                     :show
                         {
+                            var _regular_ = _ => {
+                                block.parent().css({ zIndex: '1' });
+                                block.css({ paddingTop: '80px' });
+                                block.child('bar').css({ top: '80px', borderTop: 'none' });
+                                block.child('content-wrap').css({ paddingTop: '145px' });
+                                app.ui.block.child('main/node').css({ paddingTop: '86px' });
+                                app.ui.block.child('main/header').css({ opacity: '1' });
+                            };
+                            var _large_ = _ => {
+                                block.parent().css({ zIndex: '6' });
+                                block.css({ paddingTop: '0' });
+                                block.child('bar').css({ top: '0', borderTop: 'none' });
+                                block.child('content-wrap').css({ paddingTop: '65px' });
+                                app.ui.block.child('main/node').css({ paddingTop: '86px' });
+                                app.ui.block.child('main/header').css({ opacity: '1' });
+                            };
+                            var _full_ = _ => {
+                                block.parent().css({ zIndex: '6' });
+                                block.css({ paddingTop: '0' });
+                                block.child('bar').css({ top: '0', borderTop: '1.5px solid rgb(100, 100, 100)' });
+                                block.child('content-wrap').css({ paddingTop: '65px' });
+                                app.ui.block.child('main/node').css({ paddingTop: '0' });
+                                app.ui.block.child('main/header').css({ opacity: '0' });
+                            };
+                            if (data && data.hasOwnProperty('field_id') && data.hasOwnProperty('node_type') ) {
+                                var field_id = data.field_id;
+                                var node_type = data.node_type;
+                                var metadata = app.ws.api.get_node_field_meta(node_type, field_id);
+                                if (metadata && metadata.hasOwnProperty('editor-options') && metadata['editor-options'].hasOwnProperty('submenu-size')) {
+                                    var submenu_size = metadata['editor-options']['submenu-size'];
+                                    if (data.size_override) submenu_size = data.size_override;
+                                    if (submenu_size) {
+                                        if (submenu_size == 'regular') _regular_();
+                                        else if (submenu_size == 'large') _large_();
+                                        else if (submenu_size == 'full') _full_();
+                                        else _regular_();
+                                    } else _regular_();
+                                } else _regular_();
+                            } else _regular_();
+                            if (data.topbar_theme) {
+                                if (data.topbar_theme == 'dark') {
+                                    block.child('bar')
+                                        .css('border-bottom', 'none')
+                                        .css('border-top', 'none')
+                                        .css('background-color', 'rgb(17, 17, 17)')
+                                        .child('title')
+                                            .css('color', 'white')
+                                        .sibling('exit')
+                                            .key('theme', 'dark')
+                                            .css('opacity', '1')
+                                            .child('img')
+                                                .css('background-image', 'url(/img/x_w.png)')
+                                    ;
+                                } else if (data.topbar_theme == 'light') {
+                                    block.child('bar')
+                                        .css('border-bottom', '1px solid #f0f0f0')
+                                        //.css('border-top', 'none')
+                                        .css('background-color', 'white')
+                                        .child('title')
+                                            .css('color', 'black')
+                                        .sibling('exit')
+                                            .key('theme', 'light')
+                                            .css('opacity', '0.65')
+                                            .child('img')
+                                                .css('background-image', 'url(/img/x_b.png)')
+                                    ;
+                                }
+                            }
                             block.key('parent_scrolltop', block.parent().$().scrollTop())
                             block.parent().$().scrollTop(0);
                             block.css('display', 'block');
@@ -1838,6 +1469,16 @@ app
                         }
                     :hide
                         {
+                            var _regular_ = _ => {
+                                block.parent().css({ zIndex: '1' });
+                                block.css({ paddingTop: '80px' });
+                                block.child('bar').css({ top: '80px', borderTop: 'none' });
+                                block.child('content-wrap').css({ paddingTop: '145px' });
+                                app.ui.block.child('main/node').css({ paddingTop: '86px' });
+                                app.ui.block.child('main/header').css({ opacity: '1' });
+                            };
+                            _regular_();
+                            
                             block.parent().css('overflow-y', 'auto');
                             var parent_scrolltop = block.key('parent_scrolltop');
                             if (parent_scrolltop !== null) {
@@ -1858,6 +1499,12 @@ app
                                 children[c].css('display', 'none');
                             }
                         }
+                    :title_replace
+                        {
+                            if (data.title) {
+                                block.child('bar/title/text').html('').data(data.title);
+                            }
+                        }
                     div bar
                         css
                             position absolute
@@ -1867,6 +1514,7 @@ app
                             height 65px
                             z-index 12
                             border-bottom 1px solid #f0f0f0
+                            box-sizing border-box
                         block exit
                             css
                                 position absolute
@@ -1880,11 +1528,21 @@ app
                                 transition opacity 0.15s ease
                                 z-index 14
                             :mouseover
-                                css
-                                    opacity 0.8
+                                {
+                                    if (block.key('theme') === 'light') {
+                                        block.css('opacity', '0.8');
+                                    } else if (block.key('theme') === 'dark') {
+                                        block.css('opacity', '0.7');
+                                    }
+                                }
                             :mouseout
-                                css
-                                    opacity 0.65
+                                {
+                                    if (block.key('theme') === 'light') {
+                                        block.css('opacity', '0.65');
+                                    } else if (block.key('theme') === 'dark') {
+                                        block.css('opacity', '1');
+                                    }
+                                }
                             :click
                                 {
                                     var submenu = app.ui.block.child('main/node/menu/submenu');
@@ -1910,7 +1568,7 @@ app
                             image img
                                 height 44px
                                 width 44px
-                                src img/x_b.png
+                                src /img/x_b.png
                         block title
                             css
                                 position absolute
@@ -1971,7 +1629,7 @@ app
                         image img
                             width 60px
                             height 60px
-                            src img/gear_b.png
+                            src /img/gear_b.png
                             css
                                 opacity 0.65
                                 margin 0 auto
@@ -2047,7 +1705,7 @@ app
                             //        text-transform uppercase
                             //        font-size 17px
                             image img
-                                src img/trash_w.png
+                                src /img/trash_w.png
                                 height 37px
                                 width 37px
                                 css
@@ -2080,7 +1738,7 @@ app
                             top 0
                             right 135px
                         image img
-                            src img/restart_i_b.png
+                            src /img/restart_i_b.png
                             width 37px
                             height 37px
                             css
@@ -2150,7 +1808,7 @@ app
                 padding-bottom 86px
                 box-sizing border-box
                 opacity 1
-            block default
+            block content
                 text text
                     val disconnected
                     css
@@ -2166,15 +1824,17 @@ app
                         width auto
                         height auto
                         background-color #777
-                        padding 10px 38px 12px 38px
+                        padding 10px 42px 12px 42px
                         color white
-                        border-radius 8px
+                        border-radius 6px
                         outline none
                         border none
                         font-size 33px
                         cursor pointer
                         transition background-color 0.15s
-                    html reconnect
+                        letter-spacing 1px
+                    text text
+                        val reconnect
                     :mouseout
                         css
                             background-color #777
@@ -2191,3 +1851,56 @@ app
                         {
                             app.main.reload();
                         }
+    block loading
+        css
+            display none
+            position fixed
+            top 0
+            left 0
+        :show
+            {
+                block.css('display', 'block');
+                event.stopPropagation();
+            }
+        :hide
+            {
+                block.css('display', 'none');
+                event.stopPropagation();
+            }
+        html
+            `
+                <div
+                    id="loading"
+                    style="
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        display: table;
+                        text-align: center;
+                        opacity: 1;
+                        transition: opacity 0.1s ease;
+                        background-color: white;
+                    "
+                >
+                    <div
+                        style="
+                            display: table-cell;
+                            vertical-align: middle;
+                            margin: 0 auto;
+                        "
+                    >
+                        <img
+                            src="/img/loading_b.svg"
+                            id="loadingimg"
+                            style="
+                                width: 55%;
+                                max-width: 130px;
+                                opacity: 0.75;
+                                transition: opacity 0.5s ease;
+                            "
+                        />
+                    </div>
+                </div>
+            `

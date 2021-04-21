@@ -15,8 +15,12 @@ var err = null;
 /* MODULE */
 var init = _ => { };
 var main = _ => {
+    log('loading node driver metadata');
     m.main.load_node_drivers();
+    log('creating initial node drivers');
+    m.main.create_node_drivers();
     m.utils.delay(_ => {
+        log('starting device monitor');
         m.main.device_monitor();
     }, 1000);
 };
@@ -38,6 +42,17 @@ var api = {
                     data: meta_data,
                     drivers: {}
                 };
+            }
+        });
+    },
+    create_node_drivers: _ => {
+        m.db.get_all_nodes(nodes => {
+            if (nodes === null || nodes === false) return;
+            for (var n in nodes) {
+                m.main.init_node_driver(nodes[n]._id.toString(), nodes[n].type);
+                if (m.main.node_drivers[nodes[n].type].api.hasOwnProperty('__spawn')) {
+                    m.main.node_drivers[nodes[n].type].api.__create(m, log, nodes[n]);
+                }
             }
         });
     },
@@ -120,10 +135,17 @@ var api = {
         }
         return initial_vals;
     },
-    get_driver_field_type: (node_type, field_type) => {
+    get_driver_field_type: (node_type, field_id) => {
         for (var f in m.main.node_drivers[node_type].data.data) {
-            if (m.main.node_drivers[node_type].data.data[f].id == field_type) {
+            if (m.main.node_drivers[node_type].data.data[f].id == field_id) {
                 return m.main.node_drivers[node_type].data.data[f].type;
+            }
+        }
+    },
+    get_driver_field_metadata: (node_type, field_id, metadata_name) => {
+        for (var f in m.main.node_drivers[node_type].data.data) {
+            if (m.main.node_drivers[node_type].data.data[f].id == field_id) {
+                return m.main.node_drivers[node_type].data.data[f][metadata_name];
             }
         }
     },
@@ -139,6 +161,47 @@ var api = {
         if (m.main.node_drivers.hasOwnProperty(node_type)) {
             if (m.main.node_drivers[node_type].hasOwnProperty('api') && m.main.node_drivers[node_type].api.hasOwnProperty(api_req)) {
                 m.main.node_drivers[node_type].api[api_req](m, log, api_args, resolve);
+            }
+        }
+    },
+    get_driver_reset_interval: (node_type) => {
+        if (m.main.node_drivers.hasOwnProperty(node_type) && m.main.node_drivers[node_type].hasOwnProperty('data')) {
+            var node_metadata = m.main.node_drivers[node_type].data;
+            if (node_metadata.hasOwnProperty('node') && node_metadata.node.hasOwnProperty('reset')) {
+                return node_metadata.node.reset;
+            }
+        }
+        return -1;
+    },
+    node_shortcuts: {},
+    set_node_shortcut: (url, node_id, core_id, type, action, field_id, data) => {
+        // console.log(m.main.node_shortcuts);
+        m.main.node_shortcuts[url] = {
+            id: node_id,
+            core_id: core_id,
+            type: type,
+            action: action,
+            field_id: field_id,
+            data: data
+        };
+    },
+    get_node_shortcut: (url) => {
+        if (m.main.node_shortcuts.hasOwnProperty(url))
+            return m.main.node_shortcuts[url];
+        return null;
+    },
+    remove_node_shortcut: (url) => {
+        if (m.main.node_shortcuts.hasOwnProperty(url)) {
+            m.main.node_shortcuts[url] = null;
+            delete m.main.node_shortcuts[url];
+        }
+    },
+    remove_node_shortcuts: (node_id, core_id = null) => {
+        for (var url in m.main.node_shortcuts) {
+            if (m.main.node_shortcuts.hasOwnProperty(url)) {
+                if ((node_id && m.main.node_shortcuts[url].id == node_id) || (core_id && m.main.node_shortcuts[url].core_id == core_id)) {
+                    m.main.remove_node_shortcut(url);
+                }
             }
         }
     }

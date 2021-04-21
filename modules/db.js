@@ -336,6 +336,32 @@ var api = {
             }
         });
     },
+    get_user_nodes: (user_id, resolve) => {
+        mongo_api.collection('nodes').find({ user_id: `${user_id}` }).toArray((error1, nodes) => {
+            if (error1) {
+                err(`get_user_nodes | error - get node list`, error1);
+                resolve(false);
+            } else {
+                if (nodes == null) {
+                    err(`get_user_nodes | error - get node list (not found)`);
+                    resolve(null);
+                } else resolve(nodes);
+            }
+        });
+    },
+    get_all_nodes: (resolve) => {
+        mongo_api.collection('nodes').find({}).toArray((error1, nodes) => {
+            if (error1) {
+                err(`get_all_nodes | error - get node list`, error1);
+                resolve(false);
+            } else {
+                if (nodes == null) {
+                    err(`get_all_nodes | error - get node list (not found)`);
+                    resolve(null);
+                } else resolve(nodes);
+            }
+        });
+    },
     update_core_status: (core_ids, status, resolve) => {
         mongo_api.collection('cores').updateMany({ _id: { $in: core_ids } }, { $set: { status: status } }, (error1, result) => {
             if (error1) {

@@ -203,7 +203,7 @@ var init = _ => {
     /* bind events */
 
     // client: web panel
-    ws_server.bind("auth", (client, req) => {
+    ws_server.bind('auth', (client, req) => {
         // validate credentials
         m.db.auth(req.username, req.password, client.id, user => {
             if (user === false) return;
@@ -313,6 +313,7 @@ var init = _ => {
                     log(`delete_core | client ${client.id} deleted ${core_id}`);
                     ws_server.send_to_user('delete_core', core_id, core.user_id);
                     ws_server.trigger_for_user('get_core_list', null, core.user_id);
+                    m.main.remove_node_shortcuts(null, node.core_id);
                 });
             });
         });
@@ -364,6 +365,7 @@ var init = _ => {
                     log(`delete_node | client ${client.id} deleted node ${node_id}`);
                     ws_server.send_to_user('delete_node', node._id.toString(), node.user_id);
                     ws_server.trigger_for_user('get_core_info', { id: node.core_id }, node.user_id);
+                    m.main.remove_node_shortcuts(node._id.toString());
                 });
             });
         });
@@ -437,6 +439,14 @@ var init = _ => {
                 }
             }
         });
+    });
+    ws_server.bind('get_shortcut', (client, req) => {
+        var shortcut_url = `${req.url}`;
+        var shortcut_data = m.main.get_node_shortcut(shortcut_url);
+        if (shortcut_data != null) {
+            shortcut_data.url = shortcut_url;
+            ws_server.send_to_client('get_shortcut', shortcut_data, client);
+        }
     });
 
     // client: device
@@ -521,17 +531,31 @@ var init = _ => {
                             if (result === null || result === false) return;
                             if (node.status != "online") {
                                 // node just connected
+                                var node_id = node._id.toString();
                                 ws_server.send_to_user("node_status", {
-                                    id: node._id.toString(),
+                                    id: node_id,
                                     core_id: node.core_id,
                                     status: "online",
                                     status_time: now
                                 }, node.user_id);
+                                var core_client = m.ws.get_client_by_o_id(node.core_id);
+                                if (core_client) {
+                                    var reset_interval = m.main.get_driver_reset_interval(node.type);
+                                    if (reset_interval > 0) {
+                                        var reset_interval_str = m.utils.lpad(`${reset_interval}`, 2, '0');
+                                        setTimeout(_ => {
+                                            ws_server.send_to_device('node-reset_i', `${node_id}-${reset_interval_str}`, core_client);
+                                        }, 300);
+                                    }
+                                }
+                                if (m.main.node_drivers.hasOwnProperty(node.type) && m.main.node_drivers[node.type].api.hasOwnProperty('__spawn')) {
+                                    m.main.node_drivers[node.type].api.__spawn(m, log, node);
+                                }
                                 var initial_vals = m.main.get_init_driver_vals(node.type, node_mdb_id);
                                 for (var field_i in initial_vals) {
                                     if (initial_vals.hasOwnProperty(field_i)) {
                                         ws_server.trigger_for_user('update_node_data', {
-                                            id: node._id.toString(),
+                                            id: node_id,
                                             transitional: false,
                                             field_id: field_i,
                                             field_val: node.data[field_i] == undefined ? initial_vals[field_i] : node.data[field_i]
@@ -541,7 +565,7 @@ var init = _ => {
                                 setTimeout(_ => {
                                     node.status = "online";
                                     node.status_time = now;
-                                    ws_server.fire_api_events('node_ready', [node._id.toString(), node]);
+                                    ws_server.fire_api_events('node_ready', [node_id, node]);
                                 }, 100);
                             }
                         });

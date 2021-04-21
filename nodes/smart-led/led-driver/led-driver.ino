@@ -230,9 +230,9 @@ void loop() {
 bool resetRequired() {
   // check time interval
   unsigned long newTimestamp = millis();
-  unsigned long interval = 60000;
-  interval *= RESET_INTERVAL;
-  return ready && newTimestamp - lastTimestamp >= interval;
+  unsigned long minute_ms_interval = 60000;
+  minute_ms_interval *= RESET_INTERVAL;
+  return ready && newTimestamp - lastTimestamp >= minute_ms_interval;
 }
 
 // check if current process should be interrupted

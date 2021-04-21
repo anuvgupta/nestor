@@ -3,9 +3,11 @@
 // libraries
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <Hash.h>
 #include <WebSocketsClient.h>
 #include <WebSocketsServer.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
+#include <Hash.h>
 
 #include "core_conf.h"
 #include "core_esp.h"
@@ -29,6 +31,11 @@ char node_hb_json[75] = NODE_HB_JSON;
 // parsing
 int mb_i = 0;
 char msgbuff[500];
+// time
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org");
+const long utcOffsetInSeconds = 60 * 60 * -6; // GMT -6 = 60 * 60 * -6
+int resetOffset = 10; // in minutes
 
 void setup() {
 	SERIAL.begin(9600);
@@ -53,7 +60,7 @@ void setup() {
 	sprintf(device_sync_json, CORE_SYNC_JSON, device_code, device_id, device_user, device_ip, WiFi.macAddress().c_str());
 	if (LOG_VERBOSE) SERIAL.printf("[ws_client] connecting\n");
 	ws_client_online = true;
-	ws_client.begin(API_URL, API_PORT, "/");
+	ws_client.begin(API_URL, API_PORT, API_PATH);
 	ws_client.onEvent(wsClientEventHandler);
 	ws_client.setReconnectInterval(5000);
 	ws_client.enableHeartbeat(5000, 3000, 2);
@@ -62,9 +69,14 @@ void setup() {
 	ws_server.onEvent(wsServerEventHandler);
 	ws_server_online = true;
 	if (LOG_VERBOSE) SERIAL.printf("[ws_server] connected\n");
+  if (LOG_VERBOSE) SERIAL.printf("[time_client] connecting\n");
+  timeClient.begin();
+  timeClient.setTimeOffset(utcOffsetInSeconds);
+  if (LOG_VERBOSE) SERIAL.printf("[time_client] connected\n");
 }
 
 void loop() {
+  runResetTimer();
 	if (ws_client_online)
 		ws_client.loop();
 	if (ws_server_online)
@@ -97,6 +109,23 @@ void loop() {
 void restartESP() {
 	if (LOG_VERBOSE) SERIAL.println(F("[boot] resetting...\n"));
 	ESP.restart();
+}
+
+int firstTimer = 1;
+unsigned long epochTime = 0;
+unsigned long nextEpochTime = 0;
+void runResetTimer() {
+  timeClient.update();
+  nextEpochTime = timeClient.getEpochTime();
+  if (nextEpochTime - epochTime > resetOffset * 60) {
+    epochTime = nextEpochTime;
+    if (LOG_VERBOSE) SERIAL.print("[time_client] epoch time: ");
+    if (LOG_VERBOSE) SERIAL.println(epochTime);
+    if (firstTimer == 1) {
+      firstTimer = 0;
+      delay(500);
+    } else restartESP();
+  }
 }
 
 int findClient(char* n_id) {
@@ -191,7 +220,17 @@ void wsClientEventHandler(WStype_t type, uint8_t* payload, size_t len) {
 				if (LOG_VERBOSE) SERIAL.printf("[ws_client] resetting device %s\n", target_node_id);
 				ws_server.disconnect(c_id);
 			}
-		} else if (memcmp(payload, "@node-reset", 11) == 0) {
+		} else if (memcmp(payload, "@node-reset_i", 13) == 0) {
+      int dash = findDash(payload, len, 14);
+      payload[dash] = '\0';
+      char target_node_id[25];
+      strcpy(target_node_id, ((const char*)(payload + 14)));
+      int c_id = findClient(target_node_id);
+      char field_data_full[100];
+      sprintf(field_data_full, "@reset_i-%s", (payload + dash + 1));
+      ws_server.sendTXT(c_id, field_data_full, sizeof(field_data_full) / sizeof(field_data_full[0]));
+      if (LOG_VERBOSE) SERIAL.printf("[ws_client] new reset interval for node %s: %s\n", target_node_id, (payload + dash + 1));
+    } else if (memcmp(payload, "@node-reset", 11) == 0) {
 			char target_node_id[25];
 			strcpy(target_node_id, ((const char*)(payload + 12)));
 			int c_id = findClient(target_node_id);
@@ -200,7 +239,15 @@ void wsClientEventHandler(WStype_t type, uint8_t* payload, size_t len) {
 		} else if (memcmp(payload, "@core-reset", 11) == 0) {
 			if (LOG_VERBOSE) SERIAL.printf("[ws_client] resetting device self\n");
 			restartESP();
-		}
+		} else if (memcmp(payload, "@reset_i", 8) == 0) {
+      char *temp_buffer = (char*) (payload + 9);
+      temp_buffer[2] = '\0';
+      int new_reset_interval = atoi(temp_buffer);
+      if (new_reset_interval < 1) new_reset_interval = 1;
+      if (new_reset_interval > 30) new_reset_interval = 30;
+      resetOffset = new_reset_interval;
+      if (LOG_VERBOSE) SERIAL.printf("[ws_client] new reset interval: %s\n", resetOffset);
+    }
 		break;
 	case WStype_BIN:
 		if (LOG_VERBOSE) SERIAL.printf("[ws_client] received binary data (length %u):\n", len);
