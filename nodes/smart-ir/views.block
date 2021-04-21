@@ -189,6 +189,7 @@
     init
         {
             return Block('div')
+                .class('select-disabled')
                 .css({
                     height: '65px',
                     width: '130px',
@@ -206,8 +207,12 @@
                     b.css('background-color', '#1f1f1f');
                 })
                 .add(Block('block', 1)
-                    .add(Block('img', 1))
+                    .class('select-disabled')
+                    .add(Block('img', 1)
+                        .class('select-disabled')
+                    )
                     .add(Block('text', 1)
+                        .class('select-disabled')
                         .css({
                             display: 'none',
                             textTransform: 'uppercase',
@@ -263,6 +268,7 @@
     init
         {
             return Block('div')
+                .class('select-disabled')
                 .css({
                     height: '65px',
                     width: '130px',
@@ -280,8 +286,12 @@
                     b.css('background-color', '#1f1f1f');
                 })
                 .add(Block('block', 1)
-                    .add(Block('img', 1))
+                    .class('select-disabled')
+                    .add(Block('img', 1)
+                        .class('select-disabled')
+                    )
                     .add(Block('text', 1)
+                        .class('select-disabled')
                         .css({
                             display: 'none',
                             textTransform: 'uppercase',

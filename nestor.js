@@ -4,6 +4,7 @@
 /* IMPORTS */
 // import built-in & npm modules
 const fs = require("fs");
+const ejs = require('ejs');
 const path = require("path");
 const http = require("http");
 const express = require("express");

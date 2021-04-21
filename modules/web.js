@@ -2,6 +2,7 @@
 // http web server
 
 /* IMPORTS */
+const ejs = require('ejs');
 const http = require("http");
 const express = require("express");
 const body_parser = require("body-parser");
@@ -50,12 +51,14 @@ var init = _ => {
         if (shortcut_data == null)
             res.status(404).send('Not found.');
         else {
-            res.sendFile(__dirname.split('/').slice(0, -1).join('/') + "/static/index.html");
+            // res.sendFile(__dirname.split('/').slice(0, -1).join('/') + "/static/index.html");
+            res.render('index');
         }
     });
     // catch-all route
     express_api.get("/*", (req, res) => {
-        res.sendFile(__dirname.split('/').slice(0, -1).join('/') + "/static/index.html");
+        // res.sendFile(__dirname.split('/').slice(0, -1).join('/') + "/static/index.html");
+        res.render('index');
     });
 };
 var api = {
@@ -74,6 +77,7 @@ module.exports = {
         log("initializing");
         http_port = global.http_port;
         express_api = express();
+        express_api.set('view engine', 'ejs');
         http_server = http.Server(express_api);
         express_api.use(body_parser.json());
         express_api.use(body_parser.urlencoded({ extended: true }));
@@ -84,7 +88,8 @@ module.exports = {
         });
         express_api.use(express.static("static"));
         express_api.get("/", (req, res) => {
-            res.sendFile(__dirname + "/static/index.html");
+            // res.sendFile(__dirname + "/static/index.html");
+            res.render('index');
         });
         module.exports.api.exit = resolve => {
             log("exit");
