@@ -15,7 +15,7 @@ var app; app = {
             });
             app.ui.block.fill(document.body);
             Block.queries();
-            if (app.main.shortcut_exists()) {
+            if (app.main.shortcut_exists() && app.main.auth_exists()) {
                 app.ui.block.child('loading').on('show');
                 app.ui.block.css('transition', 'none');
             }
@@ -288,27 +288,63 @@ var app; app = {
                 else app.main.client_modules[node_type] = module;
             },
         },
+        query_params: null,
+        setup_query_params: _ => {
+            if (URLSearchParams)
+                app.main.query_params = new URLSearchParams(window.location.search);
+        },
+        auth_exists: _ => {
+            return util.cookie('username') != null && util.cookie('password') != null;
+        },
         shortcut_exists: _ => {
             var path = window.location.pathname;
-            if (path == "" || path == "/") return false;
-            path_arr = path.split("/");
-            if (path_arr.length >= 1 && path_arr[0] == "") {
-                if (path_arr.length >= 2 && path_arr[1] == "n") {
-                    return true;
+            if (path != "" && path != "/") {
+                path_arr = path.split("/");
+                if (path_arr.length >= 1 && path_arr[0] == "") {
+                    if (path_arr.length >= 2 && path_arr[1] == "l") {
+                        return true;
+                    }
                 }
+            }
+            if (app.main.query_params.has('l')) {
+                return true;
+            }
+            var domain = window.location.hostname.split('.')[0];
+            var domains_excluded = ['nestor', 'localhost', '192'];
+            if (!domains_excluded.includes(domain)) {
+                return true;
             }
             return false;
         },
         process_shortcuts: _ => {
+            // console.log('process_shortcuts');
             var path = window.location.pathname;
-            if (path == "" || path == "/") return;
-            path_arr = path.split("/");
-            if (path_arr.length >= 1 && path_arr[0] == "") {
-                if (path_arr.length >= 2 && path_arr[1] == "n") {
-                    if (path_arr.length >= 3 && path_arr[2] != "") {
-                        app.main.get_shortcut(path_arr[2]);
+            // console.log('path');
+            if (path != "" && path != "/") {
+                path_arr = path.split("/");
+                if (path_arr.length >= 1 && path_arr[0] == "") {
+                    if (path_arr.length >= 2 && path_arr[1] == "l") {
+                        if (path_arr.length >= 3 && path_arr[2] != "") {
+                            app.main.get_shortcut(path_arr[2]);
+                            return;
+                        }
                     }
                 }
+            }
+            // console.log('query');
+            if (app.main.query_params.has('l')) {
+                var query_shortcut = app.main.query_params.get('l');
+                if (query_shortcut && query_shortcut.trim().length > 0) {
+                    app.main.get_shortcut(query_shortcut);
+                    return;
+                }
+            }
+            // console.log('domain');
+            var domain = window.location.hostname.split('.')[0];
+            var domains_excluded = app.main.shortcut_domains_excluded;
+            // console.log(domain, !domains_excluded.includes(domain));
+            if (!domains_excluded.includes(domain)) {
+                app.main.get_shortcut(domain);
             }
         },
         get_shortcut: (shortcut) => {
@@ -426,13 +462,14 @@ var app; app = {
             });
         },
         login: _ => {
-            if (util.cookie('username') != null && util.cookie('password') != null) {
+            if (app.main.auth_exists()) {
                 app.ws.api._temp_prelogin = true;
                 app.ws.api.login(util.cookie('username'), util.cookie('password'));
             } else {
-                if (app.main.shortcut_exists()) {
-                    window.location = String(window.location.origin);
-                }
+                app.ws.api._temp_prelogin = true;
+                app.ui.block.data({
+                    auth: false
+                });
             }
         },
         quit: _ => {
@@ -444,13 +481,22 @@ var app; app = {
             }
             app.ui.block.child('main/reload').on('show');
         },
-        reload: _ => {
-            window.location.reload();
+        reload: (home = false) => {
+            if (home) {
+                // window.location.href = String(window.location.origin);
+                var domain_arr = window.location.hostname.split('.');
+                if (app.main.shortcut_exists()) {
+                    if (!app.main.shortcut_domains_excluded.includes(domain_arr[0]) && domain_arr.length > 1)
+                        domain_arr = domain_arr.slice(1);
+                }
+                window.location = String(`${window.location.protocol}//${domain_arr.join('.')}:${window.location.port}`);
+            } else window.location.reload();
         },
         init: _ => {
             console.clear();
             console.log('[main] loading');
-            if (window.location.search.includes('logout=true')) {
+            app.main.setup_query_params();
+            if ((app.main.query_params && app.main.query_params.has('logout') && app.main.query_params.get('logout') == 'true') || window.location.search.includes('logout=true')) {
                 app.ws.api.logout();
                 return;
             }

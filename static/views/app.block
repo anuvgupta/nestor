@@ -38,7 +38,7 @@ app
                     app.ui.block.child('main').on('show');
                 } });
             } else {
-                console.log('login failed');
+                console.log('[main] login failed');
                 //if () {
 
                 //}
@@ -231,9 +231,10 @@ app
         }
     #get_shortcut
         {
-            var shortcut = get_shortcut;
-            if (shortcut) {
-                app.main.process_shortcut(shortcut.url, shortcut);
+            if (get_shortcut && get_shortcut != 'null') {
+                app.main.process_shortcut(get_shortcut.url, get_shortcut);
+            } else {
+                app.main.reload(true);
             }
         }
     block login
@@ -1402,7 +1403,7 @@ app
                                 block.parent().css({ zIndex: '6' });
                                 block.css({ paddingTop: '0' });
                                 block.child('bar').css({ top: '0', borderTop: 'none' });
-                                block.child('content-wrap').css({ paddingTop: '65px' });
+                                block.child('content-wrap').css({ paddingTop: '64px' });
                                 app.ui.block.child('main/node').css({ paddingTop: '86px' });
                                 app.ui.block.child('main/header').css({ opacity: '1' });
                             };
@@ -1410,7 +1411,7 @@ app
                                 block.parent().css({ zIndex: '6' });
                                 block.css({ paddingTop: '0' });
                                 block.child('bar').css({ top: '0', borderTop: '1.5px solid rgb(100, 100, 100)' });
-                                block.child('content-wrap').css({ paddingTop: '65px' });
+                                block.child('content-wrap').css({ paddingTop: '64px' });
                                 app.ui.block.child('main/node').css({ paddingTop: '0' });
                                 app.ui.block.child('main/header').css({ opacity: '0' });
                             };
@@ -1445,7 +1446,7 @@ app
                                     ;
                                 } else if (data.topbar_theme == 'light') {
                                     block.child('bar')
-                                        .css('border-bottom', '1px solid #f0f0f0')
+                                        //.css('border-bottom', '1px solid #f0f0f0')
                                         //.css('border-top', 'none')
                                         .css('background-color', 'white')
                                         .child('title')
@@ -1513,7 +1514,7 @@ app
                             width 100%
                             height 65px
                             z-index 12
-                            border-bottom 1px solid #f0f0f0
+                            //border-bottom 1px solid #f0f0f0
                             box-sizing border-box
                         block exit
                             css

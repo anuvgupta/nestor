@@ -446,7 +446,7 @@ var init = _ => {
         if (shortcut_data != null) {
             shortcut_data.url = shortcut_url;
             ws_server.send_to_client('get_shortcut', shortcut_data, client);
-        }
+        } else ws_server.send_to_client('get_shortcut', 'null', client);
     });
 
     // client: device

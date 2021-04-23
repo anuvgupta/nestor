@@ -98,17 +98,17 @@
                             width: '42px'
                         })
                         .css({
-                            opacity: '0.5',
+                            opacity: '0.55',
                             cursor: 'pointer',
                             transition: 'opacity 0.12s ease'
                         })
                         .on('mouseover', (e, b, d) => {
                             if (block.key('enabled') === 'true')
-                                b.css('opacity', '0.6');
+                                b.css('opacity', '0.65');
                         })
                         .on('mouseout', (e, b, d) => {
                             if (block.key('enabled') === 'true')
-                                b.css('opacity', '0.5');
+                                b.css('opacity', '0.55');
                         })
                         .on('click', (e, b, d) => {
                             var submenu = app.ui.block.child('main/node/menu/submenu');
@@ -550,6 +550,10 @@ views
                                     if (outer_height > 0 && inner_height > 0) {
                                         // console.log(`oh ${outer_height} vs ih ${inner_height}`);
                                         var scale_ratio = (outer_height - app.ui.ir_remote_menu.menu_padding) / (inner_height);
+                                        var target_width = block.child('buttons').$().width();
+                                        var main_width = app.ui.block.child('main').$().width();
+                                        if ((target_width * scale_ratio) / main_width >= app.ui.ir_remote_menu.menu_width_lim)
+                                            scale_ratio = main_width * app.ui.ir_remote_menu.menu_width_lim / target_width;
                                         block.child('buttons').css('transform', `scale(${scale_ratio}, ${scale_ratio})`);
                                     }
                                 }
@@ -565,7 +569,7 @@ views
                                     //display none
                             css
                                 width 100%
-                                max-width 700px
+                                max-width 500px
                                 margin 0 auto
                             div spacer1
                                 css
@@ -647,12 +651,12 @@ views
                                 rokutv-button vol_up
                                     css
                                         margin-left 10px
-                    div spacer_post
-                        css
-                            width 100%
-                            height 1px
-                            margin-top 24px
-                            display none
+                            div spacer_post
+                                css
+                                    width 100%
+                                    height 40px
+                                    margin-top 24px
+                                    //display none
                 // LGTV IR menu
                 div lgtv
                     css
@@ -706,6 +710,11 @@ views
                                     if (outer_height > 0 && inner_height > 0) {
                                         // console.log(`oh ${outer_height} vs ih ${inner_height}`);
                                         var scale_ratio = (outer_height - app.ui.ir_remote_menu.menu_padding) / (inner_height);
+                                        scale_ratio *= 0.95;
+                                        var target_width = block.child('buttons').$().width();
+                                        var main_width = app.ui.block.child('main').$().width();
+                                        if ((target_width * scale_ratio) / main_width >= 1.02)
+                                            scale_ratio = main_width * 1.02 / target_width;
                                         block.child('buttons').css('transform', `scale(${scale_ratio}, ${scale_ratio})`);
                                     }
                                 }
@@ -713,7 +722,7 @@ views
                         div buttons
                             css
                                 width 100%
-                                max-width 700px
+                                max-width 500px
                                 margin 0 auto
                             div spacer1
                                 css
@@ -824,9 +833,9 @@ views
                                 lgtv-button vol_up
                                     css
                                         margin-left 10px
-                    div spacer_post
-                        css
-                            width 100%
-                            height 1px
-                            margin-top 24px
-                            display none
+                            div spacer_post
+                                css
+                                    width 100%
+                                    height 20px
+                                    margin-top 24px
+                                    //display none

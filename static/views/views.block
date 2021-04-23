@@ -413,7 +413,8 @@
                             fontSize: '14.5px',
                             color: '#333'
                         })
-                        .data(`${window.location.origin}/n/`)
+                        .data('/?l=')
+                        //.data(`${window.location.origin}/l/`)
                     )
                 )
                 .add(Block('block', 'input_wrap')
@@ -434,12 +435,15 @@
                         .on('change', (e, b, d) => {
                             var value = b.node().value;
                             if (value != null && typeof value === 'string' && value.trim().length > 0) {
-                                block.on('update', {
-                                    value: value,
-                                    transitional: false,
-                                    boomerang: false
-                                });
+                                // pass
+                            } else {
+                                value = 'null';
                             }
+                            block.on('update', {
+                                value: value,
+                                transitional: false,
+                                boomerang: true
+                            });
                         })
                         .on('input', (e, b, d) => {
                             /*
@@ -455,6 +459,48 @@
                         })
                     )
                 )
+                .add(Block('block', 'open_link')
+                    .css({
+                        width: '75px',
+                        float: 'left',
+                        marginLeft: '7px'
+                    })
+                    .add(Block('img', 1)
+                        .key('enabled', 'true')
+                        .data({
+                            src: '/img/launch_b.png',
+                            height: '39px',
+                            width: '39px'
+                        })
+                        .css({
+                            opacity: '0.55',
+                            cursor: 'pointer',
+                            transition: 'opacity 0.12s ease'
+                        })
+                        .on('mouseover', (e, b, d) => {
+                            if (b.key('enabled') == 'true')
+                                b.css('opacity', '0.65');
+                        })
+                        .on('mouseout', (e, b, d) => {
+                            if (b.key('enabled') == 'true')
+                                b.css('opacity', '0.55');
+                        })
+                        .on('click', (e, b, d) => {
+                            if (b.key('enabled') == 'true') {
+                                b.sibling('a').node().click();
+                            }
+                        })
+                    )
+                    .add(Block('a', 1)
+                        .css({
+                            display: 'none'
+                        })
+                        .data({
+                            href: '/#',
+                            target: '_blank'
+                        })
+                    )
+                )
             ;
             return block;
         }
@@ -465,9 +511,133 @@
                 block.key('options', {});
                 if (metadata.hasOwnProperty('editor-options') && metadata['editor-options']) {
                     block.key('options', metadata['editor-options']);
-                    if (metadata['editor-options'].hasOwnProperty('dropdown-choices') && metadata['editor-options']['dropdown-choices']) {
+                }
+                block.data({
+                    val: `${metadata.initial}`
+                });
+            });
+            data('val', value => {
+                block.key('value', value);
+                console.log(value);
+                if (value == 'null' || value == null) {
+                    block.child('input_wrap/input').node().value = '';
+                    block.child('open_link/a').attribute('href', '/#');
+                    block.child('open_link/img').key('enabled', 'false');
+                    block.child('open_link/img').css({
+                        opacity: '0.45',
+                        cursor: 'default'
+                    });
+                } else {
+                    if (block.child('input_wrap/input').node().value != `${value}`)
+                        block.child('input_wrap/input').node().value = `${value}`;
+                    block.child('open_link/a').attribute('href', `/?l=${value}`);
+                    block.child('open_link/img').key('enabled', 'true');
+                    block.child('open_link/img').css({
+                        opacity: '0.55',
+                        cursor: 'pointer'
+                    });
+                }
+            });
+        }
 
-                    }
+!icon-e
+    init
+        {
+            var block = Block('block');
+            block
+                .add(Block('block', 'text_block')
+                    .css({
+                        width: 'auto',
+                        float: 'left',
+                        marginLeft: '15px'
+                    })
+                    .add(Block('text', 1)
+                        .css({
+                            fontSize: '14.5px',
+                            color: '#333'
+                        })
+                        .data('/img/')
+                    )
+                )
+                .add(Block('block', 'input_wrap')
+                    .css({
+                        width: 'auto',
+                        float: 'left'
+                    })
+                    .add(Block('input', 1)
+                        .attribute('type', 'text')
+                        .attribute('placeholder', 'icon-name.png')
+                        .css({
+                            padding: '8px 12px',
+                            fontSize: '17px',
+                            display: 'block',
+                            marginLeft: '8px',
+                            width: '180px',
+                        })
+                        .on('change', (e, b, d) => {
+                            var value = b.node().value;
+                            if (value != null && typeof value === 'string' && value.trim().length > 0) {
+                                // pass
+                            } else {
+                                value = 'null';
+                            }
+                            block.on('update', {
+                                value: value,
+                                transitional: false,
+                                boomerang: true
+                            });
+                        })
+                        .on('input', (e, b, d) => {
+                            /*
+                            var value = b.node().value;
+                            if (value != null && typeof value === 'string' && value.trim().length > 0) {
+                                block.on('update', {
+                                    value: value,
+                                    transitional: true,
+                                    boomerang: false
+                                });
+                            }
+                            */
+                        })
+                    )
+                )
+                .add(Block('block', 'img_wrap')
+                    .css({
+                        width: 'auto',
+                        marginLeft: '30px',
+                        float: 'left'
+                    })
+                    .add(Block('block', 'img_subwrap')
+                        .css({
+                            height: '75px',
+                            width: '75px',
+                            backgroundColor: '#fdfdfd'
+                        })
+                        .add(Block('image', 1)
+                            .css({
+                                display: 'block',
+                                margin: '0 auto',
+                                border: '1px solid #e6e6e6',
+                                borderRadius: '3px'
+                            })
+                            .data({
+                                src: '/img/nestor_app.png',
+                                height: '75px',
+                                width: '75px'
+                            })
+                        )
+                    )
+                )
+            ;
+            return block;
+        }
+    load
+        {
+            data('metadata', metadata => {
+                block.key('metadata', metadata);
+                block.key('options', {});
+                if (metadata.hasOwnProperty('editor-options') && metadata['editor-options']) {
+                    block.key('options', metadata['editor-options']);
                 }
                 block.data({
                     val: `${metadata.initial}`
@@ -476,10 +646,20 @@
             data('val', value => {
                 block.key('value', value);
                 // console.log(value);
+                var input_block = block.child('input_wrap/input');
+                var img_block = block.child('img_wrap/img_subwrap/image');
                 if (value == 'null' || value == null) {
-                    block.child('input_wrap/input').node().value = '';
+                    input_block.node().value = '';
+                    img_block.data({
+                        src: '/img/nestor_app.png'
+                    });
                 } else {
-                    block.child('input_wrap/input').node().value = `${value}`;
+                    if (`${value}` != input_block.node().value) {
+                        input_block.node().value = `${value}`;
+                    }
+                    img_block.data({
+                        src: `/img/${value}`
+                    });
                 }
             });
         }

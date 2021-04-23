@@ -46,6 +46,14 @@
             "editor-options": {
                 "shortcut-exec": "block.sibling('remote').child('editor/view').on('show_menu', { size_override: 'full', topbar_theme: 'dark', title_replace: block.parent(1).key('node_info').name });"
             }
+        },
+        {
+            "id": "icon",
+            "img": "image_b",
+            "type": "string",
+            "initial": "null",
+            "label": "Icon",
+            "editor": "icon"
         }
     ],
     "env": {

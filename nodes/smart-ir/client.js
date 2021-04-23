@@ -11,6 +11,7 @@ nestor.module({
                 menu_type: "null",
                 menu_profiles: null,
                 menu_padding: 80,
+                menu_width_lim: 1.02,
                 send_button: code => {
                     var node_id = app.ui.block.child('main/node').key('id');
                     if (node_id && node_id != null && node_id.trim().length > 0) {

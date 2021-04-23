@@ -174,7 +174,7 @@ var api = {
         return -1;
     },
     node_shortcuts: {},
-    set_node_shortcut: (url, node_id, core_id, type, action, field_id, data) => {
+    set_node_shortcut: (url, node_id, core_id, type, action, field_id, data, icon = null, title = null) => {
         // console.log(m.main.node_shortcuts);
         m.main.node_shortcuts[url] = {
             id: node_id,
@@ -182,7 +182,9 @@ var api = {
             type: type,
             action: action,
             field_id: field_id,
-            data: data
+            data: data,
+            icon: icon,
+            title: title
         };
     },
     get_node_shortcut: (url) => {
