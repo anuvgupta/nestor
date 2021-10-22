@@ -1893,6 +1893,59 @@ app
                         "
                     >
                         <img
+                            src="/img/loading_alt_b.svg"
+                            id="loadingimg"
+                            style="
+                                width: 55%;
+                                max-width: 60px;
+                                opacity: 0.78;
+                                transition: opacity 0.5s ease;
+                            "
+                        />
+                    </div>
+                </div>
+            `
+    block loading_og
+        css
+            display none
+            position fixed
+            top 0
+            left 0
+        :show
+            {
+                block.css('display', 'block');
+                event.stopPropagation();
+            }
+        :hide
+            {
+                block.css('display', 'none');
+                event.stopPropagation();
+            }
+        html
+            `
+                <div
+                    id="loading"
+                    style="
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        display: table;
+                        text-align: center;
+                        opacity: 1;
+                        transition: opacity 0.1s ease;
+                        background-color: white;
+                    "
+                >
+                    <div
+                        style="
+                            display: table-cell;
+                            vertical-align: middle;
+                            margin: 0 auto;
+                        "
+                    >
+                        <img
                             src="/img/loading_b.svg"
                             id="loadingimg"
                             style="
