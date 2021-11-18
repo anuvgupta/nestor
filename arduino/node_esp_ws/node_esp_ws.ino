@@ -3,10 +3,10 @@
 // libraries
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <WebSocketsClient.h>
-#include <NTPClient.h>
-#include <WiFiUdp.h>
 #include <Hash.h>
+#include <NTPClient.h>
+#include <WebSocketsClient.h>
+#include <WiFiUdp.h>
 
 #include "node_conf.h"
 #include "node_esp.h"
@@ -32,8 +32,8 @@ char msgbuff[500];
 // time
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org");
-const long utcOffsetInSeconds = 60 * 60 * -6; // GMT -6 = 60 * 60 * -6
-int resetOffset = 10; // in minutes
+const long utcOffsetInSeconds = 60 * 60 * -6;  // GMT -6 = 60 * 60 * -6
+int resetOffset = 10;						   // in minutes
 
 void setup() {
 	SERIAL.begin(9600);
@@ -66,14 +66,14 @@ void setup() {
 	ws_api_client.setReconnectInterval(5000);
 	ws_api_client.enableHeartbeat(5000, 3000, 2);
 	ws_api_client.begin(API_URL, API_PORT, API_PATH);
-  if (LOG_VERBOSE) SERIAL.printf("[time_client] connecting\n");
-  timeClient.begin();
-  timeClient.setTimeOffset(utcOffsetInSeconds);
-  if (LOG_VERBOSE) SERIAL.printf("[time_client] connected\n");
+	if (LOG_VERBOSE) SERIAL.printf("[time_client] connecting\n");
+	timeClient.begin();
+	timeClient.setTimeOffset(utcOffsetInSeconds);
+	if (LOG_VERBOSE) SERIAL.printf("[time_client] connected\n");
 }
 
 void loop() {
-  runResetTimer();
+	runResetTimer();
 	node_driver->_loop(&ws_node_client);
 	node_driver->loop();
 	if (ws_api_client_online)
@@ -116,19 +116,19 @@ int firstTimer = 1;
 unsigned long epochTime = 0;
 unsigned long nextEpochTime = 0;
 void runResetTimer() {
-  timeClient.update();
-  nextEpochTime = timeClient.getEpochTime();
-  if (nextEpochTime - epochTime > resetOffset * 60) {
-    epochTime = nextEpochTime;
-    if (LOG_VERBOSE) SERIAL.print("[time_client] epoch time: ");
-    if (LOG_VERBOSE) SERIAL.println(epochTime);
-    if (firstTimer == 1) {
-      firstTimer = 0;
-      delay(500);
-    } else restartESP();
-  }
+	timeClient.update();
+	nextEpochTime = timeClient.getEpochTime();
+	if (nextEpochTime - epochTime > resetOffset * 60) {
+		epochTime = nextEpochTime;
+		if (LOG_VERBOSE) SERIAL.print("[time_client] epoch time: ");
+		if (LOG_VERBOSE) SERIAL.println(epochTime);
+		if (firstTimer == 1) {
+			firstTimer = 0;
+			delay(500);
+		} else
+			restartESP();
+	}
 }
-
 
 int findDash(uint8_t* buffer, int len, int start) {
 	int dash = 0;
@@ -206,14 +206,14 @@ void wsNodeClientEventHandler(WStype_t type, uint8_t* payload, size_t len) {
 			if (LOG_VERBOSE) SERIAL.printf("[ws_node_client] ready\n");
 			node_driver->ready();
 		} else if (memcmp(payload, "@reset_i", 8) == 0) {
-      char *temp_buffer = (char*) (payload + 9);
-      temp_buffer[2] = '\0';
-      int new_reset_interval = atoi(temp_buffer);
-      if (new_reset_interval < 1) new_reset_interval = 1;
-      if (new_reset_interval > 30) new_reset_interval = 30;
-      resetOffset = new_reset_interval;
-      if (LOG_VERBOSE) SERIAL.printf("[ws_node_client] new reset interval: %d\n", (int) resetOffset);
-    } else if (memcmp(payload, "@data", 5) == 0) {	// "@data-color-true-ffffff|ffffff"
+			char* temp_buffer = (char*)(payload + 9);
+			temp_buffer[2] = '\0';
+			int new_reset_interval = atoi(temp_buffer);
+			if (new_reset_interval < 1) new_reset_interval = 1;
+			if (new_reset_interval > 30) new_reset_interval = 30;
+			resetOffset = new_reset_interval;
+			if (LOG_VERBOSE) SERIAL.printf("[ws_node_client] new reset interval: %d\n", (int)resetOffset);
+		} else if (memcmp(payload, "@data", 5) == 0) {	// "@data-color-true-ffffff|ffffff"
 			int dash1 = findDash(payload, len - 6, 6);
 			int dash2 = findDash(payload, len - (dash1 + 1), dash1 + 1);
 			payload[dash1] = '\0';

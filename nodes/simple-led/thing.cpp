@@ -1,13 +1,11 @@
-/* nestor node device client driver (simple-led) */
+/* nestor thing device client driver (simple-led) */
 
 // libraries
 #include <Arduino.h>
 
-#include "node_conf.h"
-#include "node_esp.h"
+#include "thing_conf.h"
+#include "thing_esp.h"
 
-// node device type
-#define NODE_TYPE "simple-led"
 // onboard leds
 #define LED_1 2
 #define LED_2 D0
@@ -23,8 +21,9 @@ void driveLED(int led, int intensity) {
 }
 
 // driver initialization
-void NodeDriver::init() {
+void ThingDriver::init() {
 	SERIAL.println("[driver] initializing");
+	this->disable_status_leds();
 	pinMode(LED_1, OUTPUT);
 	pinMode(LED_2, OUTPUT);
 	driveLED(LED_1, 0);
@@ -36,17 +35,17 @@ void NodeDriver::init() {
 }
 
 // driver network ready
-void NodeDriver::ready() {
+void ThingDriver::ready() {
 	SERIAL.println("[driver] ready");
 }
 
 // driver serial input
-void NodeDriver::input(char *value) {
+void ThingDriver::input(char *value) {
 	SERIAL.printf("[driver] serial input %s\n", value);
 }
 
 // driver main loop
-void NodeDriver::loop() {
+void ThingDriver::loop() {
 	if (power1)
 		driveLED(LED_1, brightness1);
 	else
@@ -58,7 +57,7 @@ void NodeDriver::loop() {
 }
 
 // driver data handler
-void NodeDriver::data(char *id, char *value) {
+void ThingDriver::data(char *id, char *value, bool transitional) {
 	SERIAL.printf("[driver] data update: %s = %s\n", id, value);
 	if (memcmp(id, "switch1", 7) == 0) {
 		if (memcmp(value, "true", 4) == 0)
@@ -88,6 +87,6 @@ void NodeDriver::data(char *id, char *value) {
 }
 
 // driver user data handler
-void NodeDriver::user_data(char *id, char *value) {
+void ThingDriver::user_data(char *id, char *value) {
 	SERIAL.printf("[driver] user data update: %s = %s\n", id, value);
 }

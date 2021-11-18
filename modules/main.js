@@ -49,10 +49,7 @@ var api = {
         m.db.get_all_nodes(nodes => {
             if (nodes === null || nodes === false) return;
             for (var n in nodes) {
-                m.main.init_node_driver(nodes[n]._id.toString(), nodes[n].type);
-                if (m.main.node_drivers[nodes[n].type].api.hasOwnProperty('__spawn')) {
-                    m.main.node_drivers[nodes[n].type].api.__create(m, log, nodes[n]);
-                }
+                m.main.init_node_driver(nodes[n]._id.toString(), nodes[n].type, nodes[n]);
             }
         });
     },
@@ -60,6 +57,7 @@ var api = {
     device_disconnect_timeout: 8,
     device_monitor_interval: 1,
     device_monitor: _ => {
+        m.mq.broadcast_thing_hb();
         m.ws.broadcast_core_hb();
         m.db.get_online_cores(cores => {
             if (cores === null || cores === false) return;
@@ -106,8 +104,11 @@ var api = {
     get_node_type: type => {
         return (m.main.node_drivers.hasOwnProperty(type) && m.main.node_drivers[type] ? type : 'node');
     },
-    init_node_driver: (node_id, type) => {
+    init_node_driver: (node_id, type, node = null) => {
         m.main.node_drivers[type].drivers[node_id] = m.main.node_drivers[type].init(m, log);
+        if (m.main.node_drivers[type].api.hasOwnProperty('__create')) { // used to say '__spawn', is that right?
+            m.main.node_drivers[type].api.__create(m, log, node);
+        }
     },
     init_driver_values: (type) => {
         var node_data = {};

@@ -7,6 +7,7 @@ const fs = require("fs");
 const ejs = require('ejs');
 const path = require("path");
 const http = require("http");
+const mqtt = require("mqtt");
 const express = require("express");
 const mongodb = require('mongodb');
 const rn = require('random-number');
@@ -18,10 +19,14 @@ const body_parser = require("body-parser");
 // set up environment
 global.args = process.argv.slice(2);
 global.env = process.argv.slice(2)[0] == "prod" ? "prod" : "dev";
+global.app_id = "nestor_cloud";
+global.app_id = "nestor_cloud";
+global.mqtt_broker_url = `mqtt.anuv.me:${1883}`;
 global.http_port = global.env == "dev" ? 30008 : 3008;
 global.ws_port = global.env == "dev" ? 30009 : 3009;
 global.mdb_port = global.env == "dev" ? 27017 : 27017;
 global.mdb_db = "nestor";
+global.hb_log = false;
 
 /* MODULES */
 // import application modules

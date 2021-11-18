@@ -1,7 +1,7 @@
-/* nestor core device server driver */
+/* nestor core device websocket server */
 
-#ifndef __C_DRIVER_H__
-#define __C_DRIVER_H__
+#ifndef __C_SERVER_H__
+#define __C_SERVER_H__
 
 // libraries
 #include <Arduino.h>

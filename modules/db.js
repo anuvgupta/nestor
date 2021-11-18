@@ -217,6 +217,7 @@ var api = {
         });
     },
     get_node_info: (node_id, user_id, client_id, resolve) => {
+        // console.log('GET NODE INFO DB TRACE', node_id);
         var _find = {
             _id: m.db.o_id(node_id)
         };

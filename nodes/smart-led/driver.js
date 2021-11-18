@@ -174,7 +174,8 @@ module.exports = {
                                 user_id = node_info.user_id;
                                 core_id = node_info.core_id;
                                 var ws_client = m.ws.get_client_by_o_id(core_id);
-                                if (ws_client) {
+                                var mq_client = m.mq.client_from_node_id(node_id);
+                                if (ws_client || mq_client) {
                                     m.db.get_user_data(user_id, "color_patterns", pattern_list => {
                                         if (pattern_list === null || pattern_list === false) resolve(pattern_list);
                                         if (pattern_list) {
@@ -190,7 +191,8 @@ module.exports = {
                                             var pattern_string = m.utils.condense_pattern_hex(pattern);
                                             if (pattern_string) {
                                                 log(`driver[${node_type}.get_pattern_code] sending pattern to node ${node_id}: ${pattern_id}:${pattern_string}`);
-                                                m.ws.send_to_device('user-data', `${node_id}-pattern-${pattern_string}`, ws_client);
+                                                if (mq_client) m.mq.send_to_device('user-data', `pattern-${pattern_string}`, mq_client);
+                                                if (ws_client) m.ws.send_to_device('user-data', `${node_id}-pattern-${pattern_string}`, ws_client);
                                                 resolve(true);
                                             } else resolve(null);
                                         } else resolve(null);
@@ -208,16 +210,26 @@ module.exports = {
             var node_id = api_args[0];
             var node_object = api_args[1];
             var node_ws_client = m.ws.get_client_by_o_id(node_object.core_id);
+            var node_mq_client = m.mq.client_from_node_id(node_id);
             // log(node_ws_client);
-            if (node_id && node_object && node_ws_client) {
+            if (node_id && node_object && (node_ws_client || node_mq_client)) {
                 var audio_flag = (node_object.data.hasOwnProperty('audio') && node_object.data.audio === true);
                 setTimeout(_ => {
-                    m.ws.send_to_device('node-data', `${node_id}-audio-false-${(audio_flag ? 'true' : 'false')}`, node_ws_client, true);
+                    if (node_mq_client)
+                        m.mq.send_to_device('node-data', `audio-false-${(audio_flag ? 'true' : 'false')}`, node_mq_client, true);
+                    if (node_ws_client)
+                        m.ws.send_to_device('node-data', `${node_id}-audio-false-${(audio_flag ? 'true' : 'false')}`, node_ws_client, true);
                     setTimeout(_ => {
-                        m.ws.send_to_device('node-data', `${node_id}-audio_allow-false-true`, node_ws_client, true);
+                        if (node_mq_client)
+                            m.mq.send_to_device('node-data', `audio_allow-false-true`, node_mq_client, true);
+                        if (node_ws_client)
+                            m.ws.send_to_device('node-data', `${node_id}-audio_allow-false-true`, node_ws_client, true);
                         if (!audio_flag) {
                             setTimeout(_ => {
-                                m.ws.send_to_device('node-data', `${node_id}-brightness-false-${node_object.data.brightness}`, node_ws_client, true);
+                                if (node_mq_client)
+                                    m.mq.send_to_device('node-data', `brightness-false-${node_object.data.brightness}`, node_mq_client, true);
+                                if (node_ws_client)
+                                    m.ws.send_to_device('node-data', `${node_id}-brightness-false-${node_object.data.brightness}`, node_ws_client, true);
                                 log(`driver[${node_type}.play_initial] sending currently playing data to node ${node_id}`);
                             }, 200);
                         }

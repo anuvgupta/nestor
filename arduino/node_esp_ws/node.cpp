@@ -8,8 +8,6 @@
 #include "node_conf.h"
 #include "node_esp.h"
 
-// node device type
-#define NODE_TYPE "smart-ir"
 // onboard leds
 #define LED_1 2
 #define LED_2 D0

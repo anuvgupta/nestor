@@ -1,13 +1,11 @@
-/* nestor node device client driver (smart-led) */
+/* nestor thing device client driver (smart-led) */
 
 // libraries
 #include <Arduino.h>
 
-#include "node_conf.h"
-#include "node_esp.h"
+#include "thing_conf.h"
+#include "thing_esp.h"
 
-// node device type
-#define NODE_TYPE "smart-led"
 // onboard leds
 #define LED_1 2
 #define LED_2 D0
@@ -95,7 +93,8 @@ bool bound_bool(char* bool_val) {
 }
 
 // driver initialization
-void NodeDriver::init() {
+void ThingDriver::init() {
+  this->disable_serial_alerts();
 	pinMode(LED_1, OUTPUT);
 	pinMode(LED_2, OUTPUT);
 	driveLED(LED_1, 0);
@@ -127,17 +126,17 @@ void NodeDriver::init() {
 }
 
 // driver network ready
-void NodeDriver::ready() {
+void ThingDriver::ready() {
 	SERIAL.printf("ready\n");
 }
 
 // driver serial input
-void NodeDriver::input(char* value) {
+void ThingDriver::input(char* value) {
 	SERIAL.printf("%s\n", value);
 }
 
 // driver main loop
-void NodeDriver::loop() {
+void ThingDriver::loop() {
 	if (power)
 		driveLED(LED_1, brightness);
 	else
@@ -145,7 +144,7 @@ void NodeDriver::loop() {
 }
 
 // driver data handler
-void NodeDriver::data(char* id, char* value, bool transitional) {
+void ThingDriver::data(char* id, char* value, bool transitional) {
 	play = 1;
 	play = (((int)transitional) == 0);
 	if (memcmp(id, "switch", 6) == 0) {
@@ -164,7 +163,7 @@ void NodeDriver::data(char* id, char* value, bool transitional) {
 		if ((pattern_id_str_l != strlen(value)) || (memcmp(pattern_id, value, pattern_id_str_l) != 0)) {
 			strcpy(pattern_id, value);
 			if (memcmp(pattern_id, "null", 4) != 0) {
-				char api_args[50];
+				char api_args[100];
 				sprintf(api_args, "%s|%s", pattern_id, this->get_id());
 				this->trigger_api("get_pattern_code", api_args);
 			} else
@@ -229,7 +228,7 @@ void NodeDriver::data(char* id, char* value, bool transitional) {
 }
 
 // driver user data handler
-void NodeDriver::user_data(char* id, char* value) {
+void ThingDriver::user_data(char* id, char* value) {
 	if (memcmp(id, "pattern", 7) == 0) {
 		if (strlen(value) > 1 || memcmp(value, "null", 4) == 0) {
 			strcpy(pattern, value);

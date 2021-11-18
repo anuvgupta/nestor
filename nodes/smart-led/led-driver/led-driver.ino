@@ -1,3 +1,6 @@
+// TODO: stall and reset esp8266 via reset pin
+
+
 // includes
 #include "SoftwareSerialMod.h"
 

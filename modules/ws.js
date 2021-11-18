@@ -50,11 +50,13 @@ var ws_server = {
     },
     // send data to specific client
     send_to_client: (event, data, client, auth_req = true) => {
+        if (client.protocol != "ws") return;
         if (!auth_req || client.auth)
             client.socket.send(ws_server.encode_msg(event, data));
     },
     // send event to device
     send_to_device: (event, data, client, auth_req = true) => {
+        if (client.protocol != "ws") return;
         if (!auth_req || client.auth)
             client.socket.send(`@${event}-${data}`);
     },
@@ -65,7 +67,8 @@ var ws_server = {
                 ws_server.clients.hasOwnProperty(c_id) &&
                 ws_server.clients[c_id] !== null &&
                 (!auth_req || ws_server.clients[c_id].auth) &&
-                ws_server.clients[c_id].type == group
+                ws_server.clients[c_id].type == group &&
+                ws_server.clients[c_id].protocol == "ws"
             ) {
                 ws_server.clients[c_id].socket.send(ws_server.encode_msg(event, data));
             }
@@ -78,7 +81,8 @@ var ws_server = {
                 ws_server.clients.hasOwnProperty(c_id) &&
                 ws_server.clients[c_id] !== null &&
                 (!auth_req || ws_server.clients[c_id].auth) &&
-                ws_server.clients[c_id].type == group
+                ws_server.clients[c_id].type == group &&
+                ws_server.clients[c_id].protocol == "ws"
             ) {
                 ws_server.clients[c_id].socket.send(`@${event}-${data}`);
             }
@@ -91,7 +95,8 @@ var ws_server = {
                 ws_server.clients.hasOwnProperty(c_id) &&
                 ws_server.clients[c_id] !== null &&
                 (!auth_req || ws_server.clients[c_id].auth) &&
-                ws_server.clients[c_id].o_id == user_id
+                ws_server.clients[c_id].o_id == user_id &&
+                ws_server.clients[c_id].protocol == "ws"
             ) {
                 ws_server.clients[c_id].socket.send(ws_server.encode_msg(event, data));
             }
@@ -152,7 +157,10 @@ var ws_server = {
                 id: "_c_" + m.utils.rand_id(),
                 o_id: null,
                 auth: false,
-                type: "app"
+                type: "app",
+                protocol: "ws",
+                core_code: null,
+                standalone: false
             };
             log(`client ${client.id} – connected`);
             // client socket event handlers
@@ -313,7 +321,7 @@ var init = _ => {
                     log(`delete_core | client ${client.id} deleted ${core_id}`);
                     ws_server.send_to_user('delete_core', core_id, core.user_id);
                     ws_server.trigger_for_user('get_core_list', null, core.user_id);
-                    m.main.remove_node_shortcuts(null, node.core_id);
+                    m.main.remove_node_shortcuts(null, core_id);
                 });
             });
         });
@@ -328,6 +336,7 @@ var init = _ => {
                 mac: node.mac,
                 core_id: node.core_id,
                 type: node.type,
+                standalone: node.standalone,
                 id: node._id.toString()
             }, client);
             ws_server.send_to_client("node_status", {
@@ -363,6 +372,7 @@ var init = _ => {
                 m.db.delete_nodes([node_id], client.id, result2 => {
                     if (result2 === null || result2 === false) return;
                     log(`delete_node | client ${client.id} deleted node ${node_id}`);
+                    m.mq.remove_client(node_id);
                     ws_server.send_to_user('delete_node', node._id.toString(), node.user_id);
                     ws_server.trigger_for_user('get_core_info', { id: node.core_id }, node.user_id);
                     m.main.remove_node_shortcuts(node._id.toString());
@@ -419,6 +429,7 @@ var init = _ => {
             var node_id_rep = node._id.toString();
             log(`reset_node | client ${client.id} requested node ${node_id_rep} reset`);
             if (node.status == 'online') {
+                m.mq.send_to_device_by_node_id('reset', 'reset', `${node_id_rep}`);
                 var core_client = m.ws.get_client_by_o_id(node.core_id);
                 if (core_client) {
                     ws_server.send_to_device('node-reset', `${node_id_rep}`, core_client);
@@ -522,9 +533,9 @@ var init = _ => {
                 node_mdb_id = `${node_mdb_id}`;
                 m.db.get_node_info(node_mdb_id, null, client.id, node => {
                     if (node === false) return;
-                    else if (node === null)
+                    else if (node === null) {
                         ws_server.send_to_device("node-hb", `${node_mdb_id}-404`, client);
-                    else {
+                    } else {
                         // log(`node_hb | client ${client.id} - node ${node_mdb_id} heartbeat`);
                         var now = (new Date()).getTime();
                         m.db.set_node_status(node_mdb_id, "online", now, client.id, result => {
@@ -575,36 +586,119 @@ var init = _ => {
         });
     });
     ws_server.quiet_events.push('node_hb');
+    ws_server.bind('thing_hb', (client, req) => {
+        m.db.get_core_info(null, null, client.core_code, client.id, core => {
+            if (core === null || core === false) return;
+            var node_mdb_id = req.id;
+            if (node_mdb_id) {
+                node_mdb_id = `${node_mdb_id}`;
+                m.db.get_node_info(node_mdb_id, null, client.id, node => {
+                    if (node === false) return;
+                    else if (node === null) {
+                        m.mq.send_to_device('hb_recv', `404-${node_mdb_id}`, client);
+                        ws_server.send_to_device("node-hb", `${node_mdb_id}-404`, client);
+                    } else {
+                        // log(`node_hb | client ${client.id} - node ${node_mdb_id} heartbeat`);
+                        var now = (new Date()).getTime();
+                        m.db.set_node_status(node_mdb_id, "online", now, client.id, result => {
+                            if (result === null || result === false) return;
+                            if (node.status != "online") {
+                                log("THING JUST CONNECTED");
+                                // node just connected
+                                var node_id = node._id.toString();
+                                ws_server.send_to_user("node_status", {
+                                    id: node_id,
+                                    core_id: node.core_id,
+                                    status: "online",
+                                    status_time: now
+                                }, node.user_id);
+                                var reset_interval = m.main.get_driver_reset_interval(node.type);
+                                if (reset_interval > 0) {
+                                    var reset_interval_str = m.utils.lpad(`${reset_interval}`, 2, '0');
+                                    setTimeout(_ => {
+                                        m.mq.send_to_device('reset_i', reset_interval_str, client);
+                                    }, 300);
+                                }
+                                log("sent status to user");
+                                if (m.main.node_drivers.hasOwnProperty(node.type) && m.main.node_drivers[node.type].api.hasOwnProperty('__spawn')) {
+                                    m.main.node_drivers[node.type].api.__spawn(m, log, node);
+                                }
+                                var initial_vals = m.main.get_init_driver_vals(node.type, node_mdb_id);
+                                for (var field_i in initial_vals) {
+                                    if (initial_vals.hasOwnProperty(field_i)) {
+                                        log('sending initial val for ' + field_i);
+                                        var data = {
+                                            id: node_id,
+                                            transitional: false,
+                                            field_id: field_i,
+                                            field_val: node.data[field_i] == undefined ? initial_vals[field_i] : node.data[field_i]
+                                        };
+                                        ws_server.trigger_for_user('update_node_data', data, node.user_id);
+                                        m.mq.send_initial_val(data.field_id, data.field_val, client);
+                                    }
+                                }
+                                setTimeout(_ => {
+                                    node.status = "online";
+                                    node.status_time = now;
+                                    ws_server.fire_api_events('node_ready', [node_id, node]);
+                                }, 100);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    });
+    ws_server.quiet_events.push('thing_hb');
     ws_server.bind('node_sync', (client, req) => {
         m.db.get_core_info(null, null, `${req.core_code}`, client.id, core => {
             if (core === false) return;
-            else if (core === null)
+            else if (core === null) {
+                m.mq.send_to_device('sync', 'f', client);
                 ws_server.send_to_device('sync', 'f', client);
-            else {
+            } else {
                 m.db.get_user_info(m.db.o_id(core.user_id), `${req.user}`, client.id, user => {
                     if (user === false) return;
-                    else if (user === null)
+                    else if (user === null) {
+                        m.mq.send_to_device('sync', 'f', client);
                         ws_server.send_to_device('sync', 'f', client);
-                    else {
+                    } else {
                         var node_type = m.main.get_node_type(`${req.node_type}`);
                         if (core.nodes.hasOwnProperty(req.mac) && core.nodes[req.mac]) {
                             var node_id = core.nodes[req.mac];
-                            ws_server.send_to_device('sync', `t`, client);
-                            client.o_id = node_id;
-                            client.type = "node";
-                            client.auth = true;
-                            log(`node_sync | client ${client.id} synced as node ${client.o_id}`);
-                            m.main.init_node_driver(node_id, node_type);
-                            if (core.status == "online") {
-                                m.utils.delay(_ => {
-                                    ws_server.send_to_device("info", `${core.ip}-${client.o_id}`, client);
-                                    log(`node_sync | client ${client.id} – info forwarded to node ${client.o_id}`);
-                                }, 300);
-                            }
+                            m.db.get_node_info(node_id, core.user_id, client.id, node => {
+                                if (node === false) return;
+                                else if (node === null) {
+                                    m.mq.send_to_device('sync', 'f', client);
+                                    ws_server.send_to_device('sync', 'f', client);
+                                } else {
+                                    m.mq.send_to_device('sync', 't', client);
+                                    ws_server.send_to_device('sync', `t`, client);
+                                    m.mq.prune_duplicates(node_id, client.id);
+                                    client.o_id = node_id;
+                                    client.type = "node";
+                                    client.auth = true;
+                                    log(`node_sync | client ${client.id} synced as node ${client.o_id}`);
+                                    m.main.init_node_driver(node_id, node_type, node);
+                                    if (core.status == "online") {
+                                        m.utils.delay(_ => {
+                                            m.mq.send_to_device('info', `${client.o_id}`, client);
+                                            ws_server.send_to_device("info", `${core.ip}-${client.o_id}`, client);
+                                            log(`node_sync | client ${client.id} – info forwarded to node ${client.o_id}`);
+                                        }, 300);
+                                    } else {
+                                        m.utils.delay(_ => {
+                                            m.mq.send_to_device('info', `${client.o_id}`, client);
+                                            log(`node_sync | client ${client.id} - info forwarded to node ${client.o_id}`);
+                                        }, 300);
+                                    }
+                                }
+                            });
                         } else {
+                            req.standalone = req.standalone == true;
                             var node_data = m.main.init_driver_values(node_type);
                             var node = {
-                                name: "N-" + (req.mac.slice(req.mac.length - 5)),
+                                name: `${req.standalone ? 'T' : 'N'}-` + (req.mac.slice(req.mac.length - 5)),
                                 core_id: core._id.toString(),
                                 core_code: core.code,
                                 mac: req.mac,
@@ -612,27 +706,35 @@ var init = _ => {
                                 status_time: -1,
                                 status: "new",
                                 type: node_type,
-                                data: node_data
+                                data: node_data,
+                                standalone: (req.standalone)
                             };
                             m.db.new_node(node, client.id, status1 => {
                                 if (status1 === null || status1 === false) return;
                                 var node_id = status1.insertedId.toString();
                                 m.db.new_core_node(node.core_id, node_id, node.mac, client.id, status2 => {
                                     if (status2 === null || status2 === false) return;
+                                    m.mq.send_to_device('sync', 't', client);
                                     ws_server.send_to_device('sync', `t`, client);
-                                    log(`node_sync | client ${client.id} added new node - ${node.name}`);
+                                    log(`node_sync | client ${client.id} added new ${req.standalone ? '(standalone)' : ''} node - ${node.name}`);
                                     client.o_id = node_id;
                                     client.type = "node";
                                     client.auth = true;
                                     log(`node_sync | client ${client.id} synced as node ${client.o_id}`);
-                                    m.main.init_node_driver(node_id, node_type);
+                                    m.main.init_node_driver(node_id, node_type, node);
                                     ws_server.trigger_for_user('get_core_info', {
                                         id: node.core_id,
                                         get_nodes: true
                                     }, node.user_id);
                                     if (core.status == "online") {
                                         m.utils.delay(_ => {
+                                            m.mq.send_to_device('info', `${client.o_id}`, client);
                                             ws_server.send_to_device("info", `${core.ip}-${client.o_id}`, client);
+                                            log(`node_sync | client ${client.id} - info forwarded to node ${client.o_id}`);
+                                        }, 300);
+                                    } else {
+                                        m.utils.delay(_ => {
+                                            m.mq.send_to_device('info', `${client.o_id}`, client);
                                             log(`node_sync | client ${client.id} - info forwarded to node ${client.o_id}`);
                                         }, 300);
                                     }
@@ -655,7 +757,11 @@ var init = _ => {
             var transitional_val = req.hasOwnProperty('transitional') && req.transitional === true;
             var transitional_text = transitional_val ? 'true' : 'false';
             req.field_val = m.utils.correct_type(req.field_val, field_type);
+            var _sendMQ = _ => {
+                m.mq.send_to_device_by_node_id('node-data', `${req.field_id}-${transitional_text}-${req.field_val}`, node_id);
+            };
             var _send = _ => {
+                _sendMQ();
                 for (var c_id in ws_server.clients) {
                     if (
                         ws_server.clients.hasOwnProperty(c_id) &&
@@ -679,6 +785,7 @@ var init = _ => {
                     m.db.get_core_info(node.core_id, node.user_id, null, client.id, core => {
                         if (core === false || core === null) return;
                         if (core.status == "online") _send();
+                        else _sendMQ();
                     });
                 });
             };
@@ -710,6 +817,9 @@ var init = _ => {
     });
 };
 var api = {
+    trigger_for_mq_client: (event, data, client, auth_req = true) => {
+        ws_server.trigger_for_client(event, data, client, auth_req);
+    },
     trigger_user_data_update: (user_id, data_key) => {
         ws_server.trigger_for_user('get_user_data', {
             key: data_key
@@ -752,6 +862,7 @@ var api = {
             status_time: status_time
         }, user_id);
         if (status === "offline") {
+            m.mq.remove_client(node_id);
             for (var cl in ws_server.clients) {
                 if (ws_server.clients.hasOwnProperty(cl) && ws_server.clients[cl].o_id && ws_server.clients[cl].o_id.toString() == node_id) {
                     ws_server.clients[cl].socket.close();
