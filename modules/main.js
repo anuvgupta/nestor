@@ -53,9 +53,9 @@ var api = {
             }
         });
     },
-    device_desync_timeout: 3,
+    device_desync_timeout: 5,
     device_disconnect_timeout: 8,
-    device_monitor_interval: 1,
+    device_monitor_interval: 0.5,
     device_monitor: _ => {
         m.mq.broadcast_thing_hb();
         m.ws.broadcast_core_hb();

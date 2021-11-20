@@ -8,7 +8,11 @@
 
 // onboard leds
 #define LED_1 2
+#ifdef D0
 #define LED_2 D0
+#else
+#define LED_2 BUILTIN_LED
+#endif
 // data
 int play;
 int power;
