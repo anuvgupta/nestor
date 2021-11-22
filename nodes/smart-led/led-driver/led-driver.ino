@@ -79,7 +79,7 @@ int fade = 0;			  // transition (ms)
 // shuffle data
 int shuffle_record_l = 0;
 int shuffle_record_r = 0;
-double shuffle_beat_threshold = 640;
+double shuffle_beat_threshold = 360;
 int shuffle_beat_limit = 1;
 int shuffle_beat_limit_counter = 0;
 #define SHUFFLE_HUE_PRESET_NUM 6
