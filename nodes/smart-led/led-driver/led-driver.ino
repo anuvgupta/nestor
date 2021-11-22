@@ -18,12 +18,12 @@
 #define ESP_RX 8
 #define ESP_RST 4
 // LED PWM pins
-#define REDPIN_L 9
-#define GREENPIN_L 10
-#define BLUEPIN_L 11
-#define REDPIN_R 3
-#define GREENPIN_R 5
-#define BLUEPIN_R 6
+#define REDPIN_L   6   // 9
+#define GREENPIN_L 5   // 10
+#define BLUEPIN_L  10  // 11
+#define REDPIN_R   9   // 3
+#define GREENPIN_R 3   // 5
+#define BLUEPIN_R  11  // 6
 // msgeq7 pins
 #define STROBEPIN 2
 #define RESETPIN 4
@@ -685,6 +685,7 @@ void music(void) {
 			double level;
 			if (i == l_channel) {
 				level = bands[i];
+//        Serial.println(level);
 				// pre-amplify
 				level *= l_preamp;
 				// correct
