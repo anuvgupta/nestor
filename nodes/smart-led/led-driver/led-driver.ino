@@ -16,7 +16,6 @@
 // esp control pins
 #define ESP_TX 7
 #define ESP_RX 8
-#define ESP_RST 4
 // LED PWM pins
 #define REDPIN_L   6   // 9
 #define GREENPIN_L 5   // 10
@@ -98,7 +97,6 @@ void setup(void) {
 	// init hardware and software serials
 	Serial.begin(9600);
 	ESP8266.begin(9600);
-  digitalWrite(ESP_RST, LOW);
 
 #ifdef LOG_DEBUG
 	Serial.println(F("LED Strip Driver"));
@@ -139,14 +137,10 @@ void setup(void) {
 #endif
 	ESP8266.println(F("reset"));
   delay(1000);
-  digitalWrite(ESP_RST, HIGH);
 	lastTimestamp = millis();
 }
 
 void loop(void) {
-  // keep esp on
-  digitalWrite(ESP_RST, HIGH);
-  
 	// drive LED's
 	red_l(r_l);
 	green_l(g_l);
