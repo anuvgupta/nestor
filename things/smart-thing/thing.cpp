@@ -1,4 +1,4 @@
-/* nestor thing device client driver (simple-led) */
+/* nestor thing device client driver (smart-thing) */
 
 // libraries
 #include <Arduino.h>
