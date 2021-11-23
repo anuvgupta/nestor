@@ -1,0 +1,704 @@
+    *
+
+// nestor custom blocks blockfile
+
+
+// generic custom blocks
+
+!break
+    init
+        {
+            return Block('span').add('br');
+        }
+    load
+        {
+            data('val', val => {
+                for (var i = 1; i < val; i++)
+                    block.add('br');
+            });
+        }
+
+!text
+    init
+        {
+            return Block('span');
+        }
+    load
+        {
+            data('val', val => {
+                block.node().appendChild(document.createTextNode(val));
+            });
+            data('html', html => {
+                block.html(html);
+            });
+        }
+
+!image
+    init
+        {
+            return Block('div');
+        }
+    load
+        {
+            var src = data('src');
+            var height = data('height');
+            var width = data('width');
+            var alt = data('alt');
+            if (src != null) {
+                block.css('background-image', "url('" + src + "')")
+                    .css('background-repeat', 'no-repeat')
+                    .css('background-size', 'contain')
+                ;
+            }
+            if (height !== null) block.css('height', height);
+            if (width !== null) block.css('width', width);
+            if (alt !== null) block.attribute('title', alt);
+        }
+
+!switch
+    init
+        {
+            var block;
+            block = Block('div')
+                .key('state', false)
+                .css({
+                    width: 'auto',
+                    height: '30px',
+                    cursor: 'pointer',
+                    margin: '5px 10px',
+                    fontSize: '17px'
+                })
+                .add(Block('block', 'label')
+                    .css({
+                        width: 'auto',
+                        minWidth: '70px',
+                        float: 'left',
+                        marginRight: '10px',
+                        cursor: 'inherit',
+                        fontSize: 'inherit',
+                        display: 'none'
+                    })
+                    .__child('content')
+                        .css('text-align', 'left')
+                        .__parent()
+                    .add(Block('text', 1)
+                        .data('Label 1: ')
+                    )
+                    .on('click', (e, b, d) => {
+                        if (block.key('enabled')) {
+                            block.key('state', (!block.key('state')));
+                            block.on('modified');
+                        }
+                    })
+                )
+                .add(Block('div', 'main')
+                    .css({
+                        width: '65px',
+                        height: '100%',
+                        position: 'relative',
+                        cursor: 'inherit',
+                        display: 'inline-block'
+                    })
+                    .add(Block('div', 'bg')
+                        .css({
+                            width: '100%',
+                            height: '100%',
+                            borderRadius: '16px',
+                            backgroundColor: '#e4e4e4',
+                            position: 'absolute',
+                            top: '0',
+                            left: '0',
+                            zIndex: '1',
+                            transition: 'background-color 0.2s ease-in-out'
+                        })
+                    )
+                    .add(Block('block', 'circle')
+                        .css({
+                            width: '30px',
+                            height: '100%',
+                            position: 'absolute',
+                            top: '0.5px',
+                            left: '1px',
+                            zIndex: '2',
+                            transition: 'left 0.2s ease-in-out'
+                        })
+                        .add(Block('div')
+                            .css({
+                                width: '75%',
+                                height: '75%',
+                                borderRadius: '100%',
+                                backgroundColor: 'white',
+                                margin: '0 auto'
+                            })
+                        )
+                    )
+                    .on('click', (e, b, d) => {
+                        if (block.key('enabled')) {
+                            block.key('state', (!block.key('state')));
+                            block.on('modified');
+                        }
+                    })
+                )
+                .on('updateUI', (e, b, d) => {
+                    if (block.key('state')) {
+                        block.child('main/circle').css({
+                            left: '34px'
+                        }).sibling('bg').css({
+                            backgroundColor: '#558fed'
+                        });
+                    } else {
+                        block.child('main/circle').css({
+                            left: '1px',
+                        }).sibling('bg').css({
+                            backgroundColor: '#e4e4e4'
+                        });
+                    }
+                })
+                .on('modified', (e, b, d) => {
+                    block.on('updateUI');
+                })
+                .key('enabled', true)
+                .on('enable', (e, b, d) => {
+                    block.key('enabled', true);
+                    block.css({
+                        opacity: '1',
+                        cursor: 'pointer'
+                    });
+                    e.stopPropagation();
+                })
+                .on('disable', (e, b, d) => {
+                    block.key('enabled', false);
+                    block.css({
+                        opacity: '0.6',
+                        cursor: 'default'
+                    });
+                    e.stopPropagation();
+                })
+                .on('activate', (e, b, d) => {
+                    if (block.key('enabled')) {
+                        if (d.hasOwnProperty('state')) {
+                            block.key('state', (d.state == 'on'));
+                            block.on('modified');
+                        } else block.child('main/circle').on('click');
+                    }
+                })
+            ;
+            return block;
+        }
+    load
+        {
+            data('val', (val) => {
+                var v = (val == 'on');
+                if (block.key('state') != v) {
+                    block.key('state', v);
+                    block.on('modified', { locked: true });
+                }
+            });
+            data('label', (label) => {
+                block.child('label/text').html('').data(label);
+                block.child('label').css('display', 'inline-table');
+            });
+            data('minWidth', (w) => {
+                block.child('label').css('min-width', w);
+            });
+            data('marginRight', (r) => {
+                block.child('label').css('margin-right', r);
+            });
+        }
+
+// application custom blocks
+
+!core-item
+    init
+        {
+            var block = Block('div');
+            return block
+                .css({
+                    width: '100%',
+                    height: '110px',
+                    backgroundColor: 'white',
+                    borderBottom: '1px solid #ededed',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.15s ease',
+                    position: 'relative'
+                })
+                .on('mouseover', _ => {
+                    block.css('background-color', '#f9f9f9');
+                })
+                .on('mouseout', _ => {
+                    block.css('background-color', 'white');
+                })
+                .add(Block('block', 'img')
+                    .css({
+                        opacity: '0.7',
+                        width: '90px',
+                        height: '110px',
+                        float: 'left',
+                        boxSizing: 'border-box',
+                        paddingTop: '3.5px'
+                    })
+                    .add(Block('image', 1)
+                        .data({
+                            src: '/img/memory_b.png',
+                            //src: '/img/gear_b.png',
+                            css: { margin: '0 auto' },
+                            width: '40px',
+                            height: '40px'
+                            //width: '35px',
+                            //height: '35px'
+                        })
+                    )
+                )
+                .add(Block('block', 'name')
+                    .css({
+                        height: '110px',
+                        float: 'left',
+                        width: 'auto'
+                    })
+                    .add(Block('text', 1)
+                        .data('Name')
+                        .css({
+                            fontSize: '25px',
+                            letterSpacing: '1px'
+                        })
+                    )
+                )
+                .add(Block('block', 'next')
+                    .css({
+                        width: '50px',
+                        height: '110px',
+                        opacity: '0.65',
+                        position: 'absolute',
+                        right: '15px',
+                    })
+                    .add(Block('image', 1)
+                        .data({
+                            src: '/img/right_b.png',
+                            css: { margin: '0 auto' },
+                            width: '50px',
+                            height: '50px'
+                        })
+                    )
+                )
+                .on('click' , _ => {
+                    var id = block.key('id');
+                    if (id) {
+                        block.parent(1)
+                            .sibling('core').data({
+                                    id: id
+                                })
+                            .sibling('cores')
+                                .on('hide', { concurrent: _ => {
+                                    block.parent(1)
+                                        .sibling('core').on('show');
+                                } });
+                    }
+                })
+            ;
+        }
+    load
+        {
+            data('name', name => {
+                block.key('name', name);
+                block.child('name/text').html('').data(name);
+            });
+            data('id', id => {
+                block.key('id', id);
+            });
+            data('status', status => {
+                switch (status.status) {
+                    case "online":
+                        block.child('status/circle').css('background-color', app.ui.block.key('statusGreen'));
+                        break;
+                    case "offline":
+                        block.child('status/circle').css('background-color', app.ui.block.key('deleteRed'));
+                        break;
+                    case "desync":
+                        block.child('status/circle').css('background-color', app.ui.block.key('slowYellow'));
+                        break;
+                    case "intermediate":
+                        block.child('status/circle').css('background-color', app.ui.block.key('buttonBlue'));
+                        break;
+                    case "new":
+                    default:
+                        block.child('status/circle').css('background-color', app.ui.block.key('stalledGrey'));
+                        break;
+                }
+            });
+        }
+
+!node-item
+    init
+        {
+            var block = Block('block')
+                .css({
+                    width: '50%',
+                    height: '50%',
+                    minHeight: '345px',
+                    maxHeight: '355px',
+                    float: 'left'
+                })
+                .add(Block('div', 'content')
+                    .css({
+                        width: '89.5%',
+                        height: '92%',
+                        margin: '0 auto',
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #f0f0f0',
+                        boxSizing: 'border-box',
+                        borderRadius: '7px',
+                        boxShadow: 'rgba(50, 50, 50, 0.04) 0px 2px 4px',
+                        transition: 'box-shadow 0.2s ease, background-color 0.2s ease',
+                        cursor: 'pointer',
+                        position: 'relative'
+                    })
+                    .on('mouseover', (e, b, d) => {
+                        b.css({
+                            boxShadow: 'rgba(50, 50, 50, 0.09) 0px 2.5px 5px',
+                            backgroundColor: '#fbfbfb'
+                        });
+                    })
+                    .on('mouseout', (e, b, d) => {
+                        b.css({
+                            boxShadow: 'rgba(50, 50, 50, 0.04) 0px 2px 4px',
+                            backgroundColor: '#ffffff'
+                        });
+                    })
+                    .add(Block('div', 'img')
+                        .css({
+                            margin: '20px auto 0',
+                            height: '160px',
+                            width: '160px',
+                            opacity: '0.7'
+                        })
+                        .bind('load', load => {
+                            block.child('content/img/image').data({
+                                src: load,
+                                height: '160px',
+                                width: '160px'
+                            });
+                        })
+                        .add(Block('image', 1))
+                    )
+                    .add(Block('div', 'title')
+                        .add(Block('text', 1)
+                            .data('Title')
+                            .css({
+                                fontSize: '35px',
+                                color: '#222'
+                            })
+                        )
+                    )
+                    .add(Block('div', 'status')
+                        .css({
+                            width: '100%',
+                            height: '80px',
+                            marginTop: '8px',
+                            position: 'absolute',
+                            bottom: '13.2px'
+                        })
+                        .add(Block('block', 'light')
+                            .css({
+                                width: '27%',
+                                height: '100%',
+                                float: 'left'
+                            })
+                            .query('window width >= 665', function (event, block, data) {
+                                block.css('width', '27%');
+                            })
+                            .query('window width < 665', function (event, block, data) {
+                                block.css('width', '23%');
+                            })
+                            .add(Block('div', 'circle')
+                                .css({
+                                    borderRadius: '100%',
+                                    height: '20px',
+                                    width: '20px',
+                                    backgroundColor: '#ddd',
+                                    border: '1px solid #eee',
+                                    margin: '0 0 0 auto'
+                                })
+                            )
+                        )
+                        .add(Block('div', 'labels')
+                            .css({
+                                width: '73%',
+                                height: '100%',
+                                float: 'left',
+                                paddingLeft: '25px',
+                                boxSizing: 'border-box'
+                            })
+                            .add(Block('div', 'type')
+                                .css({
+                                    height: '50%',
+                                    width: '100%'
+                                })
+                                .add(Block('text', 1)
+                                    .data('Type')
+                                    .css({
+                                        display: 'block',
+                                        textAlign: 'left',
+                                        paddingTop: '13px',
+                                        fontSize: '23px',
+                                        color: '#222'
+                                    })
+                                )
+                            )
+                            .add(Block('div', 'status')
+                                .css({
+                                    height: '50%',
+                                    width: '100%'
+                                })
+                                .add(Block('text', 1)
+                                    .data('Status 5 min ago')
+                                    .css({
+                                        display: 'block',
+                                        textAlign: 'left',
+                                        fontSize: '15px',
+                                        color: '#888',
+                                        fontStyle: 'italic',
+                                        paddingTop: '3px'
+                                    })
+                                )
+                            )
+                        )
+                    )
+                )
+                .on('click', _ => {
+                    var id = block.key('id');
+                    if (id) {
+                        block.parent(1)
+                            .sibling('node').data({
+                                id: id
+                            });
+                        block.parent(1).on('hide', { concurrent: _ => {
+                            block.parent(1).sibling('node').on('show');
+                        }});
+                    }
+                })
+            ;
+            return block;
+        }
+    load
+        {
+            data('title', title => {
+                block.child('content/title/text').html('').data(title);
+            });
+            data('type', type => {
+                // console.log(type);
+                var img_src = app.ws.api.node_profiles[type].thing.img;
+                if (app.ws.api.node_profiles[type].thing.hasOwnProperty('img-alt'))
+                    img_src = app.ws.api.node_profiles[type].thing['img-alt'];
+                block.child('content/img').data({ load: '/img/' + img_src + '.png' });
+                block.child('content/status/labels/type/text').html('').data(app.ws.api.node_profiles[type].thing.label);
+            });
+            data('status', status => {
+                block.key('status', status);
+                block.child('content/status/labels/status/text').html('').data(status.code.charAt(0).toUpperCase() + status.code.slice(1) + " " + (status.code == "online" ? "now" : util.duration_desc(status.time)));
+                switch (status.code) {
+                    case "online":
+                        block.child('content/status/light/circle').css('background-color', app.ui.block.key('statusGreen'));
+                        break;
+                    case "offline":
+                        block.child('content/status/light/circle').css('background-color', app.ui.block.key('deleteRed'));
+                        break;
+                    case "desync":
+                        block.child('content/status/light/circle').css('background-color', app.ui.block.key('slowYellow'));
+                        break;
+                    case "new":
+                    default:
+                        block.child('content/status/light/circle').css('background-color', app.ui.block.key('stalledGrey'));
+                        break;
+                }
+            });
+            data('id', id => {
+                block.key('id', id);
+            });
+        }
+
+!node-menu-item
+    init
+        {
+            var block = Block('block');
+            return block
+                .css({
+                    width: '100%',
+                    //height: '135px',
+                    height: '110px',
+                    backgroundColor: 'white',
+                    borderBottom: '1px solid #eee',
+                    position: 'relative'
+                })
+                .add(Block('block', 'icon')
+                    .css({
+                        width: '135px',
+                        float: 'left'
+                    })               
+                    .add(Block('image', 1)
+                        .data({
+                            src: '/img/gear_b.png',
+                            width: '37px',
+                            height: '37px',
+                        })
+                        .css({
+                            opacity: '0.65',
+                            margin: '0 auto'
+                        })
+                    )
+                )
+                .add(Block('block', 'label')
+                    .css({
+                        width: 'auto',
+                        float: 'left',
+                        marginLeft: '-3px',
+                        display: 'none'
+                    })
+                    .add(Block('text', 1)
+                        .data('Label: ')
+                        .css({
+                            fontSize: '20px'
+                        })
+                    )
+                )
+                .add(Block('div', 'editor')
+                    .css({
+                        height: '100%',
+                        width: 'calc(100% - 135px)',
+                        minWidth: '50px',
+                        boxSizing: 'border-box',
+                        float: 'left'
+                    })
+                    .query('window width != 0', function (event, block, data) {
+                        var lbl = block.sibling('label');
+                        var new_width = `calc(100% - 135px - (${lbl.$().width()}px))`;
+                        block.css('width', new_width);
+                    })
+                )
+                .on('local-update', (e, b, d) => {
+                    if (d && d.value !== null) {
+                        var value = d.value;
+                        var field_id = block.key('id');
+                        if (field_id) {
+                            var local_update = {};
+                            local_update[field_id] = value;
+                            app.ui.block.child('main/node').data({
+                                local_update_node_data: local_update
+                            });
+                        }
+                    }
+                })
+            ;
+        }
+    load
+        {
+            data('metadata', metadata => {
+                block.key('id', metadata.id);
+                block.key('value', metadata.initial);
+                block.key('value-alt', {});
+                block.key('metadata', metadata);
+                block.child('icon/image').data({ src: `/img/${metadata.img}.png` });
+                if (metadata.hasOwnProperty('label') && metadata.label)
+                    block.child('label/text').html('').data(`${metadata.label}: `)
+                        .parent().css('display', 'table');
+                block.child('editor').add(Block(`${metadata.editor}-e`, 'view')
+                    .data({ metadata: metadata })
+                    .on('update', (event, editor_block, data) => {
+                        //if (data.hasOwnProperty('value') && data.value != block.key('value')) {
+                        if (data.hasOwnProperty('value')) {
+                            block.key('value', data.value);
+                            // console.log('update: ', data.value);
+                            block.on('local-update', {
+                                value: data.value
+                            });
+                            if (!data.hasOwnProperty('update_node_data') || data.update_node_data == true) {
+                                app.ws.api.update_node_data(app.ui.block.child('main/node').key('id'), metadata.id, data.value,
+                                    data.hasOwnProperty('transitional') && data.transitional === true,
+                                    data.hasOwnProperty('boomerang') && data.boomerang === true);
+                            }
+                        }
+                    })
+                    .on('update-alt', (event, editor_block, data) => {
+                        if (data.hasOwnProperty('value') && data.hasOwnProperty('id')) {
+                            var alt_val_keys = block.key('value-alt');
+                            if (alt_val_keys) {
+                                alt_val_keys[data.id] = data.value;
+                                block.key('value-alt', alt_val_keys);
+                                if (!data.hasOwnProperty('update_node_data') || data.update_node_data == true) {
+                                    app.ws.api.update_node_data(app.ui.block.child('main/node').key('id'), data.id, data.value,
+                                        data.hasOwnProperty('transitional') && data.transitional === true, 
+                                        data.hasOwnProperty('boomerang') && data.boomerang === true);
+                                }
+                            }
+                        }
+                    })
+                );
+            });
+            data('val', value => {
+                block.key('value', value);
+                block.child('editor/view').data({ val: value });
+                // console.log(block.key('id'), value);
+                block.on('local-update', {
+                    value: value
+                });
+            });
+            data('forward_data', forward_data => {
+                block.key('forward_data', forward_data);
+                var node_field_meta = block.key('metadata');
+                var f_data_capture = node_field_meta.hasOwnProperty('editor-options') && node_field_meta['editor-options'].hasOwnProperty('forward-data-capture') && node_field_meta['editor-options']['forward-data-capture'].includes(forward_data.id);
+                if (f_data_capture)
+                    block.child('editor/view').data({ forward_data: forward_data });
+                // console.log(block.mark(), forward_data);
+            });
+            data('user_data', user_data => {
+                block.child('editor/view').data({
+                    user_data: user_data
+                });
+            });
+            data('env', env => {
+                block.key('env', env);
+                if (env) {
+                    block.child('editor/view').data({
+                        env: env
+                    });
+                }
+            });
+            data('node_type', node_type => {
+                block.key('node_type', node_type);
+                if (node_type) {
+                    block.child('editor/view').data({
+                        node_type: node_type
+                    });
+                }
+            });
+        }
+
+!node-menu-header
+    init
+        {
+            var block = Block('block');
+            return block
+                .css({
+                    height: '45px',
+                    backgroundColor: '#f8f8f8',
+                    borderBottom: '1px solid #efefef',
+                    boxSizing: 'border-box',
+                    paddingLeft: '47px'
+                })
+                .__child('content')
+                    .css('text-align', 'left')
+                    .__parent()
+                .add(Block('text', 1)
+                    .data('text')
+                    .css({
+                        fontSize: '21px',
+                        color: '#333'
+                    })
+                )
+            ;
+        }
+    load
+        {
+            data('val', val => {
+                block.child('text').html('').data(val);
+            });
+        }

@@ -1,0 +1,184 @@
+{
+    "thing": {
+        "img": "remote_b",
+        "img-alt": "remote_s_b",
+        "label": "Smart IR",
+        "reset": 2
+    },
+    "data": [
+        {
+            "id": "target",
+            "img": "tv_b",
+            "type": "string",
+            "initial": "null",
+            "label": "Target",
+            "editor": "dropdown",
+            "editor-options": {
+                "dropdown-edit": false,
+                "dropdown-choices": [
+                    ["null", "None"],
+                    ["viziotv", "Vizio"],
+                    ["rokutv", "RokuTV"],
+                    ["lgtv", "LGTV"]
+                ]
+            },
+            "forwarding": ["remote"]
+        },
+        {
+            "id": "remote",
+            "img": "swipe_menu_vibration_b",
+            "type": "string",
+            "initial": "null",
+            "label": "Remote",
+            "editor": "ir-remote-menu",
+            "editor-options": {
+                "forward-data-capture": ["target"],
+                "submenu-size": "large"
+            }
+        },
+        {
+            "id": "link",
+            "img": "link_b",
+            "type": "string",
+            "initial": "null",
+            "label": "Link",
+            "editor": "shortcut",
+            "editor-options": {
+                "shortcut-exec": "block.sibling('remote').child('editor/view').on('show_menu', { size_override: 'full', topbar_theme: 'dark', title_replace: block.parent(1).key('node_info').name });"
+            }
+        },
+        {
+            "id": "icon",
+            "img": "image_b",
+            "type": "string",
+            "initial": "null",
+            "label": "Icon",
+            "editor": "icon"
+        }
+    ],
+    "env": {
+        "menu_profiles": {
+            "viziotv": {
+                "ir_codes": {
+                    "power": 551489775,
+                    "netflix": 551540520,
+                    "input": 551547915,
+                    "rewind": 551529555,
+                    "pause": 551545875,
+                    "play": 551537715,
+                    "forward": 551513235,
+                    "captions": 551525475,
+                    "record": 551496915,
+                    "stop": 551488755,
+                    "info": 551540775,
+                    "exit": 551522925,
+                    "menu": 551547405,
+                    "back": 551506605,
+                    "guide": 551499975,
+                    "up": 551527005,
+                    "down": 551510685,
+                    "left": 551543325,
+                    "right": 551490285,
+                    "ok": 551494365,
+                    "yellow": 551504565,
+                    "blue": 551537205,
+                    "red": 551496405,
+                    "green": 551529045,
+                    "vol_up": 551502015,
+                    "vol_down": 551534655,
+                    "vizio": 551531595,
+                    "ch_up": 551485695,
+                    "ch_down": 551518335,
+                    "mute": 551522415,
+                    "return": 551508135,
+                    "1": 551520375,
+                    "2": 551504055,
+                    "3": 551536695,
+                    "4": 551495895,
+                    "5": 551528535,
+                    "6": 551512215,
+                    "7": 551544855,
+                    "8": 551491815,
+                    "9": 551524455,
+                    "0": 551487735,
+                    "wide": 551546385,
+                    "—": 551550720
+                }
+            },
+            "rokutv": {
+                "ir_codes": {
+                    "power": 1637937167,
+                    "rewind": 1637908097,
+                    "pause": 1637879537,
+                    "play": 1637879537,
+                    "forward": 1637924417,
+                    "back": 1637931047,
+                    "home": 1637886167,
+                    "up": 1637892797,
+                    "down": 1637925437,
+                    "left": 1637902487,
+                    "right": 1637918807,
+                    "ok": 1637882087,
+                    "vol_up": 1637888207,
+                    "vol_down": 1637920847,
+                    "vol_mute": 1637904527,
+                    "return": 3258182271,
+                    "sleep": 1637926967,
+                    "options": 1637935127
+                }
+            },
+            "lgtv": {
+                "ir_codes": {
+                    "ok": 551494365,
+                    "up": 551486205,
+                    "left": 551542815,
+                    "right": 551510175,
+                    "down": 551518845,
+                    "back": 551490795,
+                    "exit": 551541285,
+                    "info": 551507370,
+                    "sap": 551520630,
+                    "home": 551501505,
+                    "netflix": 551512725,
+                    "prime": 551500485,
+                    "movies": 551518590,
+                    "rec": 551533890,
+                    "stop": 551521650,
+                    "rewind": 551547150,
+                    "forward": 551514510,
+                    "play": 551489010,
+                    "pause": 551509410,
+                    "red": 551505585,
+                    "green": 551521905,
+                    "yellow": 551536185,
+                    "blue": 551519865,
+                    "vol_up": 551502015,
+                    "vol_down": 551534655,
+                    "mute": 551522415,
+                    "ch_up": 551485695,
+                    "ch_down": 551518335,
+                    "fav": 551516295,
+                    "guide": 551540010,
+                    "power": 551489775,
+                    "tv": 551546895,
+                    "search": 551493345,
+                    "captions": 551525475,
+                    "options": 551535165,
+                    "input": 551538735,
+                    "1": 551520375,
+                    "2": 551504055,
+                    "3": 551536695,
+                    "4": 551495895,
+                    "5": 551528535,
+                    "6": 551512215,
+                    "7": 551544855,
+                    "8": 551491815,
+                    "9": 551524455,
+                    "0": 551487735,
+                    "list": 551498445,
+                    "ellipsis": 551512470
+                }
+            }
+        }
+    }
+}

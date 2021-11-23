@@ -1,0 +1,44 @@
+{
+    "thing": {
+        "img": "board_b",
+        "label": "Smart Thing"
+    },
+    "data": [
+        {
+            "id": "switch1",
+            "img": "power_b",
+            "type": "bool",
+            "initial": true,
+            "editor": "switch",
+            "label": "Power",
+            "header": "LED A"
+        },
+        {
+            "id": "brightness1",
+            "img": "sun_b",
+            "type": "int",
+            "initial": 25,
+            "editor": "slider",
+            "bounds": [0, 50],
+            "label": "Brightness"
+        },
+        {
+            "id": "switch2",
+            "img": "power_b",
+            "type": "bool",
+            "initial": true,
+            "editor": "switch",
+            "label": "Power",
+            "header": "LED B"
+        },
+        {
+            "id": "brightness2",
+            "img": "sun_b",
+            "type": "int",
+            "initial": 25,
+            "editor": "slider",
+            "bounds": [0, 50],
+            "label": "Brightness"
+        }
+    ]
+}
