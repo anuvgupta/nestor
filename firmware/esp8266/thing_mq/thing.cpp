@@ -98,7 +98,7 @@ bool bound_bool(char* bool_val) {
 
 // driver initialization
 void ThingDriver::init() {
-  this->disable_serial_alerts();
+	this->disable_serial_alerts();
 	pinMode(LED_1, OUTPUT);
 	pinMode(LED_2, OUTPUT);
 	driveLED(LED_1, 0);

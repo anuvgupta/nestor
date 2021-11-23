@@ -16,9 +16,9 @@
 #define ESP_TX 7
 #define ESP_RX 8
 // LED PWM pins
-#define REDPIN_L 6	  // 9
-#define GREENPIN_L 5  // 10
-#define BLUEPIN_L 10  // 11
+#define REDPIN_L 10	  // 9
+#define GREENPIN_L 6  // 10
+#define BLUEPIN_L 5  // 11
 #define REDPIN_R 9	  // 3
 #define GREENPIN_R 3  // 5
 #define BLUEPIN_R 11  // 6

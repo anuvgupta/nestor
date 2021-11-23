@@ -135,7 +135,7 @@ var client_event_handler = (topic_abbv, message, client) => {
     } else if (topic_abbv == 'user-data_recv') {
         log(topic_abbv, message);
     } else if (topic_abbv == 'trigger-api_recv') {
-        log(topic_abbv, message);
+        // log(topic_abbv, message);
         var message_parts = message.split('-');
         var req = {
             node_type: message_parts[0],
@@ -143,7 +143,7 @@ var client_event_handler = (topic_abbv, message, client) => {
             api_args: message_parts[2]
         };
         var client_node_id = client.o_id.toString();
-        console.log(client_node_id);
+        // console.log(client_node_id);
         m.db.get_node_info(client_node_id, null, client.id, node => {
             if (node === false || node === null) return;
             var client_user_id = `${node.user_id}`;

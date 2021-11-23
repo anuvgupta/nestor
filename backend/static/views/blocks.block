@@ -316,6 +316,9 @@
                     case "desync":
                         block.child('status/circle').css('background-color', app.ui.block.key('slowYellow'));
                         break;
+                    case "override":
+                        block.child('status/circle').css('background-color', app.ui.block.key('buttonBlue'));
+                        break;
                     case "intermediate":
                         block.child('status/circle').css('background-color', app.ui.block.key('buttonBlue'));
                         break;
@@ -504,6 +507,9 @@
                         break;
                     case "desync":
                         block.child('content/status/light/circle').css('background-color', app.ui.block.key('slowYellow'));
+                        break;
+                    case "override":
+                        block.child('content/status/light/circle').css('background-color', app.ui.block.key('buttonBlue'));
                         break;
                     case "new":
                     default:

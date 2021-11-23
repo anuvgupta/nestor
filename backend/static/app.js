@@ -221,11 +221,11 @@ var app; app = {
                 });
             },
             delete_core: (id, name) => {
-                if (true == confirm(`Confirm—delete core "${name}" and its nodes?`))
+                if (true == confirm(`Confirm—delete core "${name}" and its thing/node devices?`))
                     app.ws.send('delete_core', id);
             },
             delete_node: (id, name) => {
-                if (true == confirm(`Confirm—delete node "${name}"?`))
+                if (true == confirm(`Confirm—delete thing/node "${name}"?`))
                     app.ws.send('delete_node', id);
             },
             get_node_data: (id, field_id) => {
@@ -277,6 +277,10 @@ var app; app = {
                 app.ws.send('get_shortcut', {
                     url: url
                 });
+            },
+            override_activate_core: (id, name) => {
+                if (true == confirm(`Override core sync for "${name}" to activate thing devices?`))
+                    app.ws.send('override_activate_core', id);
             }
         }
     },

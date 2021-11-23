@@ -193,6 +193,9 @@ app
                 if (delete_node == block.child('main/node').key('id')) {
                     block.child('main/node').on('hide', { next: _ => {
                         app.ui.block.child('main/core').on('show');
+                        setTimeout(_ => {
+                            block.child('main/core/bar/status').on('update');
+                        }, 200);
                     } });
                 }
             }
@@ -785,12 +788,16 @@ app
                             if (core_status) {
                                 agg_status.code = core_status.code;
                                 agg_status.time = core_status.time;
-                                if (core_status.code == "online") {
+                                if (core_status.code == "online" || core_status.code == "override") {
                                     for (var n_i in node_items) {
                                         if (node_items.hasOwnProperty(n_i) && node_items[n_i] && node_items[n_i].type() == 'node-item' && n_i != 'core-node') {
                                             var status = node_items[n_i].key('status');
-                                            if (status && (status.code == "offline" || status.code == "desync")) {
-                                                agg_status.code = "intermediate";
+                                            if (status) {
+                                                if (status.code == "offline" || status.code == "desync") {
+                                                    agg_status.code = "desync";
+                                                } else if (status.code == "online" && core_status.code == "override" && agg_status.code != "desync" && agg_status.code != "offline") {
+                                                    agg_status.code = "online";
+                                                }
                                             }
                                         }
                                     }
@@ -805,6 +812,9 @@ app
                                     break;
                                 case "desync":
                                     block.child('light').css('background-color', app.ui.block.key('slowYellow'));
+                                    break;
+                                case "override":
+                                    block.child('light').css('background-color', app.ui.block.key('buttonBlue'));
                                     break;
                                 case "intermediate":
                                     block.child('light').css('background-color', app.ui.block.key('buttonBlue'));
@@ -860,6 +870,42 @@ app
                             color black
                             font-size 17px
                             text-align center
+                    div override
+                        css
+                            margin-top 20px
+                            width 100%
+                            height 60px
+                        button button
+                            css
+                                width 100%
+                                height 100%
+                                text-transform uppercase
+                                cursor pointer
+                                border-radius 7px
+                                background-color #d7d7d7
+                                border 1px solid #d3d3d3
+                                transition background-color 0.2s ease
+                                color white
+                            :mouseover
+                                css
+                                    background-color #c7c7c7
+                            :mouseout
+                                css
+                                    background-color #d7d7d7
+                            :click
+                                {
+                                    var core_info = block.parent(3).key('core_info');
+                                    if (core_info && core_info.name && core_info.id) {
+                                        app.ws.api.override_activate_core(core_info.id, core_info.name);
+                                    }
+                                }
+                            block content
+                                text text
+                                    css
+                                        letter-spacing 1.6px
+                                        font-size 22px
+                                    val Override    
+                            
                 div delete
                     css
                         position absolute
@@ -1606,6 +1652,7 @@ app
                         {
                             block.key('status', status);
                             block.child('labels/status/text').html('').data(status.code.charAt(0).toUpperCase() + status.code.slice(1) + " " + (status.code == "online" ? "now" : util.duration_desc(status.time)));
+                            console.log(status.code);
                             switch (status.code) {
                                 case "online":
                                     block.child('light/circle').css('background-color', app.ui.block.key('statusGreen'));
@@ -1615,6 +1662,9 @@ app
                                     break;
                                 case "desync":
                                     block.child('light/circle').css('background-color', app.ui.block.key('slowYellow'));
+                                    break;
+                                case "override":
+                                    block.child('light/circle').css('background-color', app.ui.block.key('buttonBlue'));
                                     break;
                                 case "new":
                                 default:

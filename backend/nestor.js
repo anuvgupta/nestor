@@ -26,7 +26,7 @@ global.http_port = global.env == "dev" ? 30008 : 3008;
 global.ws_port = global.env == "dev" ? 30009 : 3009;
 global.mdb_port = global.env == "dev" ? 27017 : 27017;
 global.mdb_db = "nestor";
-global.hb_log = false;
+global.hb_log = true;
 
 /* MODULES */
 // import application modules

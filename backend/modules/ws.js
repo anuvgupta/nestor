@@ -459,6 +459,17 @@ var init = _ => {
             ws_server.send_to_client('get_shortcut', shortcut_data, client);
         } else ws_server.send_to_client('get_shortcut', 'null', client);
     });
+    ws_server.bind('override_activate_core', (client, req) => {
+        var core_id = `${req}`;
+        m.db.get_core_info(core_id, client.o_id, null, client.id, core => {
+            if (core === false || core === null) return;
+            m.db.set_core_status(core_id, "override", (new Date()).getTime(), client.id, result1 => {
+                if (result1 === false || result1 === null) return;
+                log(`core_sync | client ${client.id} overriding core sync for core ${core_id}`);
+                ws_server.trigger_for_user("get_core_info", { id: core_id }, core.user_id);
+            });
+        });
+    });
 
     // client: device
     ws_server.bind('core_sync', (client, req) => {
