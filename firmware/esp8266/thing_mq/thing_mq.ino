@@ -173,6 +173,7 @@ void reset_monitor() {
 
 // mqtt handlers
 char mqtt_sync_topic_buffer[25] = "";
+char mqtt_announce_topic_buffer[35] = "";
 char mqtt_sync_recv_topic_buffer[75] = "";
 char mqtt_hb_topic_buffer[75] = "";
 char mqtt_hb_recv_topic_buffer[75] = "";
@@ -208,6 +209,8 @@ void mqtt_reconnect() {
 			Serial.printf("\r\n");
 #endif
 			// subscribe to necessary channels here
+      sprintf(mqtt_announce_topic_buffer, "%s_announce", THING_MQTT_APP_ID);
+      if (!mqtt_subscribe(mqtt_announce_topic_buffer)) esp_restart();
 			sprintf(mqtt_data_topic_buffer, "%s_info", mqtt_client_id);
 			if (!mqtt_subscribe(mqtt_data_topic_buffer)) esp_restart();
 			sprintf(mqtt_data_topic_buffer, "%s_reset_i", mqtt_client_id);
@@ -336,7 +339,11 @@ void mqtt_handler(char* topic, byte* payload, unsigned int len) {
 		thing_driver->user_data(data_id, data_val);
 	} else if (memcmp(topic + mqtt_client_id_len + 1, "hb_recv", 7) == 0) {
 		mqtt_publish(mqtt_hb_topic_buffer, "hb_echo");
-	}
+	} else if (memcmp(topic, mqtt_announce_topic_buffer, strlen(mqtt_announce_topic_buffer)) == 0) {
+    if (memcmp((char*) payload, "reset", 5) == 0) {
+      esp_restart();
+    }
+  }
 }
 boolean mqtt_publish(char* topic, char* message) {
 	if (mqtt_client_online && mqtt_client.connected()) {

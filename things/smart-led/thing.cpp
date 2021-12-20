@@ -59,8 +59,8 @@ void play_current() {
 		} else {
 			if (first_play) first_play = 0;
 			if (audio_enable && audio_allow) {
-				//SERIAL.printf("b%d\n", 0);
-				//SERIAL.printf("hm%s\n", hue);
+				// SERIAL.printf("b%d\n", 0);
+				// SERIAL.printf("hm%s\n", hue);
 				SERIAL.printf("b%d\n", brightness);
 				SERIAL.printf("hm%s\n", hue);
 			} else {
@@ -216,7 +216,7 @@ void ThingDriver::data(char* id, char* value, bool transitional) {
 				SERIAL.printf("ashf%s\n", (audio_shuffle ? "true" : "false"));
 			} else if (memcmp(sub_id, "allow", 5) == 0) {
 				bool new_audio_allow = bound_bool(value);
-				//if (new_audio_allow) play_current();
+				// if (new_audio_allow) play_current();
 				audio_allow = new_audio_allow;
 				play = audio_allow;
 			}

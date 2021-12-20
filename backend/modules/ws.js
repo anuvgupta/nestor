@@ -598,6 +598,7 @@ var init = _ => {
     });
     ws_server.quiet_events.push('node_hb');
     ws_server.bind('thing_hb', (client, req) => {
+        // console.log(client.core_code);
         m.db.get_core_info(null, null, client.core_code, client.id, core => {
             if (core === null || core === false) return;
             var node_mdb_id = req.id;

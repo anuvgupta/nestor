@@ -16,9 +16,9 @@
 #define ESP_TX 7
 #define ESP_RX 8
 // LED PWM pins
-#define REDPIN_L 6	  // 9
-#define GREENPIN_L 5  // 10
-#define BLUEPIN_L 10  // 11
+#define REDPIN_L 10	  // 9
+#define GREENPIN_L 6  // 10
+#define BLUEPIN_L 5  // 11
 #define REDPIN_R 9	  // 3
 #define GREENPIN_R 3  // 5
 #define BLUEPIN_R 11  // 6
@@ -284,10 +284,13 @@ void loop(void) {
 // check if reset required
 bool resetRequired(void) {
 	// check time interval
+  /* temporarily remove reset checker (since nestor monitors the device), uncomment if esp devices are stalling again
 	unsigned long newTimestamp = millis();
 	unsigned long minute_ms_interval = 60000;
 	minute_ms_interval *= RESET_INTERVAL;
 	return ready && newTimestamp - lastTimestamp >= minute_ms_interval;
+ */
+ return false;
 }
 
 // check if current process should be interrupted
@@ -306,12 +309,32 @@ void bright(void) {
 	Serial.print(F("[nano] brightness – "));
 	Serial.println(brightness);
 #endif
-	red_l(r_l);
-	green_l(g_l);
-	blue_l(b_l);
-	red_r(r_r);
-	green_r(g_r);
-	blue_r(b_r);
+  if (brightness > 0) {
+    red_l(r_l);
+    green_l(g_l);
+    blue_l(b_l);
+    red_r(r_r);
+    green_r(g_r);
+    blue_r(b_r);
+  } else {
+    dark();
+  }
+}
+void dark() {
+  // analog
+  analogWrite(REDPIN_L, 0);
+  analogWrite(GREENPIN_L, 0);
+  analogWrite(BLUEPIN_L, 0);
+  analogWrite(REDPIN_R, 0);
+  analogWrite(GREENPIN_R, 0);
+  analogWrite(BLUEPIN_R, 0);
+  // digital
+  digitalWrite(REDPIN_L, LOW);
+  digitalWrite(GREENPIN_L, LOW);
+  digitalWrite(BLUEPIN_L, LOW);
+  digitalWrite(REDPIN_R, LOW);
+  digitalWrite(GREENPIN_R, LOW);
+  digitalWrite(BLUEPIN_R, LOW);
 }
 
 // process speed from msgbuff

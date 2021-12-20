@@ -1,0 +1,16 @@
+{
+    "thing": {
+        "img": "plug_b",
+        "label": "Smart Plug"
+    },
+    "data": [
+        {
+            "id": "switch1",
+            "img": "power_b",
+            "type": "bool",
+            "initial": false,
+            "editor": "switch",
+            "label": "Power"
+        }
+    ]
+}

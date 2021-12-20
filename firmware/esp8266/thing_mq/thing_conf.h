@@ -4,13 +4,13 @@
 #define __T_CONF_H__
 
 // wifi
-#define WIFI_SSID "SSID"
-#define WIFI_PASS "PASS"
+#define WIFI_SSID "RajeevM"
+#define WIFI_PASS "1081Corn"
 
 // device
 #define DEVICE_USER "anuv"
 #define THING_TYPE "smart-led"
-#define CORE_CODE "JXeYY"
+#define CORE_CODE "xgftH"
 
 // api
 #define TIME_API_URL "pool.ntp.org"

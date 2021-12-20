@@ -5,13 +5,16 @@ const thing_type = "smart-led";
 var first_init = true;
 module.exports = {
     init: (m, log) => {
+        // log("TRACE — smart led init");
         if (first_init) {
             first_init = false;
             m.ws.api_bind('node_ready', (node_id, node_object) => {
                 // log(`node ${node_id} ready`);
-                m.main.call_driver_api(thing_type, 'play_initial', [node_id, node_object], (result) => {
-                    // console.log(result);
-                });
+                if (node_object.type == thing_type) {
+                    m.main.call_driver_api(thing_type, 'play_initial', [node_id, node_object], (result) => {
+                        // console.log(result);
+                    });
+                }
             });
         }
         return {

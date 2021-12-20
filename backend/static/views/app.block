@@ -649,6 +649,10 @@ app
                 }
             #core_status
                 {
+                    var node_menu_val = "Nodes";
+                    if (core_status.status == "override")
+                        node_menu_val = "Things";
+                    block.sibling("node").child("bar/back/div/text").html('').html(node_menu_val);
                     if (core_status.status == "new") {
                         block.child('info')
                             .css('display', 'table')

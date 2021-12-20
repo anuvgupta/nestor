@@ -24,10 +24,11 @@ var publisher = {
     client_options: {
         clientId: "",
     },
-    generate_subscribe_callback: topic_name => {
+    generate_subscribe_callback: (topic_name, next = null) => {
         return (error => {
             if (!error) {
                 log(`publisher subscribed to topic \"${topic_name}\"`);
+                if (next) next();
             } else {
                 log(error);
                 err(error);
@@ -51,41 +52,45 @@ var publisher = {
         publisher.client.publish(ch, arg);
     },
 };
+var server_announce = () => {
+    publisher.post('reset', `${global.app_id}_announce`);
+};
 var bind_events = (resolve = null) => {
     // attach topic events
     // for (var i = 0; i < global.config.virtualpin_count; i++) {
     //     mq.bind(db.api.get_virtualpin_topic(i), mq.generate_virtualpin_eventhandler(i));
     // }
-    publisher.client.subscribe(mqtt_device_sync_topic, publisher.generate_subscribe_callback(mqtt_device_sync_topic));
-    bind(mqtt_device_sync_topic, (topic, req) => {
-        try {
-            req = JSON.parse(req);
-        } catch (e) {
-            err(e);
-            return;
-        }
-        var client = {
-            topic: `${global.app_id}_${req.dev_type}_${req[`${req.dev_type}_type`]}_${req.mac}`,
-            id: "_c_mq_" + m.utils.rand_id(),
-            o_id: null,
-            auth: false,
-            type: "node",
-            protocol: "mq",
-            core_code: req.core_code,
-            standalone: (req.dev_type == "thing")
-        };
-        clients[client.id] = client;
-        log(`client ${client.id} – connected`);
-        m.ws.trigger_for_mq_client('node_sync', {
-            core_code: `${req.core_code}`,
-            user: `${req.user}`,
-            node_type: `${req[`${req.dev_type}_type`]}`,
-            mac: `${req.mac}`,
-            standalone: (req.dev_type == "thing")
-        }, client, false);
-        subscribe_client_events(client);
-    });
-    if (resolve) resolve();
+    publisher.client.subscribe(mqtt_device_sync_topic, publisher.generate_subscribe_callback(mqtt_device_sync_topic, _ => {
+        bind(mqtt_device_sync_topic, (topic, req) => {
+            try {
+                req = JSON.parse(req);
+            } catch (e) {
+                err(e);
+                return;
+            }
+            var client = {
+                topic: `${global.app_id}_${req.dev_type}_${req[`${req.dev_type}_type`]}_${req.mac}`,
+                id: "_c_mq_" + m.utils.rand_id(),
+                o_id: null,
+                auth: false,
+                type: "node",
+                protocol: "mq",
+                core_code: req.core_code,
+                standalone: (req.dev_type == "thing")
+            };
+            clients[client.id] = client;
+            log(`client ${client.id} – connected`);
+            m.ws.trigger_for_mq_client('node_sync', {
+                core_code: `${req.core_code}`,
+                user: `${req.user}`,
+                node_type: `${req[`${req.dev_type}_type`]}`,
+                mac: `${req.mac}`,
+                standalone: (req.dev_type == "thing")
+            }, client, false);
+            subscribe_client_events(client);
+        });
+        if (resolve) resolve();
+    }));
 };
 // var generate_virtualpin_eventhandler = vpin_num => {
 //     return (topic, message, db) => {
@@ -174,7 +179,9 @@ var unsubscribe_client_events = (client) => {
 var init = resolve => {
     publisher.client.on('connect', _ => {
         log(`publisher connected to broker ${broker_url} as ${publisher.client_options.clientId}`);
-        bind_events();
+        bind_events(_ => {
+            setTimeout(server_announce, 200);
+        });
     });
     publisher.client.on('message', (topic, message) => {
         if (global.hb_log || (topic.substring(topic.length - 3) != "_hb" && topic.substring(topic.length - 8) != "_hb_recv")) {
@@ -245,7 +252,8 @@ var api = {
     client_from_node_id: client_from_node_id,
     send_initial_val: (field_id, field_val, client) => {
         m.mq.send_to_device('node-data', `${field_id}-false-${field_val}`, client);
-    }
+    },
+    direct_post: publisher.post
 };
 
 

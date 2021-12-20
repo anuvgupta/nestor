@@ -1,0 +1,16 @@
+{
+    "thing": {
+        "img": "board_b",
+        "label": "Smart Pressure"
+    },
+    "data": [
+        {
+            "id": "temp",
+            "img": "power_b",
+            "type": "int",
+            "initial": true,
+            "editor": "text-display",
+            "label": "Temperature"
+        }
+    ]
+}
