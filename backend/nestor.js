@@ -30,6 +30,7 @@ global.hb_log = false; // = false;
 // temporary
 global.plex_pinned_device = '61eb90407ac29e236ddb1d90';
 global.plex_pinned_user = '5f1f9ae70a9a9b9d6e853d9d';
+global.plex_pinned_pattern = 'YOwYkamBJVvN35jXq4WV';
 
 /* MODULES */
 // import application modules

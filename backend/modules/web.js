@@ -76,15 +76,26 @@ var init = _ => {
         if (plexMetadata['event']) plexEvent = plexMetadata['event'];
 
         // act on webhook
+        var send_data_to_pinned_device = (field_id, field_val) => {
+            m.ws.trigger_node_data_update(global.plex_pinned_device, field_id, field_val, global.plex_pinned_user, '__webhook_plex_user_mock__');
+        };
         if (plexUser == "UT" && plexPlayer == "AFTMM") {
             console.log('plexEvent: ' + plexEvent);
             switch (plexEvent) {
                 case "media.pause":
-                    m.ws.trigger_node_data_update(global.plex_pinned_device, 'switch', false, global.plex_pinned_user, '__webhook_plex_user_mock__');
+                    // send_data_to_pinned_device('switch', true);
+                    send_data_to_pinned_device('color', "ff0000|ff0000");
+                    send_data_to_pinned_device('mode', 'hue');
                     break;
                 case "media.resume":
                 case "media.play":
-                    m.ws.trigger_node_data_update(global.plex_pinned_device, 'switch', true, global.plex_pinned_user, '__webhook_plex_user_mock__');
+                    send_data_to_pinned_device('mode', 'pattern');
+                    send_data_to_pinned_device('speed', 100);
+                    send_data_to_pinned_device('pattern', `${global.plex_pinned_pattern}`);
+                    break;
+                case "media.stop":
+                    send_data_to_pinned_device('color', "ffffff|ffffff");
+                    send_data_to_pinned_device('mode', 'hue');
                     break;
                 default:
                     break;
