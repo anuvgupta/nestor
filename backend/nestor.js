@@ -27,6 +27,10 @@ global.mdb_port = global.env == "dev" ? 27017 : 27017;
 global.mdb_db = "nestor";
 global.hb_log = false; // = false;
 
+// temporary
+global.plex_pinned_device = '61eb90407ac29e236ddb1d90';
+global.plex_pinned_user = '5f1f9ae70a9a9b9d6e853d9d';
+
 /* MODULES */
 // import application modules
 global.m = {};

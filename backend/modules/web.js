@@ -5,7 +5,6 @@
 const ejs = require('ejs');
 const http = require("http");
 const express = require("express");
-const body_parser = require("body-parser");
 
 /* INFRA */
 var m = null;
@@ -61,6 +60,37 @@ var init = _ => {
                 res.sendFile(`${m.utils.remove_last_dir(m.utils.remove_last_dir(__dirname))}/things/${thing_type}/views.block`);
             }
         }
+    });
+    express_api.post("/hooks/plex", (req, res) => {
+        var plexRawJSON = (`${req.rawBody.split('\n')[4]}`).trim();
+        var plexMetadata = JSON.parse(plexRawJSON);
+
+        // parse plex metadata
+        var plexUser = "";
+        var plexPlayer = "";
+        var plexEvent = "";
+        if (plexMetadata['Account'] && plexMetadata['Account']['title'])
+            plexUser = plexMetadata['Account']['title'];
+        if (plexMetadata['Player'] && plexMetadata['Player']['title'])
+            plexPlayer = plexMetadata['Player']['title'];
+        if (plexMetadata['event']) plexEvent = plexMetadata['event'];
+
+        // act on webhook
+        if (plexUser == "UT" && plexPlayer == "AFTMM") {
+            console.log('plexEvent: ' + plexEvent);
+            switch (plexEvent) {
+                case "media.pause":
+                    m.ws.trigger_node_data_update(global.plex_pinned_device, 'switch', false, global.plex_pinned_user, '__webhook_plex_user_mock__');
+                    break;
+                case "media.resume":
+                case "media.play":
+                    m.ws.trigger_node_data_update(global.plex_pinned_device, 'switch', true, global.plex_pinned_user, '__webhook_plex_user_mock__');
+                    break;
+                default:
+                    break;
+            }
+        }
+        res.status(200).send("\n");
     });
     // catch-all route
     express_api.get("/*", (req, res) => {
@@ -122,8 +152,18 @@ module.exports = {
         express_api = express();
         express_api.set('view engine', 'ejs');
         http_server = http.Server(express_api);
-        express_api.use(body_parser.json());
-        express_api.use(body_parser.urlencoded({ extended: true }));
+        express_api.use((req, res, next) => {
+            req.rawBody = '';
+            req.setEncoding('utf8');
+            req.on('data', (chunk) => {
+                req.rawBody += chunk;
+            });
+            req.on('end', () => {
+                next();
+            });
+        });
+        express_api.use(express.json());
+        express_api.use(express.urlencoded({ extended: true }));
         express_api.use((req, res, next) => {
             res.header("Access-Control-Allow-Origin", "*");
             res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");

@@ -763,6 +763,7 @@ var init = _ => {
     // client: any
     ws_server.bind('update_node_data', (client, req) => {
         var node_id = `${req.id}`;
+        console.log(node_id);
         m.db.get_node_info(node_id, null, client.id, node => {
             if (node === false || node === null) return;
             var field_type = m.main.get_driver_field_type(node.type, req.field_id);
@@ -886,6 +887,25 @@ var api = {
     api_bind: (event, handler) => {
         if (event && handler)
             ws_server.bind_api_events(event, handler);
+    },
+    trigger_node_data_update: (node_id, field_id, field_val, user_id, client_id, transitional = false) => {
+        console.log('trigger_node_data_update', node_id, field_id, field_val, user_id, client_id, transitional);
+        ws_server.events['update_node_data']({
+            socket: null,
+            id: client_id,
+            o_id: null,
+            auth: true,
+            type: "webhook",
+            protocol: "ws",
+            core_code: null,
+            standalone: false
+        }, {
+            id: node_id,
+            field_id: field_id,
+            field_val: field_val,
+            transitional: transitional,
+            boomerang: true
+        });
     }
 };
 
