@@ -83,15 +83,14 @@ var init = _ => {
             console.log('plexEvent: ' + plexEvent);
             switch (plexEvent) {
                 case "media.pause":
-                    // send_data_to_pinned_device('switch', true);
                     send_data_to_pinned_device('color', "ff0000|ff0000");
                     send_data_to_pinned_device('mode', 'hue');
                     break;
                 case "media.resume":
                 case "media.play":
-                    send_data_to_pinned_device('mode', 'pattern');
-                    send_data_to_pinned_device('speed', 100);
+                    // send_data_to_pinned_device('speed', 50);
                     send_data_to_pinned_device('pattern', `${global.plex_pinned_pattern}`);
+                    send_data_to_pinned_device('mode', 'pattern');
                     break;
                 case "media.stop":
                     send_data_to_pinned_device('color', "ffffff|ffffff");
