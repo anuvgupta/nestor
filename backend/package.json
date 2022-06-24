@@ -4,8 +4,8 @@
     "description": "home automation ecosystem",
     "main": "nestor.js",
     "scripts": {
-        "start": "node app.js dev",
-        "test": "nodemon --ignore 'mongodb/*' --ignore 'html/*' app.js dev "
+        "start": "node nestor.js dev",
+        "test": "nodemon --ignore 'mongodb/*' --ignore 'html/*' nestor.js dev "
     },
     "author": "Anuv Gupta",
     "license": "ISC",
