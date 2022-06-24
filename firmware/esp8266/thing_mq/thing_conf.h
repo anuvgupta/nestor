@@ -4,8 +4,8 @@
 #define __T_CONF_H__
 
 // wifi
-#define WIFI_SSID "RajeevM"
-#define WIFI_PASS "1081Corn"
+#define WIFI_SSID "21 Resident"
+#define WIFI_PASS "Hookem*2101"
 
 // device
 #define DEVICE_USER "anuv"
